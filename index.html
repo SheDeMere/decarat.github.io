@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Натяжные потолки Decarat</title>
+    <title>Натяжные потолки Decarat | Калькулятор стоимости</title>
     
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -55,7 +55,6 @@
             padding: 0;
         }
 
-        /* Эффект глубокого переливания цветов в шапке (Hero) */
         .hero-gradient {
             background: linear-gradient(125deg, #022c22, #064e3b, #047857, #065f46, #0f766e, #022c22);
             background-size: 300% 300%;
@@ -68,7 +67,6 @@
             100% { background-position: 0% 25%; }
         }
 
-        /* Плавное движение фоновых сфер с рассеянным светом */
         @keyframes floatSphere1 {
             0% { transform: translate(0px, 0px) scale(1); }
             50% { transform: translate(45px, 35px) scale(1.15); }
@@ -89,12 +87,10 @@
             animation: floatSphere2 16s ease-in-out infinite alternate;
         }
 
-        /* Ползунки */
         input[type="range"] {
             accent-color: #059669;
         }
 
-        /* Стилизация скроллбара админ-панели */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
@@ -113,7 +109,7 @@
 <body class="bg-stone-50 text-stone-900 antialiased selection:bg-emerald-500 selection:text-white">
 
     <!-- ЭКРАН ЗАКРЫТОГО ДОСТУПА (PAYWALL / INVITE-ONLY GATE) -->
-    <div id="access-gate-overlay" class="fixed inset-0 z-50 bg-stone-950/95 backdrop-blur-xl flex items-center justify-center p-4">
+    <div id="access-gate-overlay" class="fixed inset-0 z-40 bg-stone-950/95 backdrop-blur-xl flex items-center justify-center p-4">
         <div class="bg-stone-900 border border-emerald-800/60 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
             <div class="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none"></div>
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 mx-auto flex items-center justify-center text-white shadow-lg shadow-emerald-900/40">
@@ -127,7 +123,7 @@
                 </p>
             </div>
 
-            <form onsubmit="verifyAccessCode(event)" class="space-y-3 text-left">
+            <form id="access-gate-form" onsubmit="verifyAccessCode(event)" class="space-y-3 text-left">
                 <div>
                     <label class="text-[11px] font-semibold text-stone-300 block mb-1">Введите ваш ключ доступа:</label>
                     <input type="text" id="access-code-input" placeholder="Например: DECARAT2026" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-stone-700 text-white text-center font-bold tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500">
@@ -139,21 +135,24 @@
             </form>
 
             <div class="pt-3 border-t border-stone-800 flex items-center justify-between text-[11px] text-stone-500">
-            
-                <button type="button" onclick="openAdminModal()" class="text-emerald-400 hover:underline font-semibold">Вход для владельца</button>
+                <span>Демо-ключ: <strong class="text-stone-300">DECARAT2026</strong></span>
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="resetLocalAuthCache()" class="text-stone-400 hover:text-stone-200 underline">Сбросить кэш</button>
+                    <button type="button" onclick="openAdminModal()" class="text-emerald-400 hover:underline font-semibold">Вход для владельца</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- ОСНОВНАЯ НАВИГАЦИЯ -->
-    <nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
+    <nav class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-emerald-800 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                     <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 </div>
                 <div>
-                    <span class="text-2xl font-black tracking-tight text-stone-900 block leading-tight">DECARAT x SHAHAB</span>
+                    <span class="text-2xl font-black tracking-tight text-stone-900 block leading-tight">DECARAT</span>
                     <span class="text-[10px] text-stone-500 font-semibold uppercase tracking-widest block">Натяжные потолки & Свет</span>
                 </div>
             </div>
@@ -170,7 +169,6 @@
 
     <!-- ГЛАВНЫЙ БЛОК (HERO) -->
     <section class="relative hero-gradient text-white overflow-hidden py-16 sm:py-24 border-b border-stone-800">
-        <!-- Анимированные световые пятна для объемного переливания -->
         <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none animate-sphere-1"></div>
         <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-400/20 rounded-full blur-3xl pointer-events-none animate-sphere-2"></div>
         <div class="absolute top-1/2 left-1/3 -translate-y-1/2 w-80 h-80 bg-emerald-300/15 rounded-full blur-3xl pointer-events-none animate-sphere-1" style="animation-duration: 20s;"></div>
@@ -664,13 +662,13 @@
                         <div class="grid grid-cols-2 gap-2">
                             <button type="button" id="pay-cash-btn" onclick="setPaymentMethod('cash')" class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative">
                                 <span class="absolute -top-2 right-2 text-[9px] font-extrabold bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 px-1.5 py-0.5 rounded-full shadow-sm">−10%</span>
-                                <span class="block text-xs font-bold">Наличными</span>
+                                <span class="block text-xs font-bold">💵 Наличными</span>
                                 <span class="block text-[10px] text-emerald-300 font-semibold mt-0.5">Скидка 10%</span>
                             </button>
                             <!-- Кнопка скидки для мастера (заменяет кнопку Наличными при входе мастера) -->
                             <button type="button" id="pay-master-btn" onclick="setPaymentMethod('master')" class="hidden p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative">
                                 <span id="master-btn-badge" class="absolute -top-2 right-2 text-[9px] font-extrabold bg-emerald-500 text-stone-950 px-1.5 py-0.5 rounded-full shadow-sm">−0%</span>
-                                <span id="master-btn-title" class="block text-xs font-bold truncate">Скидка для мастера</span>
+                                <span id="master-btn-title" class="block text-xs font-bold truncate">🛠 Скидка для мастера</span>
                                 <span id="master-btn-subtitle" class="block text-[10px] text-emerald-300 font-semibold mt-0.5 truncate">Скидка 0%</span>
                             </button>
                             <button type="button" id="pay-install-btn" onclick="setPaymentMethod('installment')" class="p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition">
@@ -821,8 +819,8 @@
         <span id="toast-text">Расчет успешно скопирован!</span>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО АДМИН-ПАНЕЛИ -->
-    <div id="admin-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <!-- МОДАЛЬНОЕ ОКНО АДМИН-ПАНЕЛИ (z-50 поверх всего) -->
+    <div id="admin-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
         <!-- Шаг 1: Авторизация по пин-коду -->
         <div id="admin-auth-view" class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-stone-200">
             <div class="text-center mb-6">
@@ -867,7 +865,6 @@
 
             <!-- ВКЛАДКА 1: ЦЕНЫ -->
             <form id="admin-tab-prices" onsubmit="saveAdminPrices(event)" class="space-y-6">
-                <!-- Категория 1: Полотна -->
                 <div>
                     <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">1. Полотна за м²</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -890,7 +887,6 @@
                     </div>
                 </div>
 
-                <!-- Категория 2: Профиль периметра -->
                 <div>
                     <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">2. Профильные системы за пог. метр</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -905,7 +901,6 @@
                     </div>
                 </div>
 
-                <!-- Категория 3: Светильники -->
                 <div>
                     <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">3. Светильники и треки</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -924,7 +919,6 @@
                     </div>
                 </div>
 
-                <!-- Категория 4: LED-ленты -->
                 <div>
                     <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">4. Светодиодные ленты за пог. метр</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -943,7 +937,6 @@
                     </div>
                 </div>
 
-                <!-- Категория 5: Дополнительные работы -->
                 <div>
                     <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">5. Дополнительные работы и опции</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1035,138 +1028,7 @@
         </div>
     </div>
 
-    <!-- ПОДКЛЮЧЕНИЕ ОБЛАЧНОЙ БАЗЫ ДАННЫХ FIREBASE FIRESTORE -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // ВАШ КОНФИГ ИЗ НАСТРОЕК ПРОЕКТА FIREBASE
-        const manualFirebaseConfig = {
-            apiKey: "AIzaSyBiIRGdqUl8wb7Sgq41DCYG8trFvWlDbEQ",
-            authDomain: "decarat-5b83c.firebaseapp.com",
-            projectId: "decarat-5b83c",
-            storageBucket: "decarat-5b83c.firebasestorage.app",
-            messagingSenderId: "758058076559",
-            appId: "1:758058076559:web:9bbd05b0a0531009a363fa"
-        };
-
-        const firebaseConfig = typeof __firebase_config !== 'undefined'
-            ? JSON.parse(__firebase_config)
-            : manualFirebaseConfig;
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'decarat-prod-v1';
-
-        window.cloudSync = {
-            enabled: false,
-            saveAll: async () => {}
-        };
-
-        async function initCloudDatabase() {
-            if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey.includes('ВСТАВЬТЕ_СЮДА')) {
-                console.info('Firebase работает в локальном режиме. Вставьте firebaseConfig для синхронизации с облаком.');
-                return;
-            }
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
-
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                const user = auth.currentUser;
-                if (!user) return;
-
-                const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'main');
-
-                window.cloudSync.enabled = true;
-                window.cloudSync.saveAll = async () => {
-                    if (!auth.currentUser) return;
-                    try {
-                        await setDoc(configDocRef, {
-                            prices: JSON.parse(JSON.stringify(PRICES)),
-                            isAccessRestricted: Boolean(isAccessRestricted),
-                            allowedKeys: JSON.parse(JSON.stringify(ALLOWED_ACCESS_KEYS)),
-                            updatedAt: Date.now()
-                        }, { merge: true });
-                    } catch (err) {
-                        console.error('Ошибка сохранения в облачную БД:', err);
-                        showToast('Ошибка записи в облачную БД');
-                    }
-                };
-
-                onSnapshot(configDocRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.data();
-                        if (data.prices) {
-                            PRICES = data.prices;
-                            updateUiPriceLabels();
-                            calculateTotal();
-                            updateHeroQuickPrice();
-                            if (typeof isAdminLoggedIn !== 'undefined' && isAdminLoggedIn) {
-                                populateAdminForm();
-                            }
-                        }
-                        if (typeof data.isAccessRestricted === 'boolean') {
-                            isAccessRestricted = data.isAccessRestricted;
-                            const lockCheckbox = document.getElementById('toggle-access-lock');
-                            if (lockCheckbox) lockCheckbox.checked = isAccessRestricted;
-                        }
-                        if (Array.isArray(data.allowedKeys)) {
-                            ALLOWED_ACCESS_KEYS = data.allowedKeys;
-                            const savedCode = getSavedCachedAccessCode();
-
-                            if (activeMasterSession && activeMasterSession.code) {
-                                const updatedUser = ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === activeMasterSession.code.toUpperCase());
-                                if (updatedUser) {
-                                    applyUserAccessProfile(updatedUser, false);
-                                } else {
-                                    // Ключ был удалён владельцем в админке
-                                    clearSavedAuthCache();
-                                    activeMasterSession = null;
-                                    isSessionUnlocked = false;
-                                    updateMasterPaymentButtonUI();
-                                }
-                            } else if (savedCode) {
-                                const cachedUser = ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === savedCode);
-                                if (cachedUser) {
-                                    isSessionUnlocked = true;
-                                    unlockSiteUI();
-                                    applyUserAccessProfile(cachedUser, true);
-                                } else {
-                                    clearSavedAuthCache();
-                                }
-                            }
-
-                            if (typeof renderAccessKeysList === 'function') {
-                                renderAccessKeysList();
-                            }
-                        }
-                        if (typeof initAccessControl === 'function' && !isSessionUnlocked && !isAdminLoggedIn) {
-                            initAccessControl();
-                        }
-                    } else {
-                        window.cloudSync.saveAll();
-                    }
-                }, (error) => {
-                    console.error('Ошибка чтения из Firestore:', error);
-                });
-            } catch (e) {
-                console.error('Ошибка инициализации Firebase:', e);
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initCloudDatabase();
-        });
-    </script>
-
-    <!-- ЛОГИКА КАЛЬКУЛЯТОРА И ИНТЕРАКТИВА -->
+    <!-- ОСНОВНАЯ ЛОГИКА КАЛЬКУЛЯТОРА, ДОСТУПА И КЭША (ОБЫЧНЫЙ СКРИПТ, ДОСТУПЕН СРАЗУ) -->
     <script>
         const DEFAULT_PRICES = {
             fabrics: {
@@ -1201,23 +1063,31 @@
             }
         };
 
-        let PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
+        window.PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
 
-        // Ключи кэша в localStorage
         const STORAGE_KEY_ACCESS = 'decarat_saved_access_key';
         const STORAGE_KEY_ADMIN = 'decarat_saved_admin';
+        const STORAGE_KEY_KEYS_CACHE = 'decarat_cached_keys_list';
 
-        let ADMIN_PIN = '1234';
-        let isAdminLoggedIn = localStorage.getItem(STORAGE_KEY_ADMIN) === 'true';
+        const ADMIN_PIN = '1234';
+        window.isAdminLoggedIn = localStorage.getItem(STORAGE_KEY_ADMIN) === 'true';
+        window.isAccessRestricted = true;
+        window.isSessionUnlocked = false;
+        window.activeMasterSession = null;
 
-        let isAccessRestricted = true;
-        let isSessionUnlocked = false;
-        let activeMasterSession = null; // { code, owner, role, discount }
+        // Загружаем локальный кэш ключей (если уже был сохранён ранее)
+        let cachedKeysFromStorage = null;
+        try {
+            const rawKeys = localStorage.getItem(STORAGE_KEY_KEYS_CACHE);
+            if (rawKeys) cachedKeysFromStorage = JSON.parse(rawKeys);
+        } catch (e) {}
 
-        let ALLOWED_ACCESS_KEYS = [
-            { code: 'DECARAT2026', owner: 'Клиент Decarat', role: 'client', discount: 0, created: 'Активен' },
-            { code: 'VIP-MASTER', owner: 'Мастер Decarat', role: 'master', discount: 15, created: 'Активен' }
-        ];
+        window.ALLOWED_ACCESS_KEYS = Array.isArray(cachedKeysFromStorage) && cachedKeysFromStorage.length > 0
+            ? cachedKeysFromStorage
+            : [
+                { code: 'DECARAT2026', owner: 'Клиент Decarat', role: 'client', discount: 0, created: 'Активен' },
+                { code: 'VIP-MASTER', owner: 'Мастер Decarat', role: 'master', discount: 15, created: 'Активен' }
+            ];
 
         let calcState = {
             area: 0,
@@ -1226,11 +1096,7 @@
             pipes: 0,
             fabricKey: 'matte',
             profileKey: 'classic',
-            lamps: {
-                gx53: 0,
-                tube: 0,
-                track: 0
-            },
+            lamps: { gx53: 0, tube: 0, track: 0 },
             chandelier: false,
             ledEnabled: false,
             ledLength: 0,
@@ -1240,7 +1106,7 @@
             optMask: false,
             optVent: false,
             optFire: false,
-            paymentMethod: 'cash', // 'cash' (-10%), 'installment' (0%), 'master' (-N%)
+            paymentMethod: 'cash',
             baseTotalPrice: 0,
             totalPrice: 0,
             discountAmount: 0,
@@ -1261,6 +1127,12 @@
             } catch (e) {}
         }
 
+        function saveKeysListToCache() {
+            try {
+                localStorage.setItem(STORAGE_KEY_KEYS_CACHE, JSON.stringify(window.ALLOWED_ACCESS_KEYS));
+            } catch (e) {}
+        }
+
         function clearSavedAuthCache() {
             try {
                 localStorage.removeItem(STORAGE_KEY_ACCESS);
@@ -1268,15 +1140,17 @@
             } catch (e) {}
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initAccessControl();
-            updateUiPriceLabels();
-            updateActiveCardStyles();
-            calculateTotal();
-            updateHeroQuickPrice();
-        });
+        function resetLocalAuthCache() {
+            clearSavedAuthCache();
+            try { localStorage.removeItem(STORAGE_KEY_KEYS_CACHE); } catch (e) {}
+            window.isAdminLoggedIn = false;
+            window.isSessionUnlocked = false;
+            window.activeMasterSession = null;
+            document.getElementById('access-code-input').value = '';
+            document.getElementById('access-code-error').classList.add('hidden');
+            showToast('Кэш очищен. Введите ключ DECARAT2026 или войдите как владелец');
+        }
 
-        // ================= КОНТРОЛЬ ДОСТУПА ПО КЛЮЧАМ И РОЛЯМ =================
         function handleNewKeyRoleChange(role) {
             const discountWrap = document.getElementById('new-key-discount-wrap');
             if (!discountWrap) return;
@@ -1292,7 +1166,7 @@
             const role = keyItem.role || ((keyItem.discount && keyItem.discount > 0) ? 'master' : 'client');
             const discountVal = role === 'master' ? Math.max(0, Math.min(90, parseFloat(keyItem.discount) || 0)) : 0;
 
-            activeMasterSession = {
+            window.activeMasterSession = {
                 code: keyItem.code,
                 owner: keyItem.owner || 'Пользователь',
                 role: role,
@@ -1315,12 +1189,12 @@
             const masterBtn = document.getElementById('pay-master-btn');
             if (!cashBtn || !masterBtn) return;
 
-            if (activeMasterSession && activeMasterSession.role === 'master') {
+            if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
                 cashBtn.classList.add('hidden');
                 masterBtn.classList.remove('hidden');
-                document.getElementById('master-btn-badge').textContent = `−${activeMasterSession.discount}%`;
-                document.getElementById('master-btn-title').textContent = `🛠 Скидка для мастера: ${activeMasterSession.owner}`;
-                document.getElementById('master-btn-subtitle').textContent = `Персональная скидка ${activeMasterSession.discount}%`;
+                document.getElementById('master-btn-badge').textContent = `−${window.activeMasterSession.discount}%`;
+                document.getElementById('master-btn-title').textContent = `🛠 Скидка для мастера: ${window.activeMasterSession.owner}`;
+                document.getElementById('master-btn-subtitle').textContent = `Персональная скидка ${window.activeMasterSession.discount}%`;
                 if (calcState.paymentMethod === 'cash') {
                     calcState.paymentMethod = 'master';
                 }
@@ -1333,46 +1207,58 @@
             }
         }
 
+        function unlockSiteUI() {
+            const overlay = document.getElementById('access-gate-overlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+            }
+        }
+
+        function lockSiteUI() {
+            const overlay = document.getElementById('access-gate-overlay');
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'flex';
+            }
+        }
+
         function initAccessControl() {
             const params = new URLSearchParams(window.location.search);
             const urlKey = (params.get('access') || params.get('key') || '').trim().toUpperCase();
             const cachedKey = getSavedCachedAccessCode();
 
-            // 1. Проверяем ключ из ссылки (?access=...)
+            // 1. Вход по ссылке ?access=...
             if (urlKey) {
-                const foundByUrl = ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === urlKey);
+                const foundByUrl = window.ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === urlKey);
                 if (foundByUrl) {
-                    isSessionUnlocked = true;
+                    window.isSessionUnlocked = true;
                     saveAuthToCache(foundByUrl.code);
                     unlockSiteUI();
                     applyUserAccessProfile(foundByUrl, true);
-                    const msg = foundByUrl.role === 'master'
-                        ? `Доступ разрешён: мастер ${foundByUrl.owner} (скидка ${foundByUrl.discount || 0}%)`
-                        : `Доступ разрешён: ${foundByUrl.owner}`;
-                    showToast(msg);
                     return;
                 }
             }
 
-            // 2. Проверяем сохранённый в кэше (localStorage) ключ
+            // 2. Вход по сохранённому в кэше ключу
             if (cachedKey) {
-                const foundCached = ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === cachedKey);
+                const foundCached = window.ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === cachedKey);
                 if (foundCached) {
-                    isSessionUnlocked = true;
+                    window.isSessionUnlocked = true;
                     unlockSiteUI();
                     applyUserAccessProfile(foundCached, true);
                     return;
                 }
             }
 
-            // 3. Проверяем сохранённую сессию администратора
-            if (isAdminLoggedIn) {
-                isSessionUnlocked = true;
+            // 3. Вход администратора
+            if (window.isAdminLoggedIn) {
+                window.isSessionUnlocked = true;
                 unlockSiteUI();
                 return;
             }
 
-            if (!isAccessRestricted) {
+            if (!window.isAccessRestricted) {
                 unlockSiteUI();
                 return;
             }
@@ -1381,15 +1267,32 @@
         }
 
         function verifyAccessCode(e) {
-            e.preventDefault();
-            const inputVal = document.getElementById('access-code-input').value.trim().toUpperCase();
+            if (e) e.preventDefault();
+            const inputEl = document.getElementById('access-code-input');
             const errorEl = document.getElementById('access-code-error');
+            const inputVal = (inputEl ? inputEl.value : '').trim().toUpperCase();
 
-            const found = ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === inputVal);
+            if (!inputVal) {
+                if (errorEl) errorEl.classList.remove('hidden');
+                return;
+            }
+
+            // Если введён пин-код администратора (1234) прямо в поле входа
+            if (inputVal === ADMIN_PIN) {
+                window.isAdminLoggedIn = true;
+                window.isSessionUnlocked = true;
+                try { localStorage.setItem(STORAGE_KEY_ADMIN, 'true'); } catch (err) {}
+                if (errorEl) errorEl.classList.add('hidden');
+                unlockSiteUI();
+                showToast('Вход выполнен с правами администратора');
+                return;
+            }
+
+            const found = window.ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === inputVal);
             if (found) {
-                isSessionUnlocked = true;
+                window.isSessionUnlocked = true;
                 saveAuthToCache(found.code);
-                errorEl.classList.add('hidden');
+                if (errorEl) errorEl.classList.add('hidden');
                 unlockSiteUI();
                 applyUserAccessProfile(found, true);
                 const msg = found.role === 'master'
@@ -1397,31 +1300,75 @@
                     : `Добро пожаловать, ${found.owner}!`;
                 showToast(msg);
             } else {
-                errorEl.classList.remove('hidden');
+                if (errorEl) errorEl.classList.remove('hidden');
             }
         }
 
-        function unlockSiteUI() {
-            const overlay = document.getElementById('access-gate-overlay');
-            if (overlay) overlay.classList.add('hidden');
-        }
-
-        function lockSiteUI() {
-            const overlay = document.getElementById('access-gate-overlay');
-            if (overlay) overlay.classList.remove('hidden');
-        }
-
         function lockSiteSession() {
-            isSessionUnlocked = false;
-            isAdminLoggedIn = false;
-            activeMasterSession = null;
+            window.isSessionUnlocked = false;
+            window.isAdminLoggedIn = false;
+            window.activeMasterSession = null;
             clearSavedAuthCache();
             updateMasterPaymentButtonUI();
             setPaymentMethod('cash');
-            document.getElementById('access-code-input').value = '';
-            document.getElementById('access-code-error').classList.add('hidden');
+            const inp = document.getElementById('access-code-input');
+            const err = document.getElementById('access-code-error');
+            if (inp) inp.value = '';
+            if (err) err.classList.add('hidden');
             lockSiteUI();
             showToast('Вы вышли из аккаунта, кэш входа очищен');
+        }
+
+        // ================= АДМИН-ПАНЕЛЬ =================
+        function openAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            const authView = document.getElementById('admin-auth-view');
+            const dashView = document.getElementById('admin-dashboard-view');
+            if (!modal) return;
+
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+
+            if (window.isAdminLoggedIn) {
+                authView.classList.add('hidden');
+                dashView.classList.remove('hidden');
+                populateAdminForm();
+                renderAccessKeysList();
+            } else {
+                authView.classList.remove('hidden');
+                dashView.classList.add('hidden');
+                const pinInput = document.getElementById('admin-pin-input');
+                const pinErr = document.getElementById('admin-pin-error');
+                if (pinInput) {
+                    pinInput.value = '';
+                    setTimeout(() => pinInput.focus(), 100);
+                }
+                if (pinErr) pinErr.classList.add('hidden');
+            }
+        }
+
+        function closeAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+
+        function handleAdminLogin(e) {
+            if (e) e.preventDefault();
+            const pin = document.getElementById('admin-pin-input').value.trim();
+            if (pin === ADMIN_PIN) {
+                window.isAdminLoggedIn = true;
+                window.isSessionUnlocked = true;
+                try { localStorage.setItem(STORAGE_KEY_ADMIN, 'true'); } catch (err) {}
+                unlockSiteUI();
+                document.getElementById('admin-auth-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                populateAdminForm();
+                renderAccessKeysList();
+            } else {
+                document.getElementById('admin-pin-error').classList.remove('hidden');
+            }
         }
 
         function switchAdminTab(tab) {
@@ -1445,12 +1392,12 @@
         }
 
         function toggleAccessRestriction(enabled) {
-            isAccessRestricted = enabled;
+            window.isAccessRestricted = enabled;
             if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
             if (!enabled) {
                 unlockSiteUI();
                 showToast('Сайт открыт для всех посетителей');
-            } else if (!isSessionUnlocked && !isAdminLoggedIn) {
+            } else if (!window.isSessionUnlocked && !window.isAdminLoggedIn) {
                 lockSiteUI();
             } else {
                 showToast('Включен закрытый доступ по ключам');
@@ -1478,12 +1425,13 @@
                 code = 'DEC-' + Math.floor(1000 + Math.random() * 9000);
             }
 
-            if (ALLOWED_ACCESS_KEYS.some(k => k.code === code)) {
+            if (window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === code)) {
                 showToast('Такой ключ уже существует!');
                 return;
             }
 
-            ALLOWED_ACCESS_KEYS.unshift({ code, owner, role, discount, created: 'Активен' });
+            window.ALLOWED_ACCESS_KEYS.unshift({ code, owner, role, discount, created: 'Активен' });
+            saveKeysListToCache();
             ownerInput.value = '';
             codeInput.value = '';
             renderAccessKeysList();
@@ -1496,12 +1444,13 @@
         }
 
         function deleteAccessKey(code) {
-            ALLOWED_ACCESS_KEYS = ALLOWED_ACCESS_KEYS.filter(k => k.code !== code);
+            window.ALLOWED_ACCESS_KEYS = window.ALLOWED_ACCESS_KEYS.filter(k => k.code !== code);
+            saveKeysListToCache();
             if (getSavedCachedAccessCode() === code.toUpperCase()) {
                 try { localStorage.removeItem(STORAGE_KEY_ACCESS); } catch (e) {}
             }
-            if (activeMasterSession && activeMasterSession.code === code) {
-                activeMasterSession = null;
+            if (window.activeMasterSession && window.activeMasterSession.code === code) {
+                window.activeMasterSession = null;
                 updateMasterPaymentButtonUI();
                 setPaymentMethod('cash');
             }
@@ -1528,12 +1477,12 @@
             const container = document.getElementById('access-keys-list');
             if (!container) return;
 
-            if (ALLOWED_ACCESS_KEYS.length === 0) {
+            if (window.ALLOWED_ACCESS_KEYS.length === 0) {
                 container.innerHTML = `<div class="p-4 text-center text-xs text-stone-400 bg-stone-50 rounded-xl border border-stone-200">Нет активных ключей. Создайте новый ключ выше.</div>`;
                 return;
             }
 
-            container.innerHTML = ALLOWED_ACCESS_KEYS.map(item => {
+            container.innerHTML = window.ALLOWED_ACCESS_KEYS.map(item => {
                 const isMaster = (item.role === 'master') || (!item.role && item.discount > 0);
                 const roleBadge = isMaster
                     ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-bold text-[10px]">🛠 Мастер • Скидка ${item.discount || 0}%</span>`
@@ -1603,54 +1552,730 @@
                 if (el) el.textContent = text;
             };
 
-            setTxt('price-display-fabric-matte', `${PRICES.fabrics.matte.price.toLocaleString('ru-RU')} ₽ / м²`);
-            setTxt('price-display-fabric-satin', `${PRICES.fabrics.satin.price.toLocaleString('ru-RU')} ₽ / м²`);
-            setTxt('price-display-fabric-glossy', `${PRICES.fabrics.glossy.price.toLocaleString('ru-RU')} ₽ / м²`);
-            setTxt('price-display-fabric-fabric', `${PRICES.fabrics.fabric.price.toLocaleString('ru-RU')} ₽ / м²`);
+            setTxt('price-display-fabric-matte', `${window.PRICES.fabrics.matte.price.toLocaleString('ru-RU')} ₽ / м²`);
+            setTxt('price-display-fabric-satin', `${window.PRICES.fabrics.satin.price.toLocaleString('ru-RU')} ₽ / м²`);
+            setTxt('price-display-fabric-glossy', `${window.PRICES.fabrics.glossy.price.toLocaleString('ru-RU')} ₽ / м²`);
+            setTxt('price-display-fabric-fabric', `${window.PRICES.fabrics.fabric.price.toLocaleString('ru-RU')} ₽ / м²`);
 
-            setTxt('price-display-profile-shadow', `+ ${PRICES.profiles.shadow.price} ₽ / пог. метр`);
-            setTxt('price-display-profile-floating', `+ ${PRICES.profiles.floating.price} ₽ / пог. метр`);
+            setTxt('price-display-profile-shadow', `+ ${window.PRICES.profiles.shadow.price} ₽ / пог. метр`);
+            setTxt('price-display-profile-floating', `+ ${window.PRICES.profiles.floating.price} ₽ / пог. метр`);
 
-            setTxt('price-display-lamp-gx53', `${PRICES.lamps.gx53.price.toLocaleString('ru-RU')} ₽/шт`);
-            setTxt('price-display-lamp-tube', `${PRICES.lamps.tube.price.toLocaleString('ru-RU')} ₽/шт`);
-            setTxt('price-display-lamp-track', `${PRICES.lamps.track.price.toLocaleString('ru-RU')} ₽/м`);
-            setTxt('price-display-chandelier', `Усиленная закладная платформа + подключение (+${PRICES.extras.chandelier} ₽)`);
+            setTxt('price-display-lamp-gx53', `${window.PRICES.lamps.gx53.price.toLocaleString('ru-RU')} ₽/шт`);
+            setTxt('price-display-lamp-tube', `${window.PRICES.lamps.tube.price.toLocaleString('ru-RU')} ₽/шт`);
+            setTxt('price-display-lamp-track', `${window.PRICES.lamps.track.price.toLocaleString('ru-RU')} ₽/м`);
+            setTxt('price-display-chandelier', `Усиленная закладная платформа + подключение (+${window.PRICES.extras.chandelier} ₽)`);
 
-            setTxt('lbl-extra-corner', PRICES.extras.corner);
-            setTxt('lbl-extra-pipe', PRICES.extras.pipe);
-            setTxt('lbl-extra-cornice', PRICES.extras.cornice.toLocaleString('ru-RU'));
-            setTxt('lbl-extra-mask', PRICES.extras.mask);
-            setTxt('lbl-extra-vent', PRICES.extras.vent);
-            setTxt('lbl-extra-fire', PRICES.extras.fire);
+            setTxt('lbl-extra-corner', window.PRICES.extras.corner);
+            setTxt('lbl-extra-pipe', window.PRICES.extras.pipe);
+            setTxt('lbl-extra-cornice', window.PRICES.extras.cornice.toLocaleString('ru-RU'));
+            setTxt('lbl-extra-mask', window.PRICES.extras.mask);
+            setTxt('lbl-extra-vent', window.PRICES.extras.vent);
+            setTxt('lbl-extra-fire', window.PRICES.extras.fire);
         }
 
-        // ================= АДМИН-ПАНЕЛЬ =================
-        function openAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            const authView = document.getElementById('admin-auth-view');
-            const dashView = document.getElementById('admin-dashboard-view');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+        function populateAdminForm() {
+            document.getElementById('inp-price-fabric-matte').value = window.PRICES.fabrics.matte.price;
+            document.getElementById('inp-price-fabric-satin').value = window.PRICES.fabrics.satin.price;
+            document.getElementById('inp-price-fabric-glossy').value = window.PRICES.fabrics.glossy.price;
+            document.getElementById('inp-price-fabric-fabric').value = window.PRICES.fabrics.fabric.price;
 
-            if (isAdminLoggedIn) {
-                authView.classList.add('hidden');
-                dashView.classList.remove('hidden');
-                populateAdminForm();
-                renderAccessKeysList();
+            document.getElementById('inp-price-profile-shadow').value = window.PRICES.profiles.shadow.price;
+            document.getElementById('inp-price-profile-floating').value = window.PRICES.profiles.floating.price;
+
+            document.getElementById('inp-price-lamp-gx53').value = window.PRICES.lamps.gx53.price;
+            document.getElementById('inp-price-lamp-tube').value = window.PRICES.lamps.tube.price;
+            document.getElementById('inp-price-lamp-track').value = window.PRICES.lamps.track.price;
+
+            document.getElementById('inp-price-led-single').value = window.PRICES.led.single.price;
+            document.getElementById('inp-price-led-rgb').value = window.PRICES.led.rgb.price;
+            document.getElementById('inp-price-led-cct').value = window.PRICES.led.cct.price;
+
+            document.getElementById('inp-price-extra-pipe').value = window.PRICES.extras.pipe;
+            document.getElementById('inp-price-extra-corner').value = window.PRICES.extras.corner;
+            document.getElementById('inp-price-extra-chandelier').value = window.PRICES.extras.chandelier;
+            document.getElementById('inp-price-extra-cornice').value = window.PRICES.extras.cornice;
+            document.getElementById('inp-price-extra-mask').value = window.PRICES.extras.mask;
+            document.getElementById('inp-price-extra-vent').value = window.PRICES.extras.vent;
+        }
+
+        function saveAdminPrices(e) {
+            e.preventDefault();
+
+            window.PRICES.fabrics.matte.price = parseInt(document.getElementById('inp-price-fabric-matte').value) || 0;
+            window.PRICES.fabrics.satin.price = parseInt(document.getElementById('inp-price-fabric-satin').value) || 0;
+            window.PRICES.fabrics.glossy.price = parseInt(document.getElementById('inp-price-fabric-glossy').value) || 0;
+            window.PRICES.fabrics.fabric.price = parseInt(document.getElementById('inp-price-fabric-fabric').value) || 0;
+
+            window.PRICES.profiles.shadow.price = parseInt(document.getElementById('inp-price-profile-shadow').value) || 0;
+            window.PRICES.profiles.floating.price = parseInt(document.getElementById('inp-price-profile-floating').value) || 0;
+
+            window.PRICES.lamps.gx53.price = parseInt(document.getElementById('inp-price-lamp-gx53').value) || 0;
+            window.PRICES.lamps.tube.price = parseInt(document.getElementById('inp-price-lamp-tube').value) || 0;
+            window.PRICES.lamps.track.price = parseInt(document.getElementById('inp-price-lamp-track').value) || 0;
+
+            window.PRICES.led.single.price = parseInt(document.getElementById('inp-price-led-single').value) || 0;
+            window.PRICES.led.rgb.price = parseInt(document.getElementById('inp-price-led-rgb').value) || 0;
+            window.PRICES.led.cct.price = parseInt(document.getElementById('inp-price-led-cct').value) || 0;
+
+            window.PRICES.extras.pipe = parseInt(document.getElementById('inp-price-extra-pipe').value) || 0;
+            window.PRICES.extras.corner = parseInt(document.getElementById('inp-price-extra-corner').value) || 0;
+            window.PRICES.extras.chandelier = parseInt(document.getElementById('inp-price-extra-chandelier').value) || 0;
+            window.PRICES.extras.cornice = parseInt(document.getElementById('inp-price-extra-cornice').value) || 0;
+            window.PRICES.extras.mask = parseInt(document.getElementById('inp-price-extra-mask').value) || 0;
+            window.PRICES.extras.vent = parseInt(document.getElementById('inp-price-extra-vent').value) || 0;
+
+            updateUiPriceLabels();
+            calculateTotal();
+            updateHeroQuickPrice();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            closeAdminModal();
+            showToast('Новые цены успешно применены!');
+        }
+
+        function resetPricesToDefault() {
+            window.PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
+            populateAdminForm();
+            updateUiPriceLabels();
+            calculateTotal();
+            updateHeroQuickPrice();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Цены сброшены к стандартным значениям');
+        }
+
+        function syncAreaFromSlider(val) {
+            val = parseInt(val) || 0;
+            document.getElementById('input-area').value = val;
+            document.getElementById('area-val-label').textContent = val;
+            calcState.area = val;
+            
+            if (val > 0) {
+                const autoPerimeter = Math.round(4 * Math.sqrt(val) * 1.05);
+                document.getElementById('slider-perimeter').value = autoPerimeter;
+                document.getElementById('input-perimeter').value = autoPerimeter;
+                document.getElementById('perimeter-val-label').textContent = autoPerimeter;
+                calcState.perimeter = autoPerimeter;
             } else {
-                authView.classList.remove('hidden');
-                dashView.classList.add('hidden');
-                document.getElementById('admin-pin-input').value = '';
-                document.getElementById('admin-pin-error').classList.add('hidden');
-                setTimeout(() => document.getElementById('admin-pin-input').focus(), 100);
+                document.getElementById('slider-perimeter').value = 0;
+                document.getElementById('input-perimeter').value = 0;
+                document.getElementById('perimeter-val-label').textContent = 0;
+                calcState.perimeter = 0;
+            }
+            calculateTotal();
+        }
+
+        function syncAreaFromInput(val) {
+            val = parseInt(val) || 0;
+            document.getElementById('slider-area').value = Math.min(val, 100);
+            document.getElementById('area-val-label').textContent = val;
+            calcState.area = val;
+
+            if (val > 0) {
+                const autoPerimeter = Math.round(4 * Math.sqrt(val) * 1.05);
+                document.getElementById('slider-perimeter').value = Math.min(autoPerimeter, 120);
+                document.getElementById('input-perimeter').value = autoPerimeter;
+                document.getElementById('perimeter-val-label').textContent = autoPerimeter;
+                calcState.perimeter = autoPerimeter;
+            } else {
+                document.getElementById('slider-perimeter').value = 0;
+                document.getElementById('input-perimeter').value = 0;
+                document.getElementById('perimeter-val-label').textContent = 0;
+                calcState.perimeter = 0;
+            }
+            calculateTotal();
+        }
+
+        function syncPerimeterFromSlider(val) {
+            val = parseInt(val) || 0;
+            document.getElementById('input-perimeter').value = val;
+            document.getElementById('perimeter-val-label').textContent = val;
+            calcState.perimeter = val;
+            calculateTotal();
+        }
+
+        function syncPerimeterFromInput(val) {
+            val = parseInt(val) || 0;
+            document.getElementById('slider-perimeter').value = Math.min(val, 120);
+            document.getElementById('perimeter-val-label').textContent = val;
+            calcState.perimeter = val;
+            calculateTotal();
+        }
+
+        function changeExtraCorners(delta) {
+            let newVal = calcState.corners + delta;
+            if (newVal < 0) newVal = 0;
+            calcState.corners = newVal;
+            document.getElementById('corners-count').textContent = newVal;
+            calculateTotal();
+        }
+
+        function changePipes(delta) {
+            let newVal = calcState.pipes + delta;
+            if (newVal < 0) newVal = 0;
+            calcState.pipes = newVal;
+            document.getElementById('pipes-count').textContent = newVal;
+            calculateTotal();
+        }
+
+        function changeLampCount(type, delta) {
+            let newVal = (calcState.lamps[type] || 0) + delta;
+            if (newVal < 0) newVal = 0;
+            calcState.lamps[type] = newVal;
+            document.getElementById(`count-lamp-${type}`).textContent = newVal;
+            calculateTotal();
+        }
+
+        function toggleLedSection(enabled) {
+            calcState.ledEnabled = enabled;
+            const box = document.getElementById('led-settings-box');
+            if (enabled) {
+                box.classList.remove('opacity-50', 'pointer-events-none');
+                if (calcState.ledLength === 0) {
+                    const defaultLen = calcState.perimeter > 0 ? Math.min(calcState.perimeter, 12) : 5;
+                    syncLedLength(defaultLen);
+                }
+            } else {
+                box.classList.add('opacity-50', 'pointer-events-none');
+            }
+            calculateTotal();
+        }
+
+        function syncLedLength(len) {
+            len = parseInt(len) || 0;
+            calcState.ledLength = len;
+            document.getElementById('slider-led-length').value = len;
+            document.getElementById('led-len-display').textContent = len;
+            calculateTotal();
+        }
+
+        function setPaymentMethod(method) {
+            calcState.paymentMethod = method;
+            const cashBtn = document.getElementById('pay-cash-btn');
+            const installBtn = document.getElementById('pay-install-btn');
+            const masterBtn = document.getElementById('pay-master-btn');
+
+            const inactiveBase = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition relative";
+            const activeEmerald = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative";
+
+            if (cashBtn && !cashBtn.classList.contains('hidden')) {
+                cashBtn.className = (method === 'cash') ? activeEmerald : inactiveBase;
+            }
+            if (masterBtn && !masterBtn.classList.contains('hidden')) {
+                masterBtn.className = (method === 'master') ? activeEmerald : inactiveBase;
+            }
+            if (installBtn) {
+                installBtn.className = (method === 'installment')
+                    ? "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition"
+                    : "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition";
+            }
+
+            calculateTotal();
+        }
+
+        function scrollToTextures(event) {
+            if (event) event.preventDefault();
+            const el = document.getElementById('catalog');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
             }
         }
 
-        function closeAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+        function calculateTotal() {
+            updateActiveCardStyles();
+
+            const fabricEl = document.querySelector('input[name="fabric_type"]:checked');
+            calcState.fabricKey = fabricEl ? fabricEl.value : 'matte';
+
+            const profileEl = document.querySelector('input[name="profile_type"]:checked');
+            calcState.profileKey = profileEl ? profileEl.value : 'classic';
+
+            calcState.chandelier = document.getElementById('has-chandelier').checked;
+
+            calcState.ledType = document.getElementById('led-type').value;
+            const ledTempEl = document.querySelector('input[name="led_temp"]:checked');
+            calcState.ledTemp = ledTempEl ? ledTempEl.value : 'neutral';
+
+            calcState.optCornice = document.getElementById('opt-cornice').checked;
+            calcState.optMask = document.getElementById('opt-mask').checked;
+            calcState.optVent = document.getElementById('opt-vent').checked;
+            calcState.optFire = document.getElementById('opt-fire').checked;
+
+            let total = 0;
+            let breakdown = [];
+
+            const fabricObj = window.PRICES.fabrics[calcState.fabricKey] || window.PRICES.fabrics.matte;
+            const fabricCost = calcState.area * fabricObj.price;
+            if (calcState.area > 0) {
+                total += fabricCost;
+                breakdown.push({
+                    name: `Полотно: ${fabricObj.name} (${calcState.area} м²)`,
+                    cost: fabricCost
+                });
+            }
+
+            const profileObj = window.PRICES.profiles[calcState.profileKey] || window.PRICES.profiles.classic;
+            const profileCost = calcState.perimeter * profileObj.price;
+            if (profileCost > 0 && calcState.perimeter > 0) {
+                total += profileCost;
+                breakdown.push({
+                    name: `Профиль: ${profileObj.name} (${calcState.perimeter} м.п.)`,
+                    cost: profileCost
+                });
+            }
+
+            if (calcState.corners > 0) {
+                const cornerCost = calcState.corners * window.PRICES.extras.corner;
+                total += cornerCost;
+                breakdown.push({
+                    name: `Дополнительные углы (${calcState.corners} шт.)`,
+                    cost: cornerCost
+                });
+            }
+
+            if (calcState.pipes > 0) {
+                const pipeCost = calcState.pipes * window.PRICES.extras.pipe;
+                total += pipeCost;
+                breakdown.push({
+                    name: `Обвод труб отопления (${calcState.pipes} шт.)`,
+                    cost: pipeCost
+                });
+            }
+
+            if (calcState.lamps.gx53 > 0) {
+                const gxCost = calcState.lamps.gx53 * window.PRICES.lamps.gx53.price;
+                total += gxCost;
+                breakdown.push({
+                    name: `Споты GX53 LED со стойкой (${calcState.lamps.gx53} шт.)`,
+                    cost: gxCost
+                });
+            }
+
+            if (calcState.lamps.tube > 0) {
+                const tubeCost = calcState.lamps.tube * window.PRICES.lamps.tube.price;
+                total += tubeCost;
+                breakdown.push({
+                    name: `Накладные споты-тубусы (${calcState.lamps.tube} шт.)`,
+                    cost: tubeCost
+                });
+            }
+
+            if (calcState.lamps.track > 0) {
+                const trackCost = calcState.lamps.track * window.PRICES.lamps.track.price;
+                total += trackCost;
+                breakdown.push({
+                    name: `Встраиваемый трек + монтаж (${calcState.lamps.track} м)`,
+                    cost: trackCost
+                });
+            }
+
+            if (calcState.chandelier) {
+                total += window.PRICES.extras.chandelier;
+                breakdown.push({
+                    name: 'Закладная платформа + монтаж люстры',
+                    cost: window.PRICES.extras.chandelier
+                });
+            }
+
+            if (calcState.ledEnabled && calcState.ledLength > 0) {
+                const ledObj = window.PRICES.led[calcState.ledType] || window.PRICES.led.single;
+                const ledCost = calcState.ledLength * ledObj.price;
+                total += ledCost;
+                breakdown.push({
+                    name: `${ledObj.name} (${calcState.ledLength} м) + БП`,
+                    cost: ledCost
+                });
+            }
+
+            if (calcState.optCornice) {
+                total += window.PRICES.extras.cornice;
+                breakdown.push({
+                    name: 'Ниша под скрытый карниз ПК-5 (3 м)',
+                    cost: window.PRICES.extras.cornice
+                });
+            }
+
+            if (calcState.optMask && calcState.perimeter > 0) {
+                const maskCost = calcState.perimeter * window.PRICES.extras.mask;
+                total += maskCost;
+                breakdown.push({
+                    name: `Маскировочная лента (${calcState.perimeter} м)`,
+                    cost: maskCost
+                });
+            }
+
+            if (calcState.optVent) {
+                total += window.PRICES.extras.vent;
+                breakdown.push({
+                    name: 'Вывод вентиляции / вытяжки с термокольцом',
+                    cost: window.PRICES.extras.vent
+                });
+            }
+
+            if (calcState.optFire) {
+                total += window.PRICES.extras.fire;
+                breakdown.push({
+                    name: 'Монтаж платформы пожарного датчика',
+                    cost: window.PRICES.extras.fire
+                });
+            }
+
+            calcState.baseTotalPrice = total;
+
+            let discount = 0;
+            let finalTotal = total;
+            const badgeInfo = document.getElementById('payment-badge-info');
+
+            if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
+                const pct = window.activeMasterSession.discount || 0;
+                discount = Math.round(total * (pct / 100));
+                finalTotal = total - discount;
+                if (discount > 0) {
+                    breakdown.push({
+                        name: `Скидка для мастера: ${window.activeMasterSession.owner} (${pct}%)`,
+                        cost: -discount
+                    });
+                }
+                if (badgeInfo) {
+                    badgeInfo.innerHTML = `
+                        <span>Скидка для мастера (${window.activeMasterSession.owner}, ${pct}%):</span>
+                        <span class="font-extrabold text-emerald-300">−${discount.toLocaleString('ru-RU')} ₽</span>
+                    `;
+                }
+            } else if (calcState.paymentMethod === 'cash') {
+                discount = Math.round(total * 0.10);
+                finalTotal = total - discount;
+                if (discount > 0) {
+                    breakdown.push({
+                        name: 'Скидка 10% (при оплате наличными)',
+                        cost: -discount
+                    });
+                }
+                if (badgeInfo) {
+                    badgeInfo.innerHTML = `
+                        <span>Скидка за наличный расчет (10%):</span>
+                        <span id="cash-discount-val" class="font-extrabold text-amber-300">−${discount.toLocaleString('ru-RU')} ₽</span>
+                    `;
+                }
+            } else {
+                const perMonth = finalTotal > 0 ? Math.round(finalTotal / 6) : 0;
+                if (badgeInfo) {
+                    badgeInfo.innerHTML = `
+                        <span>Платеж в рассрочку 0%:</span>
+                        <span class="font-extrabold text-emerald-300">от ${perMonth.toLocaleString('ru-RU')} ₽/мес. на 6 мес.</span>
+                    `;
+                }
+            }
+
+            calcState.totalPrice = finalTotal;
+            calcState.discountAmount = discount;
+            calcState.breakdown = breakdown;
+
+            const totalEl = document.getElementById('total-price');
+            const perM2El = document.getElementById('price-per-m2');
+            const breakdownEl = document.getElementById('breakdown-list');
+
+            if (total === 0) {
+                totalEl.textContent = '0 ₽';
+                perM2El.textContent = '0 ₽ / м²';
+                breakdownEl.innerHTML = `
+                    <div class="py-4 text-center text-stone-400 italic">
+                        Укажите площадь или выберите светильники для начала расчёта
+                    </div>
+                `;
+            } else {
+                if ((calcState.paymentMethod === 'cash' || calcState.paymentMethod === 'master') && discount > 0) {
+                    totalEl.innerHTML = `
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="line-through text-stone-500 text-lg font-normal">${total.toLocaleString('ru-RU')} ₽</span>
+                            <span>${finalTotal.toLocaleString('ru-RU')} ₽</span>
+                        </div>
+                    `;
+                } else {
+                    totalEl.textContent = `${finalTotal.toLocaleString('ru-RU')} ₽`;
+                }
+
+                const perM2 = calcState.area > 0 ? Math.round(finalTotal / calcState.area) : 0;
+                perM2El.textContent = perM2 > 0 ? `≈ ${perM2.toLocaleString('ru-RU')} ₽ / м²` : '—';
+
+                breakdownEl.innerHTML = breakdown.map(item => `
+                    <div class="flex justify-between items-center text-xs py-1 border-b border-stone-800/60 last:border-0">
+                        <span class="${item.cost < 0 ? 'text-emerald-300 font-bold' : 'text-stone-300'} pr-2">${item.name}</span>
+                        <span class="font-bold text-emerald-400 whitespace-nowrap">${item.cost > 0 ? item.cost.toLocaleString('ru-RU') + ' ₽' : '−' + Math.abs(item.cost).toLocaleString('ru-RU') + ' ₽'}</span>
+                    </div>
+                `).join('');
+            }
         }
 
-        function handleAdminLogin(e) {
-            e.preventDefault();
+        function updateHeroQuickPrice() {
+            const area = 18;
+            const cost = (area * window.PRICES.fabrics.matte.price) + (6 * window.PRICES.lamps.gx53.price);
+            const el = document.getElementById('hero-quick-price');
+            if (el) el.textContent = `${cost.toLocaleString('ru-RU')} ₽`;
+        }
+
+        // ================= WHATSAPP ОТПРАВКА =================
+        const WHATSAPP_PHONE = '79298966736';
+
+        function openWhatsAppUrl(msg) {
+            const encodedMsg = encodeURIComponent(msg);
+            const waUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMsg}`;
+
+            try {
+                const tempLink = document.createElement('a');
+                tempLink.href = waUrl;
+                tempLink.target = '_blank';
+                tempLink.rel = 'noopener noreferrer';
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+            } catch (err) {
+                window.location.href = waUrl;
+            }
+        }
+
+        function requestMeasurementInWhatsApp() {
+            let msg = 'Здравствуйте! Хочу вызвать замерщика от компании Decarat на бесплатный замер потолков.';
+            if (calcState.totalPrice > 0) {
+                msg += ` Предварительный расчет на сайте: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽ (Площадь: ${calcState.area} м²). Когда мастер сможет приехать?`;
+            } else {
+                msg += ' Подскажите, когда мастер сможет приехать с образцами полотен и светильников?';
+            }
+            openWhatsAppUrl(msg);
+        }
+
+        function sendCalculationToWhatsApp() {
+            if (calcState.totalPrice === 0) {
+                requestMeasurementInWhatsApp();
+                return;
+            }
+
+            let msg = `Здравствуйте! Рассчитал(а) смету натяжного потолка на сайте компании Decarat:\n\n`;
+            if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
+                msg += `🛠 Мастер: ${window.activeMasterSession.owner} (ключ: ${window.activeMasterSession.code})\n`;
+            }
+            msg += `📐 Площадь: ${calcState.area} м²\n`;
+            msg += `📏 Периметр: ${calcState.perimeter} м.п.\n`;
+            msg += `✨ Полотно: ${window.PRICES.fabrics[calcState.fabricKey]?.name || 'Матовое'}\n`;
+            msg += `🚪 Профиль: ${window.PRICES.profiles[calcState.profileKey]?.name || 'Классический'}\n`;
+
+            if (calcState.lamps.gx53 > 0) msg += `💡 Споты GX53: ${calcState.lamps.gx53} шт.\n`;
+            if (calcState.lamps.tube > 0) msg += `💡 Накладные тубусы: ${calcState.lamps.tube} шт.\n`;
+            if (calcState.lamps.track > 0) msg += `💡 Трековые шины: ${calcState.lamps.track} м\n`;
+            if (calcState.chandelier) msg += `🌟 Центральная люстра: да\n`;
+
+            if (calcState.ledEnabled && calcState.ledLength > 0) {
+                msg += `🌈 LED-лента: ${calcState.ledLength} м (${window.PRICES.led[calcState.ledType]?.name || 'Одноцветная'})\n`;
+            }
+
+            if (calcState.pipes > 0) msg += `🔧 Обвод труб: ${calcState.pipes} шт.\n`;
+            if (calcState.corners > 0) msg += `📐 Доп. углы: ${calcState.corners} шт.\n`;
+            if (calcState.optCornice) msg += `🪟 Скрытый карниз ПК-5: да\n`;
+            if (calcState.optMask) msg += `➖ Маскировочная лента: да\n`;
+
+            if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
+                msg += `\n🛠 Условия: Скидка для мастера ${window.activeMasterSession.owner} (${window.activeMasterSession.discount}%)\n`;
+                if (calcState.discountAmount > 0) {
+                    msg += `🎁 Скидка мастера: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
+                }
+            } else if (calcState.paymentMethod === 'cash') {
+                msg += `\n💳 Способ оплаты: Наличные (со скидкой 10%)\n`;
+                if (calcState.discountAmount > 0) {
+                    msg += `🎁 Скидка 10%: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
+                }
+            } else {
+                const perM = Math.round(calcState.totalPrice / 6);
+                msg += `\n💳 Способ оплаты: Рассрочка 0% без переплат\n`;
+                msg += `📆 Платеж: от ${perM.toLocaleString('ru-RU')} ₽/мес (на 6 месяцев)\n`;
+            }
+
+            msg += `\n💰 ИТОГОВАЯ СТОИМОСТЬ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n\n`;
+            msg += `Хочу подтвердить замер и проконсультироваться с мастером.`;
+
+            openWhatsAppUrl(msg);
+        }
+
+        function copyEstimateToClipboard() {
+            if (calcState.totalPrice === 0) {
+                showToast('Сначала заполните параметры калькулятора');
+                return;
+            }
+
+            let paymentLabel = 'Рассрочка 0%';
+            if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
+                paymentLabel = `Скидка для мастера: ${window.activeMasterSession.owner} (${window.activeMasterSession.discount}%)`;
+            } else if (calcState.paymentMethod === 'cash') {
+                paymentLabel = 'Оплата наличными (Скидка 10%)';
+            }
+
+            let text = `Смета натяжного потолка от компании Decarat:\n`;
+            if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
+                text += `Мастер: ${window.activeMasterSession.owner} (ключ ${window.activeMasterSession.code})\n`;
+            }
+            text += `Площадь: ${calcState.area} м² | Периметр: ${calcState.perimeter} м.п.\n`;
+            text += `Полотно: ${window.PRICES.fabrics[calcState.fabricKey]?.name}\n`;
+            text += `Условия: ${paymentLabel}\n`;
+            text += `------------------------------------\n`;
+            calcState.breakdown.forEach(item => {
+                const sign = item.cost < 0 ? '−' : '';
+                text += `• ${item.name}: ${sign}${Math.abs(item.cost).toLocaleString('ru-RU')} ₽\n`;
+            });
+            text += `------------------------------------\n`;
+            text += `ИТОГО К ОПЛАТЕ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n`;
+            text += `Телефон для связи: +7 (929) 896-67-36`;
+
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast('Смета скопирована в буфер обмена!');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast-message');
+            const textEl = document.getElementById('toast-text');
+            if (!toast || !textEl) return;
+            textEl.textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Немедленный запуск инициализации при загрузке страницы
+        window.addEventListener('DOMContentLoaded', () => {
+            initAccessControl();
+            updateUiPriceLabels();
+            updateActiveCardStyles();
+            calculateTotal();
+            updateHeroQuickPrice();
+        });
+    </script>
+
+    <!-- ПОДКЛЮЧЕНИЕ ОБЛАЧНОЙ БАЗЫ ДАННЫХ FIREBASE FIRESTORE (АСИНХРОННО, НЕ БЛОКИРУЕТ ВХОД) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const manualFirebaseConfig = {
+            apiKey: "AIzaSyBiIRGdqUl8wb7Sgq41DCYG8trFvWlDbEQ",
+            authDomain: "decarat-5b83c.firebaseapp.com",
+            projectId: "decarat-5b83c",
+            storageBucket: "decarat-5b83c.firebasestorage.app",
+            messagingSenderId: "758058076559",
+            appId: "1:758058076559:web:9bbd05b0a0531009a363fa"
+        };
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined'
+            ? JSON.parse(__firebase_config)
+            : manualFirebaseConfig;
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'decarat-prod-v1';
+
+        window.cloudSync = {
+            enabled: false,
+            saveAll: async () => {}
+        };
+
+        async function initCloudDatabase() {
+            if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey.includes('ВСТАВЬТЕ_СЮДА')) {
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                const user = auth.currentUser;
+                if (!user) return;
+
+                const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'main');
+
+                window.cloudSync.enabled = true;
+                window.cloudSync.saveAll = async () => {
+                    if (!auth.currentUser) return;
+                    try {
+                        await setDoc(configDocRef, {
+                            prices: JSON.parse(JSON.stringify(window.PRICES)),
+                            isAccessRestricted: Boolean(window.isAccessRestricted),
+                            allowedKeys: JSON.parse(JSON.stringify(window.ALLOWED_ACCESS_KEYS)),
+                            updatedAt: Date.now()
+                        }, { merge: true });
+                    } catch (err) {
+                        console.error('Ошибка сохранения в облачную БД:', err);
+                        showToast('Ошибка записи в облачную БД');
+                    }
+                };
+
+                onSnapshot(configDocRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        if (data.prices) {
+                            window.PRICES = data.prices;
+                            updateUiPriceLabels();
+                            calculateTotal();
+                            updateHeroQuickPrice();
+                            if (window.isAdminLoggedIn) {
+                                populateAdminForm();
+                            }
+                        }
+                        if (typeof data.isAccessRestricted === 'boolean') {
+                            window.isAccessRestricted = data.isAccessRestricted;
+                            const lockCheckbox = document.getElementById('toggle-access-lock');
+                            if (lockCheckbox) lockCheckbox.checked = window.isAccessRestricted;
+                            if (!window.isAccessRestricted) {
+                                unlockSiteUI();
+                            }
+                        }
+                        if (Array.isArray(data.allowedKeys)) {
+                            window.ALLOWED_ACCESS_KEYS = data.allowedKeys;
+                            saveKeysListToCache();
+
+                            const savedCode = getSavedCachedAccessCode();
+                            if (window.activeMasterSession && window.activeMasterSession.code) {
+                                const updatedUser = window.ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === window.activeMasterSession.code.toUpperCase());
+                                if (updatedUser) {
+                                    applyUserAccessProfile(updatedUser, false);
+                                } else {
+                                    clearSavedAuthCache();
+                                    window.activeMasterSession = null;
+                                    window.isSessionUnlocked = false;
+                                    updateMasterPaymentButtonUI();
+                                    if (window.isAccessRestricted && !window.isAdminLoggedIn) lockSiteUI();
+                                }
+                            } else if (savedCode) {
+                                const cachedUser = window.ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === savedCode);
+                                if (cachedUser) {
+                                    window.isSessionUnlocked = true;
+                                    unlockSiteUI();
+                                    applyUserAccessProfile(cachedUser, true);
+                                }
+                            }
+
+                            renderAccessKeysList();
+                        }
+                    } else {
+                        window.cloudSync.saveAll();
+                    }
+                }, (error) => {
+                    console.error('Ошибка чтения из Firestore:', error);
+                });
+            } catch (e) {
+                console.error('Ошибка инициализации Firebase:', e);
+            }
+        }
+
+        initCloudDatabase();
+    </script>
+</body>
+</html>
