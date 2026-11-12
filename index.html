@@ -1,862 +1,196 @@
 <!DOCTYPE html>
-<html lang="ru" class="scroll-smooth">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Натяжные потолки Decarat | Калькулятор стоимости</title>
-    
-    <!-- Подключение Tailwind CSS -->
+    <title>Decarat — Калькулятор расчёта натяжных потолков</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                            950: '#052e16'
-                        }
-                    }
-                }
-            }
-        };
-    </script>
-
-    <!-- Полноценный встроенный CSS на случай блокировки CDN -->
     <style>
-        :root {
-            --brand-50: #f0fdf4;
-            --brand-100: #dcfce7;
-            --brand-500: #10b981;
-            --brand-600: #059669;
-            --brand-700: #047857;
-            --brand-900: #064e3b;
-            --brand-950: #022c22;
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #fafaf9;
-            color: #1c1917;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Эффект глубокого переливания цветов в шапке (Hero) */
-        .hero-gradient {
-            background: linear-gradient(125deg, #022c22, #064e3b, #047857, #065f46, #0f766e, #022c22);
-            background-size: 300% 300%;
-            animation: heroColorWave 12s ease-in-out infinite alternate;
-        }
-
-        @keyframes heroColorWave {
-            0% { background-position: 0% 25%; }
-            50% { background-position: 100% 75%; }
-            100% { background-position: 0% 25%; }
-        }
-
-        /* Плавное движение фоновых сфер с рассеянным светом */
-        @keyframes floatSphere1 {
-            0% { transform: translate(0px, 0px) scale(1); }
-            50% { transform: translate(45px, 35px) scale(1.15); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
-
-        @keyframes floatSphere2 {
-            0% { transform: translate(0px, 0px) scale(1); }
-            50% { transform: translate(-40px, -30px) scale(1.2); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
-
-        .animate-sphere-1 {
-            animation: floatSphere1 14s ease-in-out infinite alternate;
-        }
-
-        .animate-sphere-2 {
-            animation: floatSphere2 16s ease-in-out infinite alternate;
-        }
-
-        /* Ползунки */
-        input[type="range"] {
-            accent-color: #059669;
-        }
-
-        /* Стилизация скроллбара админ-панели */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 9999px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f5f5f4; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
     </style>
 </head>
-<body class="bg-stone-50 text-stone-900 antialiased selection:bg-emerald-500 selection:text-white">
+<body class="bg-stone-100 text-stone-800 font-sans antialiased selection:bg-emerald-200 selection:text-emerald-900">
 
-    <!-- ЭКРАН ЗАКРЫТОГО ДОСТУПА (PAYWALL / INVITE-ONLY GATE) -->
-    <div id="access-gate-overlay" class="fixed inset-0 z-50 bg-stone-950/95 backdrop-blur-xl flex items-center justify-center p-4">
-        <div class="bg-stone-900 border border-emerald-800/60 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
-            <div class="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none"></div>
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 mx-auto flex items-center justify-center text-white shadow-lg shadow-emerald-900/40">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-            </div>
-            <div>
-                <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-950 px-3 py-1 rounded-full border border-emerald-800/60">Закрытый доступ</span>
-                <h2 class="text-2xl font-black text-white mt-3">DECARAT PRO</h2>
-                <p class="text-xs text-stone-400 mt-1.5 leading-relaxed">
-                    Доступ к калькулятору и расчёту сметы предоставляется только по персональному ключу или ссылке-приглашению.
-                </p>
-            </div>
-
-            <form onsubmit="verifyAccessCode(event)" class="space-y-3 text-left">
-                <div>
-                    <label class="text-[11px] font-semibold text-stone-300 block mb-1">Введите ваш ключ доступа:</label>
-                    <input type="text" id="access-code-input" placeholder="Например: DECARAT2026" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-stone-700 text-white text-center font-bold tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <p id="access-code-error" class="text-xs text-rose-400 text-center hidden">Неверный или заблокированный ключ доступа</p>
-                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-950/50 transition">
-                    Войти на сайт
-                </button>
-                <div id="admin-tab-access" class="hidden space-y-6">
-    <div class="p-4 bg-stone-50 rounded-2xl border border-stone-200 flex items-center justify-between gap-4">
-        <div>
-            <h4 class="text-sm font-bold text-stone-900">Закрытый режим работы сайта</h4>
-            <p class="text-xs text-stone-500 mt-0.5">Если включено — доступ к калькулятору открывается только по ключу или персональной ссылке.</p>
-        </div>
-        <label class="relative inline-flex items-center cursor-pointer shrink-0">
-            <input type="checkbox" id="toggle-access-restriction" onchange="toggleAccessRestriction(this.checked)" class="sr-only peer" checked>
-            <div class="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-        </label>
-    </div>
-
-    <div class="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 space-y-3">
-        <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Создать новый ключ доступа</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input type="text" id="new-key-owner" placeholder="Имя клиента или партнёра" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <input type="text" id="new-key-code" placeholder="Код (например: VIP2026)" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs uppercase font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        </div>
-        <button type="button" onclick="createNewAccessKey()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
-            + Создать ключ и сохранить в облако
-        </button>
-    </div>
-
-    <div class="space-y-2">
-        <h4 class="text-xs font-bold text-stone-700 uppercase tracking-wider">Активные ключи и ссылки</h4>
-        <div id="access-keys-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
-    </div>
-</div>
-            </form>
-
-            <div class="pt-3 border-t border-stone-800 flex items-center justify-between text-[11px] text-stone-500">
-                <span>Демо-ключ: <strong class="text-stone-300">DECARAT2026</strong></span>
-                <button type="button" onclick="openAdminModal()" class="text-emerald-400 hover:underline font-semibold">Вход для владельца</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ОСНОВНАЯ НАВИГАЦИЯ -->
-    <nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-emerald-800 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                </div>
-                <div>
-                    <span class="text-2xl font-black tracking-tight text-stone-900 block leading-tight">DECARAT</span>
-                    <span class="text-[10px] text-stone-500 font-semibold uppercase tracking-widest block">Натяжные потолки & Свет</span>
-                </div>
-            </div>
-
-            <!-- Ссылки меню -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-stone-600">
-                <a href="#calculator" class="hover:text-emerald-600 transition">Калькулятор</a>
-                <a href="#catalog" onclick="scrollToTextures(event)" class="hover:text-emerald-600 transition">Фактуры полотен</a>
-                <a href="#lights" class="hover:text-emerald-600 transition">Светильники</a>
-                <a href="#contacts" class="hover:text-emerald-600 transition">Контакты</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- ГЛАВНЫЙ БЛОК (HERO) -->
-    <section class="relative hero-gradient text-white overflow-hidden py-16 sm:py-24 border-b border-stone-800">
-        <!-- Анимированные световые пятна для объемного переливания -->
-        <div class="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none animate-sphere-1"></div>
-        <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-400/20 rounded-full blur-3xl pointer-events-none animate-sphere-2"></div>
-        <div class="absolute top-1/2 left-1/3 -translate-y-1/2 w-80 h-80 bg-emerald-300/15 rounded-full blur-3xl pointer-events-none animate-sphere-1" style="animation-duration: 20s;"></div>
-
-        <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
-                        Идеальные натяжные потолки от компании <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-emerald-400 to-teal-200">Decarat</span>
-                    </h1>
-                    <p class="text-stone-300 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                        Рассчитайте точную смету с полотном, теневыми профилями, спотами, магнитными треками и светодиодной LED-подсветкой прямо на сайте за 1 минуту.
-                    </p>
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
-                        <a href="#calculator" class="px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm shadow-xl shadow-emerald-950/40 transform hover:-translate-y-0.5 transition duration-200">
-                            Перейти к калькулятору
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Быстрая карточка Hero -->
-                <div class="lg:col-span-5">
-                    <div class="bg-stone-900/85 backdrop-blur-xl border border-emerald-950/80 p-6 sm:p-8 rounded-3xl shadow-2xl relative">
-                        <div class="flex items-center justify-between pb-4 border-b border-stone-800">
-                            <div>
-                                <span class="text-xs text-stone-400 uppercase tracking-widest font-bold">Быстрый ориентир</span>
-                                <h3 class="text-lg font-bold text-white">Стандартная комната</h3>
-                            </div>
-                            <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-semibold">18 м²</span>
-                        </div>
-                        <ul class="space-y-3 py-5 text-xs text-stone-300">
-                            <li class="flex items-center justify-between">
-                                <span>Полотно MSD Premium (матовое)</span>
-                                <span class="font-bold text-white">18 м²</span>
-                            </li>
-                            <li class="flex items-center justify-between">
-                                <span>Профиль по периметру</span>
-                                <span class="font-bold text-white">18 м.п.</span>
-                            </li>
-                            <li class="flex items-center justify-between">
-                                <span>Точечные светильники GX53 LED</span>
-                                <span class="font-bold text-white">6 шт.</span>
-                            </li>
-                            <li class="flex items-center justify-between">
-                                <span>Монтаж чистовым инструментом</span>
-                                <span class="text-emerald-400 font-semibold">Включено</span>
-                            </li>
-                        </ul>
-                        <div class="pt-4 border-t border-stone-800 flex items-center justify-between">
-                            <div>
-                                <span class="text-[11px] text-stone-400 block">Примерная цена под ключ:</span>
-                                <span id="hero-quick-price" class="text-xl sm:text-2xl font-black text-emerald-400">14 400 ₽</span>
-                            </div>
-                            <a href="#calculator" class="text-xs font-bold text-stone-300 hover:text-white flex items-center gap-1 underline underline-offset-4">
-                                Настроить под себя →
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- СЕКЦИЯ КАЛЬКУЛЯТОРА -->
-    <section id="calculator" class="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-12">
-            <span class="text-xs font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                Прозрачный онлайн-расчет
-            </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mt-3 tracking-tight">
-                Калькулятор натяжного потолка
-            </h2>
-            <p class="text-stone-500 text-sm mt-2">
-                Укажите размеры, выберите фактуру полотна, светильники и светодиодную ленту. Смета формируется мгновенно.
-            </p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            <!-- ЛЕВАЯ КОЛОНКА: ОПЦИИ И ПАРАМЕТРЫ -->
-            <div class="lg:col-span-8 space-y-6">
-
-                <!-- 1. РАЗМЕРЫ ПОМЕЩЕНИЯ -->
-                <div class="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm">
-                    <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-6">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-sm flex items-center justify-center">1</span>
-                            <h3 class="font-bold text-base sm:text-lg text-stone-900">Размеры и параметры комнаты</h3>
-                        </div>
-                        <span class="text-xs text-stone-400">Шаг 1 из 4</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Площадь -->
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center text-xs">
-                                <label class="font-bold text-stone-700">Площадь потолка (S):</label>
-                                <span class="font-extrabold text-stone-900 text-sm"><span id="area-val-label">0</span> м²</span>
-                            </div>
-                            <input type="range" id="slider-area" min="0" max="100" value="0" step="1" oninput="syncAreaFromSlider(this.value)" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
-                            <div class="flex items-center gap-2 pt-1">
-                                <input type="number" id="input-area" min="0" max="300" value="0" oninput="syncAreaFromInput(this.value)" class="w-24 px-3 py-1.5 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-stone-900 font-bold">
-                                <span class="text-xs text-stone-500">квадратных метров</span>
-                            </div>
-                        </div>
-
-                        <!-- Периметр -->
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center text-xs">
-                                <label class="font-bold text-stone-700">Периметр стен (P):</label>
-                                <span class="font-extrabold text-stone-900 text-sm"><span id="perimeter-val-label">0</span> м.п.</span>
-                            </div>
-                            <input type="range" id="slider-perimeter" min="0" max="120" value="0" step="1" oninput="syncPerimeterFromSlider(this.value)" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
-                            <div class="flex items-center gap-2 pt-1">
-                                <input type="number" id="input-perimeter" min="0" max="500" value="0" oninput="syncPerimeterFromInput(this.value)" class="w-24 px-3 py-1.5 text-sm bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-stone-900 font-bold">
-                                <span class="text-xs text-stone-500">погонных метров профиля</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Дополнительные особенности геометрии -->
-                    <div class="mt-6 pt-6 border-t border-stone-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="flex items-center justify-between p-3.5 bg-stone-50 rounded-2xl border border-stone-200/80">
-                            <div>
-                                <span class="text-xs font-bold text-stone-800 block">Углы свыше 4-х</span>
-                                <span class="text-[11px] text-stone-500">+150 ₽ за каждый доп. угол</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="changeExtraCorners(-1)" class="w-8 h-8 rounded-xl bg-white border border-stone-300 hover:bg-stone-100 font-bold text-stone-700 transition">-</button>
-                                <span id="corners-count" class="w-6 text-center font-bold text-sm">0</span>
-                                <button onclick="changeExtraCorners(1)" class="w-8 h-8 rounded-xl bg-white border border-stone-300 hover:bg-stone-100 font-bold text-stone-700 transition">+</button>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between p-3.5 bg-stone-50 rounded-2xl border border-stone-200/80">
-                            <div>
-                                <span class="text-xs font-bold text-stone-800 block">Обвод труб отопления</span>
-                                <span class="text-[11px] text-stone-500">+350 ₽ за стояк с усилением</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="changePipes(-1)" class="w-8 h-8 rounded-xl bg-white border border-stone-300 hover:bg-stone-100 font-bold text-stone-700 transition">-</button>
-                                <span id="pipes-count" class="w-6 text-center font-bold text-sm">0</span>
-                                <button onclick="changePipes(1)" class="w-8 h-8 rounded-xl bg-white border border-stone-300 hover:bg-stone-100 font-bold text-stone-700 transition">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. ФАКТУРА ПОЛОТНА И ПРОФИЛЬ -->
-                <div id="catalog" class="scroll-mt-28 bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm">
-                    <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-6">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-sm flex items-center justify-center">2</span>
-                            <h3 class="font-bold text-base sm:text-lg text-stone-900">Выбор фактуры и профиля</h3>
-                        </div>
-                        <span class="text-xs text-stone-400">Шаг 2 из 4</span>
-                    </div>
-
-                    <!-- Карточки фактур полотен -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <label class="fabric-card relative border-2 border-emerald-600 bg-emerald-50/40 p-4 rounded-2xl cursor-pointer flex flex-col justify-between transition hover:border-emerald-500">
-                            <input type="radio" name="fabric_type" value="matte" checked class="hidden" onchange="calculateTotal()">
-                            <div>
-                                <div class="w-full h-16 rounded-xl bg-stone-100 mb-3 flex items-center justify-center overflow-hidden border border-stone-200">
-                                    <div class="w-full h-full bg-stone-100 flex items-center justify-center text-center px-2 text-[10px] text-stone-500 font-bold uppercase tracking-widest">
-                                        Матовый шероховатый
-                                    </div>
-                                </div>
-                                <span class="text-sm font-bold text-stone-900 block">Матовый (MSD Premium)</span>
-                                <span class="text-xs text-stone-500 mt-1 block">Классика штукатурки без бликов</span>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-stone-200 flex justify-between items-center text-xs">
-                                <span id="price-display-fabric-matte" class="font-bold text-emerald-800">650 ₽ / м²</span>
-                                <span class="text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded font-semibold text-[11px]">Хит</span>
-                            </div>
-                        </label>
-
-                        <label class="fabric-card relative border-2 border-stone-200 p-4 rounded-2xl cursor-pointer flex flex-col justify-between transition hover:border-emerald-300">
-                            <input type="radio" name="fabric_type" value="satin" class="hidden" onchange="calculateTotal()">
-                            <div>
-                                <div class="w-full h-16 rounded-xl bg-stone-200 mb-3 flex items-center justify-center overflow-hidden">
-                                    <div class="w-full h-full bg-gradient-to-br from-stone-50 via-white to-emerald-50 flex items-center justify-center text-[10px] text-stone-600 font-bold uppercase tracking-widest">
-                                        Сатин Шелковистый
-                                    </div>
-                                </div>
-                                <span class="text-sm font-bold text-stone-900 block">Сатиновый</span>
-                                <span class="text-xs text-stone-500 mt-1 block">Мягкий перламутровый блеск</span>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-stone-200 flex justify-between items-center text-xs">
-                                <span id="price-display-fabric-satin" class="font-bold text-emerald-800">700 ₽ / м²</span>
-                            </div>
-                        </label>
-
-                        <label class="fabric-card relative border-2 border-stone-200 p-4 rounded-2xl cursor-pointer flex flex-col justify-between transition hover:border-emerald-300">
-                            <input type="radio" name="fabric_type" value="glossy" class="hidden" onchange="calculateTotal()">
-                            <div>
-                                <div class="w-full h-16 rounded-xl bg-stone-200 mb-3 flex items-center justify-center overflow-hidden">
-                                    <div class="w-full h-full bg-gradient-to-br from-emerald-50/40 via-white to-stone-200 flex items-center justify-center text-[10px] text-stone-600 font-bold uppercase tracking-widest shadow-inner">
-                                        Глянец Зеркальный
-                                    </div>
-                                </div>
-                                <span class="text-sm font-bold text-stone-900 block">Глянцевый</span>
-                                <span class="text-xs text-stone-500 mt-1 block">Визуально поднимает потолок</span>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-stone-200 flex justify-between items-center text-xs">
-                                <span id="price-display-fabric-glossy" class="font-bold text-emerald-800">680 ₽ / м²</span>
-                            </div>
-                        </label>
-
-                        <label class="fabric-card relative border-2 border-stone-200 p-4 rounded-2xl cursor-pointer flex flex-col justify-between transition hover:border-emerald-300">
-                            <input type="radio" name="fabric_type" value="fabric" class="hidden" onchange="calculateTotal()">
-                            <div>
-                                <div class="w-full h-16 rounded-xl bg-stone-200 mb-3 flex items-center justify-center overflow-hidden">
-                                    <div class="w-full h-full bg-stone-300 flex items-center justify-center text-[10px] text-stone-700 font-bold uppercase tracking-widest">
-                                        Ткань Descor
-                                    </div>
-                                </div>
-                                <span class="text-sm font-bold text-stone-900 block">Тканевый (Descor)</span>
-                                <span class="text-xs text-stone-500 mt-1 block">Дышащее полотно без нагрева</span>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-stone-200 flex justify-between items-center text-xs">
-                                <span id="price-display-fabric-fabric" class="font-bold text-emerald-800">1 450 ₽ / м²</span>
-                                <span class="text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded font-semibold text-[11px]">Люкс</span>
-                            </div>
-                        </label>
-                    </div>
-
-                    <!-- Профиль примыкания -->
-                    <div class="mt-6 pt-5 border-t border-stone-100">
-                        <label class="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-3">Тип профиля по периметру:</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <label class="profile-card border border-emerald-600 bg-emerald-50/50 p-3.5 rounded-xl cursor-pointer flex items-center gap-3">
-                                <input type="radio" name="profile_type" value="classic" checked class="text-emerald-600 focus:ring-emerald-500" onchange="calculateTotal()">
-                                <div>
-                                    <span class="text-xs font-bold text-stone-900 block">Классический алюминий</span>
-                                    <span class="text-[11px] text-stone-500">Включен в базовый монтаж</span>
-                                </div>
-                            </label>
-                            <label class="profile-card border border-stone-200 p-3.5 rounded-xl cursor-pointer flex items-center gap-3">
-                                <input type="radio" name="profile_type" value="shadow" class="text-emerald-600 focus:ring-emerald-500" onchange="calculateTotal()">
-                                <div>
-                                    <span class="text-xs font-bold text-stone-900 block">Теневой зазор (EuroKraab)</span>
-                                    <span id="price-display-profile-shadow" class="text-[11px] text-stone-500">+ 450 ₽ / пог. метр</span>
-                                </div>
-                            </label>
-                            <label class="profile-card border border-stone-200 p-3.5 rounded-xl cursor-pointer flex items-center gap-3">
-                                <input type="radio" name="profile_type" value="floating" class="text-emerald-600 focus:ring-emerald-500" onchange="calculateTotal()">
-                                <div>
-                                    <span class="text-xs font-bold text-stone-900 block">Парящий профиль под LED</span>
-                                    <span id="price-display-profile-floating" class="text-[11px] text-stone-500">+ 550 ₽ / пог. метр</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. КАТАЛОГ СВЕТИЛЬНИКОВ И ОСВЕЩЕНИЯ -->
-                <div id="lights" class="scroll-mt-28 bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm">
-                    <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-6">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-sm flex items-center justify-center">3</span>
-                            <h3 class="font-bold text-base sm:text-lg text-stone-900">Выбор светильников и люстры</h3>
-                        </div>
-                        <span class="text-xs text-stone-400">Шаг 3 из 4</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <!-- Модель 1: GX53 -->
-                        <div class="border border-stone-200 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md transition bg-stone-50/50">
-                            <div>
-                                <div class="w-full h-28 rounded-xl bg-gradient-to-tr from-stone-100 to-stone-200 flex items-center justify-center mb-3">
-                                    <div class="w-16 h-16 rounded-full bg-white shadow-inner border border-stone-300 flex items-center justify-center">
-                                        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">GX53</div>
-                                    </div>
-                                </div>
-                                <span class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Встраиваемый спот</span>
-                                <h4 class="font-bold text-sm text-stone-900">Ультратонкий светильник GX53</h4>
-                                <p class="text-xs text-stone-500 mt-1">Идеально ровная посадка в плоскость потолка. Не греется.</p>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between">
-                                <div>
-                                    <span class="text-xs text-stone-500 block">Цена со стойкой:</span>
-                                    <span id="price-display-lamp-gx53" class="text-sm font-bold text-stone-900">450 ₽/шт</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <button onclick="changeLampCount('gx53', -1)" class="w-7 h-7 rounded-lg bg-white border border-stone-300 hover:bg-stone-100 font-bold text-xs">-</button>
-                                    <span id="count-lamp-gx53" class="w-6 text-center font-bold text-sm">0</span>
-                                    <button onclick="changeLampCount('gx53', 1)" class="w-7 h-7 rounded-lg bg-white border border-stone-300 hover:bg-stone-100 font-bold text-xs">+</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Модель 2: Премиум тубус накладной -->
-                        <div class="border border-stone-200 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md transition bg-stone-50/50">
-                            <div>
-                                <div class="w-full h-28 rounded-xl bg-gradient-to-tr from-stone-800 to-stone-700 flex items-center justify-center mb-3 text-stone-300">
-                                    <svg class="w-10 h-10 text-emerald-400" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4h10v12H7z"/><circle cx="12" cy="16" r="5" fill="#fff" opacity="0.3"/></svg>
-                                </div>
-                                <span class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Накладной спот</span>
-                                <h4 class="font-bold text-sm text-stone-900">Цилиндрический светильник (Black/White)</h4>
-                                <p class="text-xs text-stone-500 mt-1">Стильный акцент для современного и лофт интерьера.</p>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between">
-                                <div>
-                                    <span class="text-xs text-stone-500 block">Цена со стойкой:</span>
-                                    <span id="price-display-lamp-tube" class="text-sm font-bold text-stone-900">1 200 ₽/шт</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <button onclick="changeLampCount('tube', -1)" class="w-7 h-7 rounded-lg bg-white border border-stone-300 hover:bg-stone-100 font-bold text-xs">-</button>
-                                    <span id="count-lamp-tube" class="w-6 text-center font-bold text-sm">0</span>
-                                    <button onclick="changeLampCount('tube', 1)" class="w-7 h-7 rounded-lg bg-white border border-stone-300 hover:bg-stone-100 font-bold text-xs">+</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Модель 3: Магнитный трек -->
-                        <div class="border border-stone-200 rounded-2xl p-4 flex flex-col justify-between hover:shadow-md transition bg-stone-50/50">
-                            <div>
-                                <div class="w-full h-28 rounded-xl bg-stone-900 flex items-center justify-center mb-3">
-                                    <div class="w-4/5 h-2 bg-stone-700 rounded relative">
-                                        <div class="absolute left-4 -top-2 w-5 h-4 bg-emerald-400 rounded-sm"></div>
-                                        <div class="absolute right-6 -top-2 w-5 h-4 bg-emerald-400 rounded-sm"></div>
-                                    </div>
-                                </div>
-                                <span class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Трековая система</span>
-                                <h4 class="font-bold text-sm text-stone-900">Встраиваемый трек (секциями по 1м)</h4>
-                                <p class="text-xs text-stone-500 mt-1">Свободное перемещение светильников по всей длине шины.</p>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between">
-                                <div>
-                                    <span class="text-xs text-stone-500 block">Шина + монтаж:</span>
-                                    <span id="price-display-lamp-track" class="text-sm font-bold text-stone-900">2 800 ₽/м</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <button onclick="changeLampCount('track', -1)" class="w-7 h-7 rounded-lg bg-white border border-stone-300 hover:bg-stone-100 font-bold text-xs">-</button>
-                                    <span id="count-lamp-track" class="w-6 text-center font-bold text-sm">0</span>
-                                    <button onclick="changeLampCount('track', 1)" class="w-7 h-7 rounded-lg bg-white border border-stone-300 hover:bg-stone-100 font-bold text-xs">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Монтаж люстры -->
-                    <div class="mt-6 pt-5 border-t border-stone-100 flex flex-wrap items-center justify-between gap-4">
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" id="has-chandelier" onchange="calculateTotal()" class="w-5 h-5 text-emerald-600 rounded border-stone-300 focus:ring-emerald-500">
-                            <div>
-                                <span class="text-sm font-bold text-stone-900">Монтаж центральной люстры</span>
-                                <span id="price-display-chandelier" class="text-xs text-stone-500 block">Усиленная закладная платформа + подключение (+650 ₽)</span>
-                            </div>
-                        </label>
-                        <span class="text-xs px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold rounded-lg">Гарантия надёжности крепления</span>
-                    </div>
-                </div>
-
-                <!-- 4. СВЕТОДИОДНАЯ LED-ПОДСВЕТКА И ДОП. ОПЦИИ -->
-                <div class="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm">
-                    <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-6">
-                        <div class="flex items-center gap-3">
-                            <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 font-extrabold text-sm flex items-center justify-center">4</span>
-                            <h3 class="font-bold text-base sm:text-lg text-stone-900">Светодиодная LED-лента и опции</h3>
-                        </div>
-                        <span class="text-xs text-stone-400">Шаг 4 из 4</span>
-                    </div>
-
-                    <!-- Блок LED-подсветки -->
-                    <div class="p-5 rounded-2xl bg-gradient-to-r from-stone-900 via-stone-850 to-stone-900 text-white relative overflow-hidden">
-                        <div class="relative z-10 space-y-4">
-                            <div class="flex flex-wrap items-center justify-between gap-4">
-                                <label class="flex items-center gap-3 cursor-pointer">
-                                    <input type="checkbox" id="enable-led" onchange="toggleLedSection(this.checked)" class="w-5 h-5 text-emerald-500 rounded border-stone-700 focus:ring-emerald-400">
-                                    <div>
-                                        <span class="text-sm font-bold text-white block">Добавить светодиодную ленту (LED)</span>
-                                        <span class="text-xs text-stone-400">Парящий потолок, контурная ниша или световые линии</span>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <!-- Настройки LED (раскрываются при включении) -->
-                            <div id="led-settings-box" class="space-y-4 pt-3 border-t border-stone-800 opacity-50 pointer-events-none transition duration-200">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="text-xs text-stone-300 block mb-1.5 font-medium">Длина светодиодной ленты (м):</label>
-                                        <div class="flex items-center gap-3">
-                                            <input type="range" id="slider-led-length" min="0" max="40" value="0" step="1" oninput="syncLedLength(this.value)" class="w-full h-2 bg-stone-700 rounded-lg appearance-none cursor-pointer">
-                                            <span class="text-sm font-bold text-emerald-400 w-12 text-right"><span id="led-len-display">0</span> м</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="text-xs text-stone-300 block mb-1.5 font-medium">Тип LED ленты:</label>
-                                        <select id="led-type" onchange="calculateTotal()" class="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-400">
-                                            <option value="single">Одноцветная Premium 12V (Белая) — 950 ₽/м</option>
-                                            <option value="rgb">Многоцветная RGB с пультом ДУ — 1 350 ₽/м</option>
-                                            <option value="cct">С регулировкой температуры (CCT) — 1 550 ₽/м</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Температура свечения -->
-                                <div>
-                                    <label class="text-xs text-stone-300 block mb-2 font-medium">Цветовая температура:</label>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        <label class="led-temp-card border border-emerald-400 bg-stone-800 rounded-xl p-2 cursor-pointer flex flex-col items-center text-center transition">
-                                            <input type="radio" name="led_temp" value="warm" class="hidden" onchange="calculateTotal()">
-                                            <span class="w-3 h-3 rounded-full bg-amber-300 mb-1"></span>
-                                            <span class="text-[11px] font-bold text-white">3000K</span>
-                                            <span class="text-[10px] text-stone-400">Тёплый уют</span>
-                                        </label>
-                                        <label class="led-temp-card border border-emerald-400 bg-stone-800 rounded-xl p-2 cursor-pointer flex flex-col items-center text-center transition">
-                                            <input type="radio" name="led_temp" value="neutral" checked class="hidden" onchange="calculateTotal()">
-                                            <span class="w-3 h-3 rounded-full bg-emerald-100 mb-1"></span>
-                                            <span class="text-[11px] font-bold text-white">4000K</span>
-                                            <span class="text-[10px] text-stone-400">Нейтральный</span>
-                                        </label>
-                                        <label class="led-temp-card border border-stone-700 rounded-xl p-2 cursor-pointer flex flex-col items-center text-center bg-stone-850 hover:border-emerald-400 transition">
-                                            <input type="radio" name="led_temp" value="cool" class="hidden" onchange="calculateTotal()">
-                                            <span class="w-3 h-3 rounded-full bg-teal-200 mb-1"></span>
-                                            <span class="text-[11px] font-bold text-white">6000K</span>
-                                            <span class="text-[10px] text-stone-400">Холодный день</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Дополнительные удобства -->
-                    <div class="mt-6 pt-5 border-t border-stone-100 space-y-3">
-                        <label class="text-xs font-bold text-stone-500 uppercase tracking-wider block">Другие важные моменты монтажа:</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                            <label class="flex items-center gap-3 p-3 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
-                                <input type="checkbox" id="opt-cornice" onchange="calculateTotal()" class="w-4 h-4 text-emerald-600 rounded">
-                                <div>
-                                    <span class="font-bold text-stone-800 block">Скрытый карниз для штор (ПК-5)</span>
-                                    <span class="text-stone-500 text-[11px]">+2 700 ₽ за готовую нишу (3 м)</span>
-                                </div>
-                            </label>
-                            <label class="flex items-center gap-3 p-3 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
-                                <input type="checkbox" id="opt-mask" onchange="calculateTotal()" class="w-4 h-4 text-emerald-600 rounded">
-                                <div>
-                                    <span class="font-bold text-stone-800 block">Маскировочная лента (вставка)</span>
-                                    <span class="text-stone-500 text-[11px]">+90 ₽/м.п. по всему периметру</span>
-                                </div>
-                            </label>
-                            <label class="flex items-center gap-3 p-3 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
-                                <input type="checkbox" id="opt-vent" onchange="calculateTotal()" class="w-4 h-4 text-emerald-600 rounded">
-                                <div>
-                                    <span class="font-bold text-stone-800 block">Вывод под вентиляцию / вытяжку</span>
-                                    <span class="text-stone-500 text-[11px]">+600 ₽ (с термокольцом)</span>
-                                </div>
-                            </label>
-                            <label class="flex items-center gap-3 p-3 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
-                                <input type="checkbox" id="opt-fire" onchange="calculateTotal()" class="w-4 h-4 text-emerald-600 rounded">
-                                <div>
-                                    <span class="font-bold text-stone-800 block">Установка датчика дыма / пожарного</span>
-                                    <span class="text-stone-500 text-[11px]">+400 ₽ за точку</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ПРАВАЯ КОЛОНКА: ИТОГОВАЯ СМЕТА -->
-            <div class="lg:col-span-4 sticky top-28 space-y-4">
-                <div class="bg-gradient-to-b from-stone-900 to-stone-950 text-white rounded-3xl p-6 sm:p-7 shadow-2xl border border-emerald-950/70">
-                    <div class="flex items-center justify-between pb-4 border-b border-stone-800">
-                        <div>
-                            <span class="text-xs uppercase tracking-widest text-emerald-400 font-bold block">Смета в реальном времени</span>
-                            <h3 class="text-lg font-bold text-white">Итоговая стоимость</h3>
-                        </div>
-                        <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" title="Расчет активен"></span>
-                    </div>
-
-                    <!-- Большой блок цены -->
-                    <div class="py-5 text-center">
-                        <span class="text-xs text-stone-400 uppercase tracking-wider block mb-1">Итого за потолок и свет:</span>
-                        <div id="total-price" class="text-2xl sm:text-3xl font-bold tracking-tight text-emerald-400">
-                            0 ₽
-                        </div>
-                        <div id="price-per-m2" class="text-xs text-stone-400 mt-1 font-medium">
-                            0 ₽ / м²
-                        </div>
-                    </div>
-
-                    <!-- Выбор способа оплаты: Наличные со скидкой 10% или Рассрочка 0% -->
-                    <div class="pt-2 pb-4 border-t border-stone-800 space-y-2.5">
-                        <label class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">Способ оплаты:</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" id="pay-cash-btn" onclick="setPaymentMethod('cash')" class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative">
-                                <span class="absolute -top-2 right-2 text-[9px] font-extrabold bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 px-1.5 py-0.5 rounded-full shadow-sm">−10%</span>
-                                <span class="block text-xs font-bold">💵 Наличными</span>
-                                <span class="block text-[10px] text-emerald-300 font-semibold mt-0.5">Скидка 10%</span>
-                            </button>
-                            <button type="button" id="pay-install-btn" onclick="setPaymentMethod('installment')" class="p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition">
-                                <span class="block text-xs font-bold">💳 Рассрочка</span>
-                                <span class="block text-[10px] text-stone-400 mt-0.5">0% без переплат</span>
-                            </button>
-                        </div>
-                        <div id="payment-badge-info" class="p-2 rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-[11px] text-emerald-300 flex items-center justify-between">
-                            <span>Выгода при расчете наличными:</span>
-                            <span id="cash-discount-val" class="font-extrabold text-amber-300">0 ₽</span>
-                        </div>
-                    </div>
-
-                    <!-- Детализация сметы -->
-                    <div class="space-y-2.5 py-4 border-t border-b border-stone-800 text-xs">
-                        <div class="text-[11px] font-bold uppercase tracking-wider text-stone-400 mb-2">Детализация расчета:</div>
-                        <div id="breakdown-list" class="space-y-1.5 text-stone-300 max-h-56 overflow-y-auto pr-1">
-                            <!-- Заполняется динамически JS -->
-                        </div>
-                    </div>
-
-                    <!-- Гарантии и преимущества -->
-                    <div class="pt-4 space-y-2 text-[11px] text-stone-400">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>Цена фиксируется в официальном договоре</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>Монтаж перфораторами с пылесосом без пыли</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>Безопасные композитные баллоны</span>
-                        </div>
-                    </div>
-
-                    <!-- Кнопка отправки расчета в WhatsApp -->
-                    <div class="pt-6 space-y-3">
-                        <button onclick="sendCalculationToWhatsApp()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-extrabold text-sm shadow-xl shadow-green-900/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-center">
-                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                            <span>Отправить расчет в WhatsApp</span>
-                        </button>
-                        <button onclick="copyEstimateToClipboard()" class="w-full py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-semibold transition flex items-center justify-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                            <span>Скопировать смету текстом</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Блок помощи мастера -->
-                <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-200/80 text-xs text-emerald-950 flex items-start gap-3">
-                    <span class="text-xl">👷‍♂️</span>
+    <!-- ЭКРАН ЗАКРЫТОГО ДОСТУПА ПО КЛЮЧУ -->
+    <div id="access-gate-overlay" class="fixed inset-0 z-50 bg-stone-950/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl p-7 shadow-2xl border border-stone-200 space-y-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-700 text-white flex items-center justify-center font-bold text-xl shadow-md">D</div>
                     <div>
-                        <span class="font-bold block text-stone-900">Нужен совет технолога?</span>
-                        <span>Технолог бесплатно приедет с лазерным дальномером и чемоданом образцов профилей и светильников.</span>
+                        <h2 class="text-lg font-bold text-stone-900 leading-tight" id="gate-brand-name">Decarat</h2>
+                        <p class="text-xs text-stone-500">Профессиональный расчёт потолков</p>
                     </div>
                 </div>
+                <button type="button" onclick="openAdminModal()" class="text-xs text-stone-400 hover:text-stone-700 px-2.5 py-1.5 rounded-xl border border-stone-200 transition">
+                    Админ
+                </button>
             </div>
 
-        </div>
-    </section>
-
-    <!-- ПОДВАЛ (FOOTER) -->
-    <footer id="contacts" class="bg-stone-950 text-stone-300 pt-16 pb-12 border-t border-stone-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-stone-800">
-                <div class="space-y-4 md:col-span-1">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-700/40">
-                            D
-                        </div>
-                        <span class="text-2xl font-black text-white tracking-tight">DECARAT</span>
-                    </div>
-                    <p class="text-xs text-stone-400 leading-relaxed">
-                        Профессиональный монтаж натяжных потолков любой сложности: теневые EuroKraab, парящие линии, светодиодная подсветка и дизайнерский свет.
-                    </p>
-                    <div class="text-xs text-stone-500">
-                        © 2026 Компания Decarat. Все права защищены.
-                    </div>
-                    <div class="pt-2 flex flex-wrap items-center gap-4">
-                        <button onclick="openAdminModal()" class="text-xs text-stone-400 hover:text-emerald-400 underline transition">
-                            Панель управления ценами и доступом
-                        </button>
-                        <button onclick="lockSiteSession()" class="text-xs text-stone-500 hover:text-rose-400 underline transition">
-                            Заблокировать экран
-                        </button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Материалы</h4>
-                    <ul class="space-y-2 text-xs text-stone-400">
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Матовые полотна MSD</a></li>
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Сатиновые перламутровые</a></li>
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Глянцевые зеркальные</a></li>
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Тканевые Descor (Германия)</a></li>
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Теневые зазоры EuroKraab</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Освещение</h4>
-                    <ul class="space-y-2 text-xs text-stone-400">
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Светильники GX53 LED</a></li>
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Накладные споты-тубусы</a></li>
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Магнитные шинопроводы</a></li>
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Парящие светодиодные ленты</a></li>
-                        <li><a href="#calculator" class="hover:text-emerald-400 transition">Световые линии 3000K-6000K</a></li>
-                    </ul>
-                </div>
-
-                <div class="space-y-3">
-                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Связь с нами</h4>
-                    <div class="text-xs text-stone-400 space-y-2">
-                        <p class="flex items-center gap-2">
-                            <span class="text-emerald-400">📞</span>
-                            <a href="tel:+79298966736" class="hover:text-white font-bold text-white text-sm">+7 (929) 896-67-36</a>
-                        </p>
-                        <p class="flex items-center gap-2">
-                            <span class="text-emerald-400">💬</span>
-                            <button onclick="requestMeasurementInWhatsApp()" class="text-left hover:text-white underline">
-                                Написать в WhatsApp
-                            </button>
-                        </p>
-                        <p class="flex items-center gap-2">
-                            <span class="text-emerald-400">📍</span>
-                            <span>Выезд технолога по городу и пригороду</span>
-                        </p>
-                        <p class="flex items-center gap-2">
-                            <span class="text-emerald-400">⏰</span>
-                            <span>Ежедневно с 08:00 до 21:00</span>
-                        </p>
-                    </div>
-                    <div class="pt-2">
-                        <button onclick="requestMeasurementInWhatsApp()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs transition text-center shadow-lg shadow-emerald-900/30">
-                            Бесплатный вызов на замер
-                        </button>
-                    </div>
-                </div>
+            <div class="space-y-2">
+                <h3 class="text-base font-bold text-stone-900">Вход по персональному ключу</h3>
+                <p class="text-xs text-stone-500 leading-relaxed">Введите код доступа, полученный при оформлении подписки, или перейдите по персональной ссылке.</p>
             </div>
-        </div>
-    </footer>
 
-    <!-- УВЕДОМЛЕНИЕ О КОПИРОВАНИИ / УСПЕШНОМ ДЕЙСТВИИ -->
-    <div id="toast-message" class="fixed bottom-6 right-6 z-50 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-900/50 text-xs flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span id="toast-text">Расчет успешно скопирован!</span>
+            <form onsubmit="submitAccessCode(event)" class="space-y-3">
+                <input type="text" id="access-code-input" placeholder="Введите ключ доступа" class="w-full px-4 py-3 rounded-2xl border border-stone-300 text-center font-mono text-base uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <p id="access-code-error" class="text-xs text-red-600 text-center hidden">Неверный или отключённый ключ доступа</p>
+                <button type="submit" class="w-full py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold transition shadow-md">
+                    Открыть калькулятор
+                </button>
+            </form>
+        </div>
     </div>
+
+    <!-- ВСПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 z-50 hidden bg-stone-900 text-white text-xs font-medium px-4 py-3 rounded-2xl shadow-xl border border-stone-700 transition-all"></div>
+
+    <!-- ШАПКА САЙТА -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-700 text-white flex items-center justify-center font-bold text-lg shadow-sm" id="header-brand-logo">D</div>
+                <div>
+                    <h1 class="text-lg font-bold text-stone-900 leading-none" id="header-brand-title">Decarat</h1>
+                    <p class="text-xs text-stone-500 mt-1" id="header-brand-subtitle">Калькулятор сметы натяжных потолков</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span id="cloud-status-badge" class="text-[11px] px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium">
+                    Подключение к облаку...
+                </span>
+                <button type="button" onclick="lockSiteSession()" class="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold transition">
+                    Выйти
+                </button>
+                <button type="button" onclick="openAdminModal()" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition shadow-sm">
+                    ⚙ Настройки и ключи
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ КАЛЬКУЛЯТОРА -->
+    <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- ЛЕВАЯ КОЛОНКА: ПАРАМЕТРЫ ПОМЕЩЕНИЯ -->
+        <div class="lg:col-span-2 space-y-5">
+            <!-- Блок 1: Геометрия и полотно -->
+            <section class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 space-y-5">
+                <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                    <h2 class="text-base font-bold text-stone-900">1. Параметры помещения и полотна</h2>
+                    <button type="button" onclick="resetCalculator()" class="text-xs text-stone-400 hover:text-stone-700 transition">Сбросить</button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Площадь (м²)</label>
+                        <input type="number" id="calc-area" value="18" min="1" step="0.5" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Периметр (пог. м)</label>
+                        <input type="number" id="calc-perimeter" value="17" min="1" step="0.5" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Количество углов (шт.)</label>
+                        <input type="number" id="calc-corners" value="4" min="4" step="1" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Тип полотна</label>
+                        <select id="calc-fabric" onchange="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white text-sm font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                            <option value="matte">Матовое MSD</option>
+                            <option value="satin">Сатиновое MSD</option>
+                            <option value="glossy">Глянцевое MSD</option>
+                            <option value="fabric">Тканевое Descor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Профиль крепления</label>
+                        <select id="calc-profile" onchange="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white text-sm font-medium text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                            <option value="pvc">Стандартный ПВХ + вставка</option>
+                            <option value="shadow">Теневой профиль EuroKRAAB</option>
+                            <option value="floating">Парящий профиль с подсветкой</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Блок 2: Освещение и доп. работы -->
+            <section class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 space-y-5">
+                <h2 class="text-base font-bold text-stone-900 border-b border-stone-100 pb-3">2. Освещение и дополнительные элементы</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Точечные светильники (шт.)</label>
+                        <input type="number" id="calc-spotlights" value="6" min="0" step="1" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Люстры с закладной (шт.)</label>
+                        <input type="number" id="calc-chandeliers" value="1" min="0" step="1" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Световые линии (пог. м)</label>
+                        <input type="number" id="calc-lightlines" value="0" min="0" step="0.5" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Ниша под карниз / ПК-5 (пог. м)</label>
+                        <input type="number" id="calc-curtain" value="3" min="0" step="0.5" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Обвод труб отопления (шт.)</label>
+                        <input type="number" id="calc-pipes" value="1" min="0" step="1" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">Скидка для клиента (%)</label>
+                        <input type="number" id="calc-discount" value="0" min="0" max="50" step="1" oninput="recalculateAll()" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-bold text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА: ИТОГОВАЯ СМЕТА -->
+        <div class="space-y-5">
+            <section class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 space-y-4 sticky top-24">
+                <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                    <h2 class="text-base font-bold text-stone-900">Итоговая смета</h2>
+                    <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">Под ключ</span>
+                </div>
+
+                <div id="estimate-breakdown" class="space-y-2.5 text-xs text-stone-600"></div>
+
+                <div class="border-t border-stone-200 pt-4 space-y-1">
+                    <div class="flex justify-between text-xs text-stone-500" id="discount-row">
+                        <span>Скидка:</span>
+                        <span id="estimate-discount-amount">0 ₽</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-sm font-bold text-stone-800">Итого к оплате:</span>
+                        <span class="text-2xl font-extrabold text-emerald-700" id="estimate-total">0 ₽</span>
+                    </div>
+                </div>
+
+                <button type="button" onclick="copyEstimateText()" class="w-full py-3 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition shadow-md">
+                    Скопировать смету для клиента
+                </button>
+            </section>
+        </div>
+    </main>
 
     <!-- МОДАЛЬНОЕ ОКНО АДМИН-ПАНЕЛИ -->
-    <div id="admin-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
-        <!-- Шаг 1: Авторизация по пин-коду -->
-        <div id="admin-auth-view" class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-stone-200">
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 mx-auto flex items-center justify-center mb-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                </div>
-                <h3 class="text-lg font-bold text-stone-900">Вход в панель цен</h3>
-                <p class="text-xs text-stone-500 mt-1">Введите пин-код администратора компании Decarat</p>
-                <p class="text-[10px] text-emerald-700 mt-0.5 font-medium">(Пин по умолчанию: 1234)</p>
+    <div id="admin-modal" class="fixed inset-0 z-40 bg-stone-950/75 backdrop-blur-sm hidden items-center justify-center p-4">
+        <!-- Шаг 1: Ввод пин-кода -->
+        <div id="admin-login-view" class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-stone-200 space-y-4">
+            <div class="text-center space-y-1">
+                <h3 class="text-lg font-bold text-stone-900">Вход в панель управления</h3>
+                <p class="text-xs text-stone-500">Введите пин-код администратора (по умолчанию: 1234)</p>
             </div>
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <input type="password" id="admin-pin-input" placeholder="Введите пин-код" class="w-full text-center tracking-widest text-lg font-bold py-2.5 px-4 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <form onsubmit="verifyAdminPin(event)" class="space-y-3">
+                <input type="password" id="admin-pin-input" placeholder="Введите пин-код" class="w-full text-center tracking-widest text-lg font-bold py-2.5 px-4 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                 <p id="admin-pin-error" class="text-xs text-red-500 text-center hidden">Неверный пин-код</p>
                 <div class="flex gap-2">
                     <button type="button" onclick="closeAdminModal()" class="w-1/2 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-bold text-stone-600 transition">Отмена</button>
@@ -865,14 +199,14 @@
             </form>
         </div>
 
-        <!-- Шаг 2: Редактор цен и управление доступом -->
-        <div id="admin-dashboard-view" class="bg-white rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl border border-stone-200 max-h-[90vh] overflow-y-auto hidden custom-scrollbar">
+        <!-- Шаг 2: Редактор цен, бренда и управления доступом -->
+        <div id="admin-dashboard-view" class="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl border border-stone-200 max-h-[90vh] overflow-y-auto hidden custom-scrollbar">
             <div class="flex items-center justify-between pb-4 border-b border-stone-200 mb-6">
                 <div>
                     <h3 class="text-xl font-bold text-stone-900">Управление сайтом Decarat</h3>
-                    <p class="text-xs text-stone-500">Настройка расценок и выдача персональных ключей доступа</p>
+                    <p class="text-xs text-stone-500">Настройка расценок, бренда и выдача персональных ключей доступа</p>
                 </div>
-                <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center font-bold text-sm transition">
+                <button type="button" onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center font-bold text-sm transition">
                     ✕
                 </button>
             </div>
@@ -887,8 +221,23 @@
                 </button>
             </div>
 
-            <!-- ВКЛАДКА 1: ЦЕНЫ -->
+            <!-- ВКЛАДКА 1: ЦЕНЫ И БРЕНД -->
             <form id="admin-tab-prices" onsubmit="saveAdminPrices(event)" class="space-y-6">
+                <!-- Категория 0: Брендирование и пин-код -->
+                <div>
+                    <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">0. Брендирование и безопасность</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between gap-2">
+                            <span class="text-xs font-medium text-stone-700">Название компании:</span>
+                            <input type="text" id="inp-brand-name" class="w-40 px-2.5 py-1 bg-white border border-stone-300 rounded-lg text-xs font-bold text-stone-800">
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between gap-2">
+                            <span class="text-xs font-medium text-stone-700">Пин-код админа:</span>
+                            <input type="text" id="inp-admin-pin" class="w-28 px-2.5 py-1 bg-white border border-stone-300 rounded-lg text-xs font-bold text-right text-stone-800">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Категория 1: Полотна -->
                 <div>
                     <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">1. Полотна за м²</h4>
@@ -915,33 +264,99 @@
                 <!-- Категория 2: Профиль периметра -->
                 <div>
                     <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">2. Профильные системы за пог. метр</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
-                            <span class="text-xs font-medium text-stone-700">Теневой EuroKraab (₽/м):</span>
-                            <input type="number" id="inp-price-profile-shadow" class="w-24 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                            <span class="text-xs font-medium text-stone-700">ПВХ + вставка:</span>
+                            <input type="number" id="inp-price-profile-pvc" class="w-20 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
                         </div>
                         <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
-                            <span class="text-xs font-medium text-stone-700">Парящий профиль (₽/м):</span>
-                            <input type="number" id="inp-price-profile-floating" class="w-24 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                            <span class="text-xs font-medium text-stone-700">Теневой:</span>
+                            <input type="number" id="inp-price-profile-shadow" class="w-20 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
+                            <span class="text-xs font-medium text-stone-700">Парящий:</span>
+                            <input type="number" id="inp-price-profile-floating" class="w-20 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
                         </div>
                     </div>
                 </div>
-                    <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Активные пользователи и ключи доступа:</span>
-                    <div id="access-keys-list" class="space-y-2 max-h-64 overflow-y-auto pr-1">
-                        <!-- Рендерится через JS -->
+
+                <!-- Категория 3: Освещение и доп. элементы -->
+                <div>
+                    <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">3. Освещение и дополнительные работы</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
+                            <span class="text-xs font-medium text-stone-700">Светильник (₽/шт.):</span>
+                            <input type="number" id="inp-price-spotlight" class="w-24 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
+                            <span class="text-xs font-medium text-stone-700">Люстра (₽/шт.):</span>
+                            <input type="number" id="inp-price-chandelier" class="w-24 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
+                            <span class="text-xs font-medium text-stone-700">Световые линии (₽/м):</span>
+                            <input type="number" id="inp-price-lightline" class="w-24 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
+                            <span class="text-xs font-medium text-stone-700">Ниша под карниз (₽/м):</span>
+                            <input type="number" id="inp-price-curtain" class="w-24 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
+                            <span class="text-xs font-medium text-stone-700">Доп. угол свыше 4 (₽/шт.):</span>
+                            <input type="number" id="inp-price-corner" class="w-24 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex items-center justify-between">
+                            <span class="text-xs font-medium text-stone-700">Обвод трубы (₽/шт.):</span>
+                            <input type="number" id="inp-price-pipe" class="w-24 px-2 py-1 bg-white border border-stone-300 rounded-lg text-sm text-right font-bold text-stone-800">
+                        </div>
                     </div>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-3 border-t border-stone-200">
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition shadow-md">
+                        Сохранить цены в облако
+                    </button>
+                </div>
+            </form>
+
+            <!-- ВКЛАДКА 2: ДОСТУП ПО КЛЮЧАМ И ССЫЛКАМ -->
+            <div id="admin-tab-access" class="hidden space-y-6">
+                <div class="p-4 bg-stone-50 rounded-2xl border border-stone-200 flex items-center justify-between gap-4">
+                    <div>
+                        <h4 class="text-sm font-bold text-stone-900">Закрытый режим работы сайта</h4>
+                        <p class="text-xs text-stone-500 mt-0.5">Если включено — доступ к калькулятору открывается только по ключу или персональной ссылке.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" id="toggle-access-restriction" onchange="toggleAccessRestriction(this.checked)" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                </div>
+
+                <div class="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200 space-y-3">
+                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Создать новый ключ доступа</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="new-key-owner" placeholder="Имя клиента или партнёра" class="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                        <input type="text" id="new-key-code" placeholder="Код (например: VIP2026)" class="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-xs uppercase font-mono focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    </div>
+                    <button type="button" onclick="createNewAccessKey()" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl transition shadow-sm">
+                        + Создать ключ и сохранить в облако
+                    </button>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-stone-700 uppercase tracking-wider">Активные ключи и ссылки</h4>
+                    <div id="access-keys-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ПОДКЛЮЧЕНИЕ ОБЛАЧНОЙ БАЗЫ ДАННЫХ FIREBASE FIRESTORE -->
+    <!-- ПОДКЛЮЧЕНИЕ FIREBASE SDK И ЛОГИКА СИНХРОНИЗАЦИИ -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // 1. ВСТАВЬТЕ СЮДА ВАШ КОНФИГ ИЗ НАСТРОЕК ПРОЕКТА FIREBASE (Project Settings -> Web App)
+        // ВАШИ КЛЮЧИ КОНФИГУРАЦИИ FIREBASE
         const manualFirebaseConfig = {
             apiKey: "AIzaSyBiIRGdqUl8wb7Sgq41DCYG8trFvWlDbEQ",
             authDomain: "decarat-5b83c.firebaseapp.com",
@@ -951,225 +366,133 @@
             appId: "1:758058076559:web:9bbd05b0a0531009a363fa"
         };
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined'
-            ? JSON.parse(__firebase_config)
-            : manualFirebaseConfig;
+        const appId = "decarat-saas-v1";
+        const statusBadge = document.getElementById('cloud-status-badge');
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'decarat-prod-v1';
+        try {
+            const app = initializeApp(manualFirebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const settingsDocRef = doc(db, "artifacts", appId, "public", "data", "config", "main");
 
-        window.cloudSync = {
-            enabled: false,
-            saveAll: async () => {}
-        };
-
-        async function initCloudDatabase() {
-            // Проверяем, заполнены ли реальные ключи Firebase
-            if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey.includes('ВСТАВЬТЕ_СЮДА')) {
-                console.info('Firebase работает в локальном режиме. Вставьте firebaseConfig для синхронизации с облаком.');
-                return;
-            }
-
-            try {
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
-
-                // Обязательная авторизация перед запросами к Firestore
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                const user = auth.currentUser;
-                if (!user) return;
-
-                // Строгий путь хранения настроек сайта и ключей доступа
-                const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'main');
-
-                window.cloudSync.enabled = true;
-                window.cloudSync.saveAll = async () => {
-                    if (!auth.currentUser) return;
+            window.cloudSync = {
+                enabled: false,
+                saveAll: async function() {
                     try {
-                        await setDoc(configDocRef, {
-                            prices: JSON.parse(JSON.stringify(PRICES)),
-                            isAccessRestricted: Boolean(isAccessRestricted),
-                            allowedKeys: JSON.parse(JSON.stringify(ALLOWED_ACCESS_KEYS)),
+                        await setDoc(settingsDocRef, {
+                            brandName: window.siteConfig.brandName,
+                            adminPin: window.siteConfig.adminPin,
+                            prices: window.siteConfig.prices,
+                            isAccessRestricted: window.isAccessRestricted,
+                            accessKeys: window.accessKeysData || [],
                             updatedAt: Date.now()
                         }, { merge: true });
                     } catch (err) {
-                        console.error('Ошибка сохранения в облачную БД:', err);
-                        showToast('Ошибка записи в облачную БД');
+                        console.error("Ошибка сохранения в Firestore:", err);
+                        window.showToast("Ошибка сохранения в облако: " + err.message);
                     }
-                };
+                }
+            };
 
-                // Подписка на обновления в реальном времени
-                onSnapshot(configDocRef, (snapshot) => {
+            signInAnonymously(auth).then(() => {
+                window.cloudSync.enabled = true;
+                if (statusBadge) {
+                    statusBadge.textContent = "● Облако подключено";
+                    statusBadge.className = "text-[11px] px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold";
+                }
+
+                onSnapshot(settingsDocRef, (snapshot) => {
                     if (snapshot.exists()) {
                         const data = snapshot.data();
-                        if (data.prices) {
-                            PRICES = data.prices;
-                            updateUiPriceLabels();
-                            calculateTotal();
-                            updateHeroQuickPrice();
-                            if (typeof isAdminLoggedIn !== 'undefined' && isAdminLoggedIn) {
-                                populateAdminForm();
-                            }
-                        }
-                        if (typeof data.isAccessRestricted === 'boolean') {
-                            isAccessRestricted = data.isAccessRestricted;
-                            const lockCheckbox = document.getElementById('toggle-access-lock');
-                            if (lockCheckbox) lockCheckbox.checked = isAccessRestricted;
-                        }
-                        if (Array.isArray(data.allowedKeys)) {
-                            ALLOWED_ACCESS_KEYS = data.allowedKeys;
-                            if (typeof renderAccessKeysList === 'function') {
-                                renderAccessKeysList();
-                            }
-                        }
-                        if (typeof initAccessControl === 'function' && !isSessionUnlocked && !isAdminLoggedIn) {
-                            initAccessControl();
-                        }
+                        if (data.brandName) window.siteConfig.brandName = data.brandName;
+                        if (data.adminPin) window.siteConfig.adminPin = data.adminPin;
+                        if (data.prices) window.siteConfig.prices = { ...window.siteConfig.prices, ...data.prices };
+                        if (typeof data.isAccessRestricted === "boolean") window.isAccessRestricted = data.isAccessRestricted;
+                        if (Array.isArray(data.accessKeys)) window.accessKeysData = data.accessKeys;
+
+                        localStorage.setItem('decarat_saas_backup', JSON.stringify({
+                            siteConfig: window.siteConfig,
+                            isAccessRestricted: window.isAccessRestricted,
+                            accessKeysData: window.accessKeysData
+                        }));
+
+                        window.applyLoadedState();
                     } else {
-                        // При первом запуске записываем стартовые цены и ключи в базу
+                        // Первая инициализация документа в облаке
                         window.cloudSync.saveAll();
                     }
                 }, (error) => {
-                    console.error('Ошибка чтения из Firestore:', error);
+                    console.error("Ошибка чтения Firestore:", error);
+                    if (statusBadge) {
+                        statusBadge.textContent = "Ошибка доступа к БД";
+                        statusBadge.className = "text-[11px] px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-semibold";
+                    }
                 });
-            } catch (e) {
-                console.error('Ошибка инициализации Firebase:', e);
-            }
+            }).catch((error) => {
+                console.error("Ошибка авторизации Firebase:", error);
+                if (statusBadge) {
+                    statusBadge.textContent = "Авторизация отключена";
+                    statusBadge.className = "text-[11px] px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-semibold";
+                }
+            });
+        } catch (e) {
+            console.error("Ошибка инициализации Firebase:", e);
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initCloudDatabase();
-        });
     </script>
 
-    <!-- ЛОГИКА КАЛЬКУЛЯТОРА И ИНТЕРАКТИВА -->
+    <!-- ОСНОВНАЯ ЛОГИКА КАЛЬКУЛЯТОРА И ДОСТУПА -->
     <script>
-        // Заводские цены по умолчанию
-        const DEFAULT_PRICES = {
-            fabrics: {
-                matte: { name: 'Матовое MSD Premium', price: 650 },
-                satin: { name: 'Сатиновое шелковистое', price: 700 },
-                glossy: { name: 'Глянцевое зеркальное', price: 680 },
-                fabric: { name: 'Тканевое Descor (Германия)', price: 1450 }
-            },
-            profiles: {
-                classic: { name: 'Классический алюминиевый профиль', price: 0 },
-                shadow: { name: 'Теневой профиль EuroKraab', price: 450 },
-                floating: { name: 'Парящий профиль для скрытого света', price: 550 }
-            },
-            lamps: {
-                gx53: { name: 'Точечный спот GX53 LED', price: 450 },
-                tube: { name: 'Накладной цилиндрический тубус', price: 1200 },
-                track: { name: 'Магнитный трек (1м)', price: 2800 }
-            },
-            led: {
-                single: { name: 'LED одноцветная 120 led/м', price: 950 },
-                rgb: { name: 'LED RGB мультицветная с пультом', price: 1350 },
-                cct: { name: 'LED CCT с регулировкой тепла', price: 1550 }
-            },
-            extras: {
+        window.siteConfig = {
+            brandName: "Decarat",
+            adminPin: "1234",
+            prices: {
+                matte: 450,
+                satin: 480,
+                glossy: 500,
+                fabric: 1200,
+                pvc: 250,
+                shadow: 750,
+                floating: 850,
+                spotlight: 650,
+                chandelier: 900,
+                lightline: 2200,
+                curtain: 1400,
                 corner: 150,
-                pipe: 350,
-                chandelier: 650,
-                cornice: 2700,
-                mask: 90,
-                vent: 600,
-                fire: 400
+                pipe: 350
             }
         };
 
-        // Рабочий объект цен (копия по умолчанию)
-        let PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
-
-        // Пин-код для доступа к админке
-        let ADMIN_PIN = '1234';
-        let isAdminLoggedIn = false;
-
-        // Система контроля доступа к сайту (список разрешённых ключей)
-        let isAccessRestricted = true;
-        let isSessionUnlocked = false;
-        let ALLOWED_ACCESS_KEYS = [
-            { code: 'DECARAT2026', owner: 'Основной доступ Decarat', created: 'Активен' },
-            { code: 'VIP-CLIENT', owner: 'VIP-клиент (тестовый)', created: 'Активен' }
+        window.isAccessRestricted = true;
+        window.accessKeysData = [
+            { code: "START2026", owner: "Демо-ключ", active: true, createdAt: "12.11.2026" }
         ];
+        window.isSessionUnlocked = sessionStorage.getItem('decarat_unlocked') === 'true';
+        window.isAdminLoggedIn = false;
 
-        // Состояние калькулятора (в начале все параметры по нулям)
-        let calcState = {
-            area: 0,
-            perimeter: 0,
-            corners: 0,
-            pipes: 0,
-            fabricKey: 'matte',
-            profileKey: 'classic',
-            lamps: {
-                gx53: 0,
-                tube: 0,
-                track: 0
-            },
-            chandelier: false,
-            ledEnabled: false,
-            ledLength: 0,
-            ledType: 'single',
-            ledTemp: 'neutral',
-            optCornice: false,
-            optMask: false,
-            optVent: false,
-            optFire: false,
-            paymentMethod: 'cash', // 'cash' (-10%) или 'installment' (0%)
-            baseTotalPrice: 0,
-            totalPrice: 0,
-            discountAmount: 0,
-            breakdown: []
-        };
+        // Загрузка локального кэша до ответа облака
+        (function loadLocalBackup() {
+            try {
+                const raw = localStorage.getItem('decarat_saas_backup');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed.siteConfig) window.siteConfig = parsed.siteConfig;
+                    if (typeof parsed.isAccessRestricted === "boolean") window.isAccessRestricted = parsed.isAccessRestricted;
+                    if (Array.isArray(parsed.accessKeysData)) window.accessKeysData = parsed.accessKeysData;
+                }
+            } catch (e) {}
+        })();
 
-        // Инициализация при загрузке
-        window.addEventListener('DOMContentLoaded', () => {
-            initAccessControl();
-            updateUiPriceLabels();
-            updateActiveCardStyles();
-            calculateTotal();
-            updateHeroQuickPrice();
-        });
-
-        // ================= КОНТРОЛЬ ДОСТУПА ПО КЛЮЧАМ И ССЫЛКАМ =================
-        function initAccessControl() {
-            const params = new URLSearchParams(window.location.search);
-            const urlKey = (params.get('access') || params.get('key') || '').trim().toUpperCase();
-
-            if (!isAccessRestricted) {
-                unlockSiteUI();
-                return;
-            }
-
-            if (urlKey && ALLOWED_ACCESS_KEYS.some(item => item.code.toUpperCase() === urlKey)) {
-                isSessionUnlocked = true;
-                unlockSiteUI();
-                showToast(`Доступ разрешён по приглашению (${urlKey})`);
-            } else {
-                lockSiteUI();
-            }
+        function showToast(msg) {
+            const toast = document.getElementById('toast-notification');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.remove('hidden');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3200);
         }
-
-        function verifyAccessCode(e) {
-            e.preventDefault();
-            const inputVal = document.getElementById('access-code-input').value.trim().toUpperCase();
-            const errorEl = document.getElementById('access-code-error');
-
-            const found = ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === inputVal);
-            if (found) {
-                isSessionUnlocked = true;
-                errorEl.classList.add('hidden');
-                unlockSiteUI();
-                showToast(`Добро пожаловать! Доступ открыт (${found.owner})`);
-            } else {
-                errorEl.classList.remove('hidden');
-            }
-        }
+        window.showToast = showToast;
 
         function unlockSiteUI() {
             const overlay = document.getElementById('access-gate-overlay');
@@ -1182,11 +505,136 @@
         }
 
         function lockSiteSession() {
-            isSessionUnlocked = false;
-            document.getElementById('access-code-input').value = '';
-            document.getElementById('access-code-error').classList.add('hidden');
-            lockSiteUI();
-            showToast('Экран заблокирован');
+            window.isSessionUnlocked = false;
+            sessionStorage.removeItem('decarat_unlocked');
+            const input = document.getElementById('access-code-input');
+            const err = document.getElementById('access-code-error');
+            if (input) input.value = '';
+            if (err) err.classList.add('hidden');
+            if (window.isAccessRestricted) {
+                lockSiteUI();
+                showToast('Сессия завершена, экран заблокирован');
+            } else {
+                showToast('Сейчас включён свободный доступ для всех');
+            }
+        }
+
+        function checkUrlAccessParam() {
+            const params = new URLSearchParams(window.location.search);
+            const urlKey = params.get('access');
+            if (!urlKey) return false;
+            const normalized = urlKey.trim().toUpperCase();
+            const found = (window.accessKeysData || []).find(k => k.code.toUpperCase() === normalized && k.active);
+            if (found) {
+                window.isSessionUnlocked = true;
+                sessionStorage.setItem('decarat_unlocked', 'true');
+                unlockSiteUI();
+                return true;
+            }
+            return false;
+        }
+
+        function submitAccessCode(event) {
+            event.preventDefault();
+            const input = document.getElementById('access-code-input');
+            const errorEl = document.getElementById('access-code-error');
+            const code = (input.value || '').trim().toUpperCase();
+
+            const found = (window.accessKeysData || []).find(k => k.code.toUpperCase() === code && k.active);
+            if (found) {
+                window.isSessionUnlocked = true;
+                sessionStorage.setItem('decarat_unlocked', 'true');
+                errorEl.classList.add('hidden');
+                unlockSiteUI();
+                showToast('Доступ разрешён: ' + found.owner);
+            } else {
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function applyLoadedState() {
+            // Обновление названия бренда
+            const brand = window.siteConfig.brandName || "Decarat";
+            const letter = brand.charAt(0).toUpperCase();
+            const hTitle = document.getElementById('header-brand-title');
+            const hLogo = document.getElementById('header-brand-logo');
+            const gBrand = document.getElementById('gate-brand-name');
+            if (hTitle) hTitle.textContent = brand;
+            if (hLogo) hLogo.textContent = letter;
+            if (gBrand) gBrand.textContent = brand;
+
+            // Заполнение полей в админке
+            const p = window.siteConfig.prices;
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+            setVal('inp-brand-name', brand);
+            setVal('inp-admin-pin', window.siteConfig.adminPin);
+            setVal('inp-price-fabric-matte', p.matte);
+            setVal('inp-price-fabric-satin', p.satin);
+            setVal('inp-price-fabric-glossy', p.glossy);
+            setVal('inp-price-fabric-fabric', p.fabric);
+            setVal('inp-price-profile-pvc', p.pvc);
+            setVal('inp-price-profile-shadow', p.shadow);
+            setVal('inp-price-profile-floating', p.floating);
+            setVal('inp-price-spotlight', p.spotlight);
+            setVal('inp-price-chandelier', p.chandelier);
+            setVal('inp-price-lightline', p.lightline);
+            setVal('inp-price-curtain', p.curtain);
+            setVal('inp-price-corner', p.corner);
+            setVal('inp-price-pipe', p.pipe);
+
+            const toggleEl = document.getElementById('toggle-access-restriction');
+            if (toggleEl) toggleEl.checked = window.isAccessRestricted;
+
+            // Проверка доступа
+            checkUrlAccessParam();
+            if (!window.isAccessRestricted || window.isSessionUnlocked || window.isAdminLoggedIn) {
+                unlockSiteUI();
+            } else {
+                lockSiteUI();
+            }
+
+            renderAccessKeysList();
+            recalculateAll();
+        }
+        window.applyLoadedState = applyLoadedState;
+
+        function openAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            const loginView = document.getElementById('admin-login-view');
+            const dashView = document.getElementById('admin-dashboard-view');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if (window.isAdminLoggedIn) {
+                loginView.classList.add('hidden');
+                dashView.classList.remove('hidden');
+                applyLoadedState();
+            } else {
+                loginView.classList.remove('hidden');
+                dashView.classList.add('hidden');
+                document.getElementById('admin-pin-input').value = '';
+                document.getElementById('admin-pin-error').classList.add('hidden');
+            }
+        }
+
+        function closeAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function verifyAdminPin(event) {
+            event.preventDefault();
+            const pin = document.getElementById('admin-pin-input').value.trim();
+            if (pin === String(window.siteConfig.adminPin)) {
+                window.isAdminLoggedIn = true;
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                unlockSiteUI();
+                applyLoadedState();
+            } else {
+                document.getElementById('admin-pin-error').classList.remove('hidden');
+            }
         }
 
         function switchAdminTab(tab) {
@@ -1209,16 +657,57 @@
             }
         }
 
+        function saveAdminPrices(event) {
+            event.preventDefault();
+            const num = (id, def) => {
+                const v = parseFloat(document.getElementById(id).value);
+                return isNaN(v) ? def : v;
+            };
+
+            const newBrand = document.getElementById('inp-brand-name').value.trim();
+            const newPin = document.getElementById('inp-admin-pin').value.trim();
+            if (newBrand) window.siteConfig.brandName = newBrand;
+            if (newPin) window.siteConfig.adminPin = newPin;
+
+            window.siteConfig.prices = {
+                matte: num('inp-price-fabric-matte', 450),
+                satin: num('inp-price-fabric-satin', 480),
+                glossy: num('inp-price-fabric-glossy', 500),
+                fabric: num('inp-price-fabric-fabric', 1200),
+                pvc: num('inp-price-profile-pvc', 250),
+                shadow: num('inp-price-profile-shadow', 750),
+                floating: num('inp-price-profile-floating', 850),
+                spotlight: num('inp-price-spotlight', 650),
+                chandelier: num('inp-price-chandelier', 900),
+                lightline: num('inp-price-lightline', 2200),
+                curtain: num('inp-price-curtain', 1400),
+                corner: num('inp-price-corner', 150),
+                pipe: num('inp-price-pipe', 350)
+            };
+
+            localStorage.setItem('decarat_saas_backup', JSON.stringify({
+                siteConfig: window.siteConfig,
+                isAccessRestricted: window.isAccessRestricted,
+                accessKeysData: window.accessKeysData
+            }));
+
+            applyLoadedState();
+            if (window.cloudSync && window.cloudSync.enabled) {
+                window.cloudSync.saveAll();
+            }
+            showToast('Цены и настройки сохранены в облако');
+        }
+
         function toggleAccessRestriction(enabled) {
-            isAccessRestricted = enabled;
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            window.isAccessRestricted = enabled;
+            if (window.cloudSync && window.cloudSync.enabled) {
+                window.cloudSync.saveAll();
+            }
             if (!enabled) {
                 unlockSiteUI();
                 showToast('Сайт открыт для всех посетителей');
-            } else if (!isSessionUnlocked && !isAdminLoggedIn) {
-                lockSiteUI();
             } else {
-                showToast('Включен закрытый доступ по ключам');
+                showToast('Включён закрытый доступ по ключам');
             }
         }
 
@@ -1226,738 +715,165 @@
             const ownerInput = document.getElementById('new-key-owner');
             const codeInput = document.getElementById('new-key-code');
             const owner = ownerInput.value.trim() || 'Клиент / Партнёр';
-            let code = codeInput.value.trim().toUpperCase().replace(/\s+/g, '-');
+            const rawCode = codeInput.value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+            const code = rawCode || ('KEY-' + Math.random().toString(36).substring(2, 7).toUpperCase());
 
-            if (!code) {
-                code = 'DEC-' + Math.floor(1000 + Math.random() * 9000);
-            }
-
-            if (ALLOWED_ACCESS_KEYS.some(k => k.code === code)) {
-                showToast('Такой ключ уже существует!');
+            if (!window.accessKeysData) window.accessKeysData = [];
+            if (window.accessKeysData.some(k => k.code === code)) {
+                showToast('Такой ключ уже существует');
                 return;
             }
 
-            ALLOWED_ACCESS_KEYS.unshift({ code, owner, created: 'Активен' });
+            window.accessKeysData.unshift({
+                code: code,
+                owner: owner,
+                active: true,
+                createdAt: new Date().toLocaleDateString('ru-RU')
+            });
+
             ownerInput.value = '';
             codeInput.value = '';
             renderAccessKeysList();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(`Ключ ${code} успешно создан!`);
+            if (window.cloudSync && window.cloudSync.enabled) {
+                window.cloudSync.saveAll();
+            }
+            showToast('Ключ ' + code + ' создан и сохранён');
         }
 
-        function deleteAccessKey(code) {
-            ALLOWED_ACCESS_KEYS = ALLOWED_ACCESS_KEYS.filter(k => k.code !== code);
+        function toggleAccessKeyStatus(index) {
+            if (!window.accessKeysData || !window.accessKeysData[index]) return;
+            window.accessKeysData[index].active = !window.accessKeysData[index].active;
             renderAccessKeysList();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(`Доступ по ключу ${code} отозван`);
+            if (window.cloudSync && window.cloudSync.enabled) {
+                window.cloudSync.saveAll();
+            }
         }
 
-        function copyInviteLink(code) {
-            const baseUrl = window.location.href.split('?')[0];
-            const inviteUrl = `${baseUrl}?access=${encodeURIComponent(code)}`;
+        function deleteAccessKey(index) {
+            if (!window.accessKeysData) return;
+            window.accessKeysData.splice(index, 1);
+            renderAccessKeysList();
+            if (window.cloudSync && window.cloudSync.enabled) {
+                window.cloudSync.saveAll();
+            }
+            showToast('Ключ удалён');
+        }
 
-            const tempInput = document.createElement('textarea');
-            tempInput.value = inviteUrl;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            showToast(`Ссылка с ключом ${code} скопирована!`);
+        function copyAccessLink(code) {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const link = baseUrl + '?access=' + encodeURIComponent(code);
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('Персональная ссылка скопирована');
+            }).catch(() => {
+                prompt('Скопируйте персональную ссылку:', link);
+            });
         }
 
         function renderAccessKeysList() {
             const container = document.getElementById('access-keys-list');
             if (!container) return;
+            const keys = window.accessKeysData || [];
 
-            if (ALLOWED_ACCESS_KEYS.length === 0) {
-                container.innerHTML = `<div class="p-4 text-center text-xs text-stone-400 bg-stone-50 rounded-xl border border-stone-200">Нет активных ключей. Создайте новый ключ выше.</div>`;
+            if (keys.length === 0) {
+                container.innerHTML = '<p class="text-xs text-stone-400 text-center py-5 bg-stone-50 rounded-xl border border-dashed border-stone-200">Ключей пока нет. Создайте первый ключ выше.</p>';
                 return;
             }
 
-            container.innerHTML = ALLOWED_ACCESS_KEYS.map(item => `
-                <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
-                    <div>
+            container.innerHTML = keys.map((item, idx) => `
+                <div class="p-3 bg-white rounded-xl border border-stone-200 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-mono font-bold text-xs">${item.code}</span>
-                            <span class="text-xs font-bold text-stone-800">${item.owner}</span>
+                            <span class="font-mono text-xs font-bold ${item.active ? 'text-emerald-700' : 'text-stone-400 line-through'}">${item.code}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold ${item.active ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500'}">${item.active ? 'Активен' : 'Пауза'}</span>
                         </div>
-                        <span class="text-[10px] text-stone-400 block mt-0.5">Статус: ${item.created}</span>
+                        <p class="text-xs text-stone-500 truncate mt-0.5">${item.owner} • ${item.createdAt || ''}</p>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <button type="button" onclick="copyInviteLink('${item.code}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-stone-300 hover:bg-emerald-50 hover:border-emerald-400 text-[11px] font-semibold text-stone-700 transition">
-                            🔗 Ссылка-вход
-                        </button>
-                        <button type="button" onclick="deleteAccessKey('${item.code}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-rose-200 hover:bg-rose-50 text-[11px] font-semibold text-rose-600 transition">
-                            Удалить
-                        </button>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="copyAccessLink('${item.code}')" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-semibold transition">Ссылка</button>
+                        <button type="button" onclick="toggleAccessKeyStatus(${idx})" class="px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-[11px] font-semibold transition">${item.active ? 'Выкл' : 'Вкл'}</button>
+                        <button type="button" onclick="deleteAccessKey(${idx})" class="px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-[11px] font-bold transition">✕</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Обновление визуальной подсветки выбранных карточек (фактура, профиль, температура LED)
-        function updateActiveCardStyles() {
-            // 1. Карточки фактур полотна
-            document.querySelectorAll('.fabric-card').forEach(card => {
-                const radio = card.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    card.classList.remove('border-stone-200', 'hover:border-emerald-300');
-                    card.classList.add('border-emerald-600', 'bg-emerald-50/40', 'shadow-sm');
-                } else {
-                    card.classList.remove('border-emerald-600', 'bg-emerald-50/40', 'shadow-sm');
-                    card.classList.add('border-stone-200', 'hover:border-emerald-300');
-                }
+        function recalculateAll() {
+            const p = window.siteConfig.prices;
+            const area = Math.max(0, parseFloat(document.getElementById('calc-area').value) || 0);
+            const perimeter = Math.max(0, parseFloat(document.getElementById('calc-perimeter').value) || 0);
+            const corners = Math.max(0, parseInt(document.getElementById('calc-corners').value) || 0);
+            const fabricType = document.getElementById('calc-fabric').value;
+            const profileType = document.getElementById('calc-profile').value;
+            const spotlights = Math.max(0, parseInt(document.getElementById('calc-spotlights').value) || 0);
+            const chandeliers = Math.max(0, parseInt(document.getElementById('calc-chandeliers').value) || 0);
+            const lightlines = Math.max(0, parseFloat(document.getElementById('calc-lightlines').value) || 0);
+            const curtain = Math.max(0, parseFloat(document.getElementById('calc-curtain').value) || 0);
+            const pipes = Math.max(0, parseInt(document.getElementById('calc-pipes').value) || 0);
+            const discountPct = Math.min(100, Math.max(0, parseFloat(document.getElementById('calc-discount').value) || 0));
+
+            const fabricNames = { matte: 'Полотно матовое', satin: 'Полотно сатиновое', glossy: 'Полотно глянцевое', fabric: 'Полотно тканевое' };
+            const profileNames = { pvc: 'Профиль ПВХ + вставка', shadow: 'Теневой профиль', floating: 'Парящий профиль' };
+
+            const items = [
+                { label: `${fabricNames[fabricType]} (${area} м²)`, cost: area * (p[fabricType] || 0) },
+                { label: `${profileNames[profileType]} (${perimeter} м)`, cost: perimeter * (p[profileType] || 0) },
+                { label: `Доп. углы (${Math.max(0, corners - 4)} шт.)`, cost: Math.max(0, corners - 4) * (p.corner || 0) },
+                { label: `Светильники (${spotlights} шт.)`, cost: spotlights * (p.spotlight || 0) },
+                { label: `Люстры (${chandeliers} шт.)`, cost: chandeliers * (p.chandelier || 0) },
+                { label: `Световые линии (${lightlines} м)`, cost: lightlines * (p.lightline || 0) },
+                { label: `Ниша под карниз (${curtain} м)`, cost: curtain * (p.curtain || 0) },
+                { label: `Обвод труб (${pipes} шт.)`, cost: pipes * (p.pipe || 0) }
+            ].filter(i => i.cost > 0);
+
+            const subtotal = items.reduce((sum, item) => sum + item.cost, 0);
+            const discountAmount = Math.round(subtotal * (discountPct / 100));
+            const total = Math.max(0, Math.round(subtotal - discountAmount));
+
+            const breakdownEl = document.getElementById('estimate-breakdown');
+            breakdownEl.innerHTML = items.map(i => `
+                <div class="flex justify-between gap-2">
+                    <span>${i.label}</span>
+                    <span class="font-semibold text-stone-800 shrink-0">${Math.round(i.cost).toLocaleString('ru-RU')} ₽</span>
+                </div>
+            `).join('');
+
+            document.getElementById('estimate-discount-amount').textContent = `-${discountAmount.toLocaleString('ru-RU')} ₽ (${discountPct}%)`;
+            document.getElementById('estimate-total').textContent = `${total.toLocaleString('ru-RU')} ₽`;
+            window._lastEstimateSummary = { items, subtotal, discountAmount, total };
+        }
+
+        function resetCalculator() {
+            document.getElementById('calc-area').value = 18;
+            document.getElementById('calc-perimeter').value = 17;
+            document.getElementById('calc-corners').value = 4;
+            document.getElementById('calc-fabric').value = 'matte';
+            document.getElementById('calc-profile').value = 'pvc';
+            document.getElementById('calc-spotlights').value = 6;
+            document.getElementById('calc-chandeliers').value = 1;
+            document.getElementById('calc-lightlines').value = 0;
+            document.getElementById('calc-curtain').value = 3;
+            document.getElementById('calc-pipes').value = 1;
+            document.getElementById('calc-discount').value = 0;
+            recalculateAll();
+        }
+
+        function copyEstimateText() {
+            const est = window._lastEstimateSummary;
+            if (!est) return;
+            const lines = [
+                `Расчёт натяжного потолка (${window.siteConfig.brandName}):`,
+                ...est.items.map(i => `• ${i.label}: ${Math.round(i.cost).toLocaleString('ru-RU')} ₽`),
+                est.discountAmount > 0 ? `Скидка: -${est.discountAmount.toLocaleString('ru-RU')} ₽` : null,
+                `Итого под ключ: ${est.total.toLocaleString('ru-RU')} ₽`
+            ].filter(Boolean).join('\n');
+
+            navigator.clipboard.writeText(lines).then(() => {
+                showToast('Смета скопирована в буфер обмена');
             });
-
-            // 2. Карточки типа профиля
-            document.querySelectorAll('.profile-card').forEach(card => {
-                const radio = card.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    card.classList.remove('border-stone-200');
-                    card.classList.add('border-emerald-600', 'bg-emerald-50/50');
-                } else {
-                    card.classList.remove('border-emerald-600', 'bg-emerald-50/50');
-                    card.classList.add('border-stone-200');
-                }
-            });
-
-            // 3. Карточки цветовой температуры LED
-            document.querySelectorAll('.led-temp-card').forEach(card => {
-                const radio = card.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    card.classList.remove('border-stone-700', 'bg-stone-850');
-                    card.classList.add('border-emerald-400', 'bg-stone-800');
-                } else {
-                    card.classList.remove('border-emerald-400', 'bg-stone-800');
-                    card.classList.add('border-stone-700', 'bg-stone-850');
-                }
-            });
         }
 
-        // Обновление текстовых ценников на карточках в интерфейсе
-        function updateUiPriceLabels() {
-            const setTxt = (id, text) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = text;
-            };
-
-            setTxt('price-display-fabric-matte', `${PRICES.fabrics.matte.price.toLocaleString('ru-RU')} ₽ / м²`);
-            setTxt('price-display-fabric-satin', `${PRICES.fabrics.satin.price.toLocaleString('ru-RU')} ₽ / м²`);
-            setTxt('price-display-fabric-glossy', `${PRICES.fabrics.glossy.price.toLocaleString('ru-RU')} ₽ / м²`);
-            setTxt('price-display-fabric-fabric', `${PRICES.fabrics.fabric.price.toLocaleString('ru-RU')} ₽ / м²`);
-
-            setTxt('price-display-profile-shadow', `+ ${PRICES.profiles.shadow.price} ₽ / пог. метр`);
-            setTxt('price-display-profile-floating', `+ ${PRICES.profiles.floating.price} ₽ / пог. метр`);
-
-            setTxt('price-display-lamp-gx53', `${PRICES.lamps.gx53.price.toLocaleString('ru-RU')} ₽/шт`);
-            setTxt('price-display-lamp-tube', `${PRICES.lamps.tube.price.toLocaleString('ru-RU')} ₽/шт`);
-            setTxt('price-display-lamp-track', `${PRICES.lamps.track.price.toLocaleString('ru-RU')} ₽/м`);
-            setTxt('price-display-chandelier', `Усиленная закладная платформа + подключение (+${PRICES.extras.chandelier} ₽)`);
-        }
-
-        // ================= АДМИН-ПАНЕЛЬ =================
-        function openAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            const authView = document.getElementById('admin-auth-view');
-            const dashView = document.getElementById('admin-dashboard-view');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-
-            if (isAdminLoggedIn) {
-                authView.classList.add('hidden');
-                dashView.classList.remove('hidden');
-                populateAdminForm();
-            } else {
-                authView.classList.remove('hidden');
-                dashView.classList.add('hidden');
-                document.getElementById('admin-pin-input').value = '';
-                document.getElementById('admin-pin-error').classList.add('hidden');
-                setTimeout(() => document.getElementById('admin-pin-input').focus(), 100);
-            }
-        }
-
-        function closeAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const pin = document.getElementById('admin-pin-input').value.trim();
-            if (pin === ADMIN_PIN) {
-                isAdminLoggedIn = true;
-                isSessionUnlocked = true;
-                unlockSiteUI();
-                document.getElementById('admin-auth-view').classList.add('hidden');
-                document.getElementById('admin-dashboard-view').classList.remove('hidden');
-                populateAdminForm();
-                renderAccessKeysList();
-            } else {
-                document.getElementById('admin-pin-error').classList.remove('hidden');
-            }
-        }
-
-        function populateAdminForm() {
-            document.getElementById('inp-price-fabric-matte').value = PRICES.fabrics.matte.price;
-            document.getElementById('inp-price-fabric-satin').value = PRICES.fabrics.satin.price;
-            document.getElementById('inp-price-fabric-glossy').value = PRICES.fabrics.glossy.price;
-            document.getElementById('inp-price-fabric-fabric').value = PRICES.fabrics.fabric.price;
-
-            document.getElementById('inp-price-profile-shadow').value = PRICES.profiles.shadow.price;
-            document.getElementById('inp-price-profile-floating').value = PRICES.profiles.floating.price;
-
-            document.getElementById('inp-price-lamp-gx53').value = PRICES.lamps.gx53.price;
-            document.getElementById('inp-price-lamp-tube').value = PRICES.lamps.tube.price;
-            document.getElementById('inp-price-lamp-track').value = PRICES.lamps.track.price;
-
-            document.getElementById('inp-price-led-single').value = PRICES.led.single.price;
-            document.getElementById('inp-price-led-rgb').value = PRICES.led.rgb.price;
-            document.getElementById('inp-price-led-cct').value = PRICES.led.cct.price;
-
-            document.getElementById('inp-price-extra-pipe').value = PRICES.extras.pipe;
-            document.getElementById('inp-price-extra-corner').value = PRICES.extras.corner;
-            document.getElementById('inp-price-extra-chandelier').value = PRICES.extras.chandelier;
-            document.getElementById('inp-price-extra-cornice').value = PRICES.extras.cornice;
-            document.getElementById('inp-price-extra-mask').value = PRICES.extras.mask;
-            document.getElementById('inp-price-extra-vent').value = PRICES.extras.vent;
-        }
-
-        function saveAdminPrices(e) {
-            e.preventDefault();
-
-            PRICES.fabrics.matte.price = parseInt(document.getElementById('inp-price-fabric-matte').value) || 0;
-            PRICES.fabrics.satin.price = parseInt(document.getElementById('inp-price-fabric-satin').value) || 0;
-            PRICES.fabrics.glossy.price = parseInt(document.getElementById('inp-price-fabric-glossy').value) || 0;
-            PRICES.fabrics.fabric.price = parseInt(document.getElementById('inp-price-fabric-fabric').value) || 0;
-
-            PRICES.profiles.shadow.price = parseInt(document.getElementById('inp-price-profile-shadow').value) || 0;
-            PRICES.profiles.floating.price = parseInt(document.getElementById('inp-price-profile-floating').value) || 0;
-
-            PRICES.lamps.gx53.price = parseInt(document.getElementById('inp-price-lamp-gx53').value) || 0;
-            PRICES.lamps.tube.price = parseInt(document.getElementById('inp-price-lamp-tube').value) || 0;
-            PRICES.lamps.track.price = parseInt(document.getElementById('inp-price-lamp-track').value) || 0;
-
-            PRICES.led.single.price = parseInt(document.getElementById('inp-price-led-single').value) || 0;
-            PRICES.led.rgb.price = parseInt(document.getElementById('inp-price-led-rgb').value) || 0;
-            PRICES.led.cct.price = parseInt(document.getElementById('inp-price-led-cct').value) || 0;
-
-            PRICES.extras.pipe = parseInt(document.getElementById('inp-price-extra-pipe').value) || 0;
-            PRICES.extras.corner = parseInt(document.getElementById('inp-price-extra-corner').value) || 0;
-            PRICES.extras.chandelier = parseInt(document.getElementById('inp-price-extra-chandelier').value) || 0;
-            PRICES.extras.cornice = parseInt(document.getElementById('inp-price-extra-cornice').value) || 0;
-            PRICES.extras.mask = parseInt(document.getElementById('inp-price-extra-mask').value) || 0;
-            PRICES.extras.vent = parseInt(document.getElementById('inp-price-extra-vent').value) || 0;
-
-            updateUiPriceLabels();
-            calculateTotal();
-            updateHeroQuickPrice();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            closeAdminModal();
-            showToast('Новые цены успешно применены!');
-        }
-
-        function resetPricesToDefault() {
-            PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
-            populateAdminForm();
-            updateUiPriceLabels();
-            calculateTotal();
-            updateHeroQuickPrice();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Цены сброшены к стандартным значениям');
-        }
-
-        // Синхронизация площади
-        function syncAreaFromSlider(val) {
-            val = parseInt(val) || 0;
-            document.getElementById('input-area').value = val;
-            document.getElementById('area-val-label').textContent = val;
-            calcState.area = val;
-            
-            // Авторасчет ориентировочного периметра при изменении площади
-            if (val > 0) {
-                const autoPerimeter = Math.round(4 * Math.sqrt(val) * 1.05);
-                document.getElementById('slider-perimeter').value = autoPerimeter;
-                document.getElementById('input-perimeter').value = autoPerimeter;
-                document.getElementById('perimeter-val-label').textContent = autoPerimeter;
-                calcState.perimeter = autoPerimeter;
-            } else {
-                document.getElementById('slider-perimeter').value = 0;
-                document.getElementById('input-perimeter').value = 0;
-                document.getElementById('perimeter-val-label').textContent = 0;
-                calcState.perimeter = 0;
-            }
-            calculateTotal();
-        }
-
-        function syncAreaFromInput(val) {
-            val = parseInt(val) || 0;
-            document.getElementById('slider-area').value = Math.min(val, 100);
-            document.getElementById('area-val-label').textContent = val;
-            calcState.area = val;
-
-            if (val > 0) {
-                const autoPerimeter = Math.round(4 * Math.sqrt(val) * 1.05);
-                document.getElementById('slider-perimeter').value = Math.min(autoPerimeter, 120);
-                document.getElementById('input-perimeter').value = autoPerimeter;
-                document.getElementById('perimeter-val-label').textContent = autoPerimeter;
-                calcState.perimeter = autoPerimeter;
-            } else {
-                document.getElementById('slider-perimeter').value = 0;
-                document.getElementById('input-perimeter').value = 0;
-                document.getElementById('perimeter-val-label').textContent = 0;
-                calcState.perimeter = 0;
-            }
-            calculateTotal();
-        }
-
-        // Синхронизация периметра
-        function syncPerimeterFromSlider(val) {
-            val = parseInt(val) || 0;
-            document.getElementById('input-perimeter').value = val;
-            document.getElementById('perimeter-val-label').textContent = val;
-            calcState.perimeter = val;
-            calculateTotal();
-        }
-
-        function syncPerimeterFromInput(val) {
-            val = parseInt(val) || 0;
-            document.getElementById('slider-perimeter').value = Math.min(val, 120);
-            document.getElementById('perimeter-val-label').textContent = val;
-            calcState.perimeter = val;
-            calculateTotal();
-        }
-
-        // Дополнительные углы
-        function changeExtraCorners(delta) {
-            let newVal = calcState.corners + delta;
-            if (newVal < 0) newVal = 0;
-            calcState.corners = newVal;
-            document.getElementById('corners-count').textContent = newVal;
-            calculateTotal();
-        }
-
-        // Обвод труб
-        function changePipes(delta) {
-            let newVal = calcState.pipes + delta;
-            if (newVal < 0) newVal = 0;
-            calcState.pipes = newVal;
-            document.getElementById('pipes-count').textContent = newVal;
-            calculateTotal();
-        }
-
-        // Количество светильников
-        function changeLampCount(type, delta) {
-            let newVal = (calcState.lamps[type] || 0) + delta;
-            if (newVal < 0) newVal = 0;
-            calcState.lamps[type] = newVal;
-            document.getElementById(`count-lamp-${type}`).textContent = newVal;
-            calculateTotal();
-        }
-
-        // Включение / выключение блока LED
-        function toggleLedSection(enabled) {
-            calcState.ledEnabled = enabled;
-            const box = document.getElementById('led-settings-box');
-            if (enabled) {
-                box.classList.remove('opacity-50', 'pointer-events-none');
-                if (calcState.ledLength === 0) {
-                    const defaultLen = calcState.perimeter > 0 ? Math.min(calcState.perimeter, 12) : 5;
-                    syncLedLength(defaultLen);
-                }
-            } else {
-                box.classList.add('opacity-50', 'pointer-events-none');
-            }
-            calculateTotal();
-        }
-
-        function syncLedLength(len) {
-            len = parseInt(len) || 0;
-            calcState.ledLength = len;
-            document.getElementById('slider-led-length').value = len;
-            document.getElementById('led-len-display').textContent = len;
-            calculateTotal();
-        }
-
-        // Переключение способа оплаты
-        function setPaymentMethod(method) {
-            calcState.paymentMethod = method;
-            const cashBtn = document.getElementById('pay-cash-btn');
-            const installBtn = document.getElementById('pay-install-btn');
-            
-            if (method === 'cash') {
-                cashBtn.className = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative";
-                installBtn.className = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition";
-            } else {
-                installBtn.className = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative";
-                cashBtn.className = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition relative";
-            }
-            calculateTotal();
-        }
-
-        // Быстрый переход к фактурам
-        function scrollToTextures(event) {
-            if (event) event.preventDefault();
-            const el = document.getElementById('catalog');
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-
-        // Главная функция перерасчета стоимости
-        function calculateTotal() {
-            // Обновляем подсветку активных карточек при любом выборе
-            updateActiveCardStyles();
-
-            // Фактура полотна
-            const fabricEl = document.querySelector('input[name="fabric_type"]:checked');
-            calcState.fabricKey = fabricEl ? fabricEl.value : 'matte';
-
-            // Профиль
-            const profileEl = document.querySelector('input[name="profile_type"]:checked');
-            calcState.profileKey = profileEl ? profileEl.value : 'classic';
-
-            // Люстра
-            calcState.chandelier = document.getElementById('has-chandelier').checked;
-
-            // LED
-            calcState.ledType = document.getElementById('led-type').value;
-            const ledTempEl = document.querySelector('input[name="led_temp"]:checked');
-            calcState.ledTemp = ledTempEl ? ledTempEl.value : 'neutral';
-
-            // Доп опции
-            calcState.optCornice = document.getElementById('opt-cornice').checked;
-            calcState.optMask = document.getElementById('opt-mask').checked;
-            calcState.optVent = document.getElementById('opt-vent').checked;
-            calcState.optFire = document.getElementById('opt-fire').checked;
-
-            let total = 0;
-            let breakdown = [];
-
-            // 1. Полотно с базовым монтажом
-            const fabricObj = PRICES.fabrics[calcState.fabricKey] || PRICES.fabrics.matte;
-            const fabricCost = calcState.area * fabricObj.price;
-            if (calcState.area > 0) {
-                total += fabricCost;
-                breakdown.push({
-                    name: `Полотно: ${fabricObj.name} (${calcState.area} м²)`,
-                    cost: fabricCost
-                });
-            }
-
-            // 2. Профильная система
-            const profileObj = PRICES.profiles[calcState.profileKey] || PRICES.profiles.classic;
-            const profileCost = calcState.perimeter * profileObj.price;
-            if (profileCost > 0 && calcState.perimeter > 0) {
-                total += profileCost;
-                breakdown.push({
-                    name: `Профиль: ${profileObj.name} (${calcState.perimeter} м.п.)`,
-                    cost: profileCost
-                });
-            }
-
-            // 3. Дополнительные углы
-            if (calcState.corners > 0) {
-                const cornerCost = calcState.corners * PRICES.extras.corner;
-                total += cornerCost;
-                breakdown.push({
-                    name: `Дополнительные углы (${calcState.corners} шт.)`,
-                    cost: cornerCost
-                });
-            }
-
-            // 4. Обвод стояков
-            if (calcState.pipes > 0) {
-                const pipeCost = calcState.pipes * PRICES.extras.pipe;
-                total += pipeCost;
-                breakdown.push({
-                    name: `Обвод труб отопления (${calcState.pipes} шт.)`,
-                    cost: pipeCost
-                });
-            }
-
-            // 5. Светильники GX53
-            if (calcState.lamps.gx53 > 0) {
-                const gxCost = calcState.lamps.gx53 * PRICES.lamps.gx53.price;
-                total += gxCost;
-                breakdown.push({
-                    name: `Споты GX53 LED со стойкой (${calcState.lamps.gx53} шт.)`,
-                    cost: gxCost
-                });
-            }
-
-            // 6. Тубусы накладные
-            if (calcState.lamps.tube > 0) {
-                const tubeCost = calcState.lamps.tube * PRICES.lamps.tube.price;
-                total += tubeCost;
-                breakdown.push({
-                    name: `Накладные споты-тубусы (${calcState.lamps.tube} шт.)`,
-                    cost: tubeCost
-                });
-            }
-
-            // 7. Трековые шины
-            if (calcState.lamps.track > 0) {
-                const trackCost = calcState.lamps.track * PRICES.lamps.track.price;
-                total += trackCost;
-                breakdown.push({
-                    name: `Встраиваемый трек + монтаж (${calcState.lamps.track} м)`,
-                    cost: trackCost
-                });
-            }
-
-            // 8. Люстра
-            if (calcState.chandelier) {
-                total += PRICES.extras.chandelier;
-                breakdown.push({
-                    name: 'Закладная платформа + монтаж люстры',
-                    cost: PRICES.extras.chandelier
-                });
-            }
-
-            // 9. LED подсветка
-            if (calcState.ledEnabled && calcState.ledLength > 0) {
-                const ledObj = PRICES.led[calcState.ledType] || PRICES.led.single;
-                const ledCost = calcState.ledLength * ledObj.price;
-                total += ledCost;
-                breakdown.push({
-                    name: `${ledObj.name} (${calcState.ledLength} м) + БП`,
-                    cost: ledCost
-                });
-            }
-
-            // 10. Скрытый карниз
-            if (calcState.optCornice) {
-                total += PRICES.extras.cornice;
-                breakdown.push({
-                    name: 'Ниша под скрытый карниз ПК-5 (3 м)',
-                    cost: PRICES.extras.cornice
-                });
-            }
-
-            // 11. Маскировочная лента
-            if (calcState.optMask && calcState.perimeter > 0) {
-                const maskCost = calcState.perimeter * PRICES.extras.mask;
-                total += maskCost;
-                breakdown.push({
-                    name: `Маскировочная лента (${calcState.perimeter} м)`,
-                    cost: maskCost
-                });
-            }
-
-            // 12. Вытяжка / вентиляция
-            if (calcState.optVent) {
-                total += PRICES.extras.vent;
-                breakdown.push({
-                    name: 'Вывод вентиляции / вытяжки с термокольцом',
-                    cost: PRICES.extras.vent
-                });
-            }
-
-            // 13. Датчик дыма
-            if (calcState.optFire) {
-                total += PRICES.extras.fire;
-                breakdown.push({
-                    name: 'Монтаж платформы пожарного датчика',
-                    cost: PRICES.extras.fire
-                });
-            }
-
-            calcState.baseTotalPrice = total;
-
-            // Расчет с учетом выбранного способа оплаты
-            let discount = 0;
-            let finalTotal = total;
-            const badgeInfo = document.getElementById('payment-badge-info');
-
-            if (calcState.paymentMethod === 'cash') {
-                discount = Math.round(total * 0.10);
-                finalTotal = total - discount;
-                if (discount > 0) {
-                    breakdown.push({
-                        name: 'Скидка 10% (при оплате наличными)',
-                        cost: -discount
-                    });
-                }
-                if (badgeInfo) {
-                    badgeInfo.innerHTML = `
-                        <span>Скидка за наличный расчет (10%):</span>
-                        <span id="cash-discount-val" class="font-extrabold text-amber-300">−${discount.toLocaleString('ru-RU')} ₽</span>
-                    `;
-                }
-            } else {
-                // Рассрочка 0% на 6 месяцев
-                const perMonth = finalTotal > 0 ? Math.round(finalTotal / 6) : 0;
-                if (badgeInfo) {
-                    badgeInfo.innerHTML = `
-                        <span>Платеж в рассрочку 0%:</span>
-                        <span class="font-extrabold text-emerald-300">от ${perMonth.toLocaleString('ru-RU')} ₽/мес. на 6 мес.</span>
-                    `;
-                }
-            }
-
-            calcState.totalPrice = finalTotal;
-            calcState.discountAmount = discount;
-            calcState.breakdown = breakdown;
-
-            // Отображение в UI
-            const totalEl = document.getElementById('total-price');
-            const perM2El = document.getElementById('price-per-m2');
-            const breakdownEl = document.getElementById('breakdown-list');
-
-            if (total === 0) {
-                totalEl.textContent = '0 ₽';
-                perM2El.textContent = '0 ₽ / м²';
-                breakdownEl.innerHTML = `
-                    <div class="py-4 text-center text-stone-400 italic">
-                        Укажите площадь или выберите светильники для начала расчёта
-                    </div>
-                `;
-            } else {
-                if (calcState.paymentMethod === 'cash' && discount > 0) {
-                    totalEl.innerHTML = `
-                        <div class="flex items-center justify-center gap-2">
-                            <span class="line-through text-stone-500 text-lg font-normal">${total.toLocaleString('ru-RU')} ₽</span>
-                            <span>${finalTotal.toLocaleString('ru-RU')} ₽</span>
-                        </div>
-                    `;
-                } else {
-                    totalEl.textContent = `${finalTotal.toLocaleString('ru-RU')} ₽`;
-                }
-
-                const perM2 = calcState.area > 0 ? Math.round(finalTotal / calcState.area) : 0;
-                perM2El.textContent = perM2 > 0 ? `≈ ${perM2.toLocaleString('ru-RU')} ₽ / м²` : '—';
-
-                // Рендер строк сметы
-                breakdownEl.innerHTML = breakdown.map(item => `
-                    <div class="flex justify-between items-center text-xs py-1 border-b border-stone-800/60 last:border-0">
-                        <span class="${item.cost < 0 ? 'text-amber-300 font-bold' : 'text-stone-300'} pr-2">${item.name}</span>
-                        <span class="font-bold ${item.cost < 0 ? 'text-amber-300' : 'text-emerald-400'} whitespace-nowrap">${item.cost > 0 ? item.cost.toLocaleString('ru-RU') + ' ₽' : '−' + Math.abs(item.cost).toLocaleString('ru-RU') + ' ₽'}</span>
-                    </div>
-                `).join('');
-            }
-        }
-
-        // Обновление подсказки по ориентировочной стоимости в Hero
-        function updateHeroQuickPrice() {
-            const area = 18;
-            const perim = 18;
-            const cost = (area * PRICES.fabrics.matte.price) + (6 * PRICES.lamps.gx53.price);
-            const el = document.getElementById('hero-quick-price');
-            if (el) el.textContent = `${cost.toLocaleString('ru-RU')} ₽`;
-        }
-
-        // ================= WHATSAPP ОТПРАВКА =================
-        const WHATSAPP_PHONE = '79298966736';
-
-        function openWhatsAppUrl(msg) {
-            const encodedMsg = encodeURIComponent(msg);
-            const waUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMsg}`;
-
-            try {
-                const tempLink = document.createElement('a');
-                tempLink.href = waUrl;
-                tempLink.target = '_blank';
-                tempLink.rel = 'noopener noreferrer';
-                document.body.appendChild(tempLink);
-                tempLink.click();
-                document.body.removeChild(tempLink);
-            } catch (err) {
-                window.location.href = waUrl;
-            }
-        }
-
-        function requestMeasurementInWhatsApp() {
-            let msg = 'Здравствуйте! Хочу вызвать замерщика от компании Decarat на бесплатный замер потолков.';
-            if (calcState.totalPrice > 0) {
-                msg += ` Предварительный расчет на сайте: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽ (Площадь: ${calcState.area} м²). Когда мастер сможет приехать?`;
-            } else {
-                msg += ' Подскажите, когда мастер сможет приехать с образцами полотен и светильников?';
-            }
-            openWhatsAppUrl(msg);
-        }
-
-        function sendCalculationToWhatsApp() {
-            if (calcState.totalPrice === 0) {
-                requestMeasurementInWhatsApp();
-                return;
-            }
-
-            let msg = `Здравствуйте! Рассчитал(а) смету натяжного потолка на сайте компании Decarat:\n\n`;
-            msg += `📐 Площадь: ${calcState.area} м²\n`;
-            msg += `📏 Периметр: ${calcState.perimeter} м.п.\n`;
-            msg += `✨ Полотно: ${PRICES.fabrics[calcState.fabricKey]?.name || 'Матовое'}\n`;
-            msg += `🚪 Профиль: ${PRICES.profiles[calcState.profileKey]?.name || 'Классический'}\n`;
-
-            if (calcState.lamps.gx53 > 0) msg += `💡 Споты GX53: ${calcState.lamps.gx53} шт.\n`;
-            if (calcState.lamps.tube > 0) msg += `💡 Накладные тубусы: ${calcState.lamps.tube} шт.\n`;
-            if (calcState.lamps.track > 0) msg += `💡 Трековые шины: ${calcState.lamps.track} м\n`;
-            if (calcState.chandelier) msg += `🌟 Центральная люстра: да\n`;
-
-            if (calcState.ledEnabled && calcState.ledLength > 0) {
-                msg += `🌈 LED-лента: ${calcState.ledLength} м (${PRICES.led[calcState.ledType]?.name || 'Одноцветная'})\n`;
-            }
-
-            if (calcState.pipes > 0) msg += `🔧 Обвод труб: ${calcState.pipes} шт.\n`;
-            if (calcState.corners > 0) msg += `📐 Доп. углы: ${calcState.corners} шт.\n`;
-            if (calcState.optCornice) msg += `🪟 Скрытый карниз ПК-5: да\n`;
-            if (calcState.optMask) msg += `➖ Маскировочная лента: да\n`;
-
-            msg += `\n💳 Способ оплаты: ${calcState.paymentMethod === 'cash' ? 'Наличные (со скидкой 10%)' : 'Рассрочка 0% без переплат'}\n`;
-            if (calcState.paymentMethod === 'cash' && calcState.discountAmount > 0) {
-                msg += `🎁 Скидка 10%: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
-            } else if (calcState.paymentMethod === 'installment') {
-                const perM = Math.round(calcState.totalPrice / 6);
-                msg += `📆 Платеж: от ${perM.toLocaleString('ru-RU')} ₽/мес (на 6 месяцев)\n`;
-            }
-
-            msg += `\n💰 ИТОГОВАЯ СТОИМОСТЬ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n\n`;
-            msg += `Хочу подтвердить замер и проконсультироваться с мастером.`;
-
-            openWhatsAppUrl(msg);
-        }
-
-        // Копирование сметы текстом
-        function copyEstimateToClipboard() {
-            if (calcState.totalPrice === 0) {
-                showToast('Сначала заполните параметры калькулятора');
-                return;
-            }
-
-            let text = `Смета натяжного потолка от компании Decarat:\n`;
-            text += `Площадь: ${calcState.area} м² | Периметр: ${calcState.perimeter} м.п.\n`;
-            text += `Полотно: ${PRICES.fabrics[calcState.fabricKey]?.name}\n`;
-            text += `Способ оплаты: ${calcState.paymentMethod === 'cash' ? 'Оплата наличными (Скидка 10%)' : 'Рассрочка 0%'}\n`;
-            text += `------------------------------------\n`;
-            calcState.breakdown.forEach(item => {
-                const sign = item.cost < 0 ? '−' : '';
-                text += `• ${item.name}: ${sign}${Math.abs(item.cost).toLocaleString('ru-RU')} ₽\n`;
-            });
-            text += `------------------------------------\n`;
-            text += `ИТОГО К ОПЛАТЕ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n`;
-            text += `Телефон для связи: +7 (929) 896-67-36`;
-
-            const tempInput = document.createElement('textarea');
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            showToast('Смета скопирована в буфер обмена!');
-        }
-
-        // Всплывающее уведомление
-        function showToast(msg) {
-            const toast = document.getElementById('toast-message');
-            const textEl = document.getElementById('toast-text');
-            textEl.textContent = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+        // Инициализация при открытии страницы
+        applyLoadedState();
     </script>
 </body>
 </html>
