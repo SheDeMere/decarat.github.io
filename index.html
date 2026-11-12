@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Натяжные потолки Decarat | Калькулятор стоимости</title>
+    <title>Натяжные потолки Decarat</title>
     
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -658,7 +658,7 @@
                         </div>
                     </div>
 
-                    <!-- Выбор способа оплаты: Наличные (-10%), Рассрочка 0% и Персональная скидка мастера -->
+                    <!-- Выбор способа оплаты: Наличные (-10%) ИЛИ Скидка для мастера + Рассрочка 0% -->
                     <div class="pt-2 pb-4 border-t border-stone-800 space-y-2.5">
                         <label class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">Способ оплаты и скидка:</label>
                         <div class="grid grid-cols-2 gap-2">
@@ -667,15 +667,15 @@
                                 <span class="block text-xs font-bold">💵 Наличными</span>
                                 <span class="block text-[10px] text-emerald-300 font-semibold mt-0.5">Скидка 10%</span>
                             </button>
+                            <!-- Кнопка скидки для мастера (заменяет кнопку Наличными при входе мастера) -->
+                            <button type="button" id="pay-master-btn" onclick="setPaymentMethod('master')" class="hidden p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative">
+                                <span id="master-btn-badge" class="absolute -top-2 right-2 text-[9px] font-extrabold bg-emerald-500 text-stone-950 px-1.5 py-0.5 rounded-full shadow-sm">−0%</span>
+                                <span id="master-btn-title" class="block text-xs font-bold truncate">🛠 Скидка для мастера</span>
+                                <span id="master-btn-subtitle" class="block text-[10px] text-emerald-300 font-semibold mt-0.5 truncate">Скидка 0%</span>
+                            </button>
                             <button type="button" id="pay-install-btn" onclick="setPaymentMethod('installment')" class="p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition">
                                 <span class="block text-xs font-bold">💳 Рассрочка</span>
                                 <span class="block text-[10px] text-stone-400 mt-0.5">0% без переплат</span>
-                            </button>
-                            <!-- Персональная кнопка скидки для мастера по ключу -->
-                            <button type="button" id="pay-master-btn" onclick="setPaymentMethod('master')" class="col-span-2 hidden p-2.5 rounded-xl border border-amber-500/70 bg-amber-500/15 hover:bg-amber-500/25 text-white text-left transition relative">
-                                <span id="master-btn-badge" class="absolute -top-2 right-2 text-[9px] font-extrabold bg-gradient-to-r from-amber-400 to-orange-500 text-stone-950 px-2 py-0.5 rounded-full shadow-sm">−0%</span>
-                                <span id="master-btn-title" class="block text-xs font-bold text-amber-200">🛠 Скидка для мастера</span>
-                                <span id="master-btn-subtitle" class="block text-[10px] text-amber-300/90 font-semibold mt-0.5">Персональная скидка по ключу</span>
                             </button>
                         </div>
                         <div id="payment-badge-info" class="p-2 rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-[11px] text-emerald-300 flex items-center justify-between">
@@ -998,28 +998,35 @@
                 </div>
 
                 <div class="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 space-y-3">
-                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Создать новый ключ доступа с персональной скидкой</h4>
+                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Создать новый ключ доступа</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                        <div class="sm:col-span-5">
-                            <label class="block text-[10px] font-bold text-stone-600 mb-1">Имя мастера / клиента:</label>
-                            <input type="text" id="new-key-owner" placeholder="Например: Али (мастер)" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        </div>
                         <div class="sm:col-span-4">
-                            <label class="block text-[10px] font-bold text-stone-600 mb-1">Пароль / Ключ входа:</label>
-                            <input type="text" id="new-key-code" placeholder="Например: ALI2026" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs uppercase font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <label class="block text-[10px] font-bold text-stone-600 mb-1">Тип пользователя:</label>
+                            <select id="new-key-role" onchange="handleNewKeyRoleChange(this.value)" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="master">🛠 Для мастера</option>
+                                <option value="client">👤 Для обычного пользователя</option>
+                            </select>
                         </div>
                         <div class="sm:col-span-3">
-                            <label class="block text-[10px] font-bold text-emerald-800 mb-1">Скидка мастера (%):</label>
-                            <input type="number" id="new-key-discount" value="15" min="0" max="90" step="1" placeholder="15" class="w-full px-3 py-2 bg-white border border-emerald-400 rounded-xl text-xs font-bold text-emerald-800 text-center focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <label class="block text-[10px] font-bold text-stone-600 mb-1">Имя человека:</label>
+                            <input type="text" id="new-key-owner" placeholder="Например: Али" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label class="block text-[10px] font-bold text-stone-600 mb-1">Пароль / Ключ:</label>
+                            <input type="text" id="new-key-code" placeholder="ALI2026" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs uppercase font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div id="new-key-discount-wrap" class="sm:col-span-2">
+                            <label class="block text-[10px] font-bold text-emerald-800 mb-1">Скидка (%):</label>
+                            <input type="number" id="new-key-discount" value="15" min="0" max="90" step="1" placeholder="15" class="w-full px-2 py-2 bg-white border border-emerald-400 rounded-xl text-xs font-bold text-emerald-800 text-center focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                     </div>
                     <button type="button" onclick="createNewAccessKey()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
-                        + Создать ключ, закрепить скидку и сохранить в облако
+                        + Создать ключ и сохранить в облако
                     </button>
                 </div>
 
                 <div class="space-y-2">
-                    <span class="text-xs font-bold text-stone-500 uppercase tracking-wider block">Активные пользователи, ключи и закреплённые скидки:</span>
+                    <span class="text-xs font-bold text-stone-500 uppercase tracking-wider block">Активные пользователи и ключи доступа:</span>
                     <div id="access-keys-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
                         <!-- Рендерится через JS -->
                     </div>
@@ -1112,11 +1119,10 @@
                         }
                         if (Array.isArray(data.allowedKeys)) {
                             ALLOWED_ACCESS_KEYS = data.allowedKeys;
-                            // Обновляем данные активного мастера, если он уже авторизован
                             if (activeMasterSession && activeMasterSession.code) {
-                                const updatedMaster = ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === activeMasterSession.code.toUpperCase());
-                                if (updatedMaster) {
-                                    applyMasterDiscountProfile(updatedMaster, false);
+                                const updatedUser = ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === activeMasterSession.code.toUpperCase());
+                                if (updatedUser) {
+                                    applyUserAccessProfile(updatedUser, false);
                                 } else {
                                     activeMasterSession = null;
                                     updateMasterPaymentButtonUI();
@@ -1187,11 +1193,11 @@
 
         let isAccessRestricted = true;
         let isSessionUnlocked = false;
-        let activeMasterSession = null; // { code, owner, discount }
+        let activeMasterSession = null; // { code, owner, role, discount }
 
         let ALLOWED_ACCESS_KEYS = [
-            { code: 'DECARAT2026', owner: 'Основной доступ Decarat', discount: 10, created: 'Активен' },
-            { code: 'VIP-CLIENT', owner: 'VIP-клиент (тестовый)', discount: 15, created: 'Активен' }
+            { code: 'DECARAT2026', owner: 'Клиент Decarat', role: 'client', discount: 0, created: 'Активен' },
+            { code: 'VIP-MASTER', owner: 'Мастер Decarat', role: 'master', discount: 15, created: 'Активен' }
         ];
 
         let calcState = {
@@ -1230,33 +1236,58 @@
             updateHeroQuickPrice();
         });
 
-        // ================= КОНТРОЛЬ ДОСТУПА ПО КЛЮЧАМ И ПЕРСОНАЛЬНОЙ СКИДКЕ =================
-        function applyMasterDiscountProfile(keyItem, autoSelectMethod = true) {
+        // ================= КОНТРОЛЬ ДОСТУПА ПО КЛЮЧАМ И РОЛЯМ =================
+        function handleNewKeyRoleChange(role) {
+            const discountWrap = document.getElementById('new-key-discount-wrap');
+            if (!discountWrap) return;
+            if (role === 'master') {
+                discountWrap.classList.remove('hidden');
+            } else {
+                discountWrap.classList.add('hidden');
+            }
+        }
+
+        function applyUserAccessProfile(keyItem, autoSelectMethod = true) {
             if (!keyItem) return;
-            const discountVal = Math.max(0, Math.min(90, parseFloat(keyItem.discount) || 0));
+            const role = keyItem.role || ((keyItem.discount && keyItem.discount > 0) ? 'master' : 'client');
+            const discountVal = role === 'master' ? Math.max(0, Math.min(90, parseFloat(keyItem.discount) || 0)) : 0;
+
             activeMasterSession = {
                 code: keyItem.code,
-                owner: keyItem.owner || 'Мастер',
+                owner: keyItem.owner || 'Пользователь',
+                role: role,
                 discount: discountVal
             };
+
             updateMasterPaymentButtonUI();
-            if (autoSelectMethod && discountVal > 0) {
-                setPaymentMethod('master');
+
+            if (role === 'master') {
+                if (autoSelectMethod) setPaymentMethod('master');
+                else calculateTotal();
             } else {
-                calculateTotal();
+                if (autoSelectMethod) setPaymentMethod('cash');
+                else calculateTotal();
             }
         }
 
         function updateMasterPaymentButtonUI() {
+            const cashBtn = document.getElementById('pay-cash-btn');
             const masterBtn = document.getElementById('pay-master-btn');
-            if (!masterBtn) return;
+            if (!cashBtn || !masterBtn) return;
 
-            if (activeMasterSession && activeMasterSession.discount > 0) {
+            if (activeMasterSession && activeMasterSession.role === 'master') {
+                // Скрываем кнопку "Наличными" и показываем кнопку "Скидка для мастера"
+                cashBtn.classList.add('hidden');
                 masterBtn.classList.remove('hidden');
                 document.getElementById('master-btn-badge').textContent = `−${activeMasterSession.discount}%`;
                 document.getElementById('master-btn-title').textContent = `🛠 Скидка для мастера: ${activeMasterSession.owner}`;
-                document.getElementById('master-btn-subtitle').textContent = `Персональная скидка ${activeMasterSession.discount}% (ключ ${activeMasterSession.code})`;
+                document.getElementById('master-btn-subtitle').textContent = `Персональная скидка ${activeMasterSession.discount}%`;
+                if (calcState.paymentMethod === 'cash') {
+                    calcState.paymentMethod = 'master';
+                }
             } else {
+                // Обычный пользователь: показываем "Наличными", скрываем "Скидка для мастера"
+                cashBtn.classList.remove('hidden');
                 masterBtn.classList.add('hidden');
                 if (calcState.paymentMethod === 'master') {
                     calcState.paymentMethod = 'cash';
@@ -1273,8 +1304,11 @@
                 if (foundByUrl) {
                     isSessionUnlocked = true;
                     unlockSiteUI();
-                    applyMasterDiscountProfile(foundByUrl, true);
-                    showToast(`Доступ разрешён: ${foundByUrl.owner} (скидка ${foundByUrl.discount || 0}%)`);
+                    applyUserAccessProfile(foundByUrl, true);
+                    const msg = foundByUrl.role === 'master'
+                        ? `Доступ разрешён: мастер ${foundByUrl.owner} (скидка ${foundByUrl.discount || 0}%)`
+                        : `Доступ разрешён: ${foundByUrl.owner}`;
+                    showToast(msg);
                     return;
                 }
             }
@@ -1297,8 +1331,11 @@
                 isSessionUnlocked = true;
                 errorEl.classList.add('hidden');
                 unlockSiteUI();
-                applyMasterDiscountProfile(found, true);
-                showToast(`Добро пожаловать, ${found.owner}! Закреплена скидка ${found.discount || 0}%`);
+                applyUserAccessProfile(found, true);
+                const msg = found.role === 'master'
+                    ? `Добро пожаловать, ${found.owner}! Скидка мастера ${found.discount || 0}%`
+                    : `Добро пожаловать, ${found.owner}!`;
+                showToast(msg);
             } else {
                 errorEl.classList.remove('hidden');
             }
@@ -1359,15 +1396,21 @@
         }
 
         function createNewAccessKey() {
+            const roleSelect = document.getElementById('new-key-role');
             const ownerInput = document.getElementById('new-key-owner');
             const codeInput = document.getElementById('new-key-code');
             const discountInput = document.getElementById('new-key-discount');
 
-            const owner = ownerInput.value.trim() || 'Мастер';
+            const role = roleSelect ? roleSelect.value : 'master';
+            const owner = ownerInput.value.trim() || (role === 'master' ? 'Мастер' : 'Пользователь');
             let code = codeInput.value.trim().toUpperCase().replace(/\s+/g, '-');
-            let discount = parseFloat(discountInput.value);
-            if (isNaN(discount) || discount < 0) discount = 0;
-            if (discount > 90) discount = 90;
+
+            let discount = 0;
+            if (role === 'master') {
+                discount = parseFloat(discountInput.value);
+                if (isNaN(discount) || discount < 0) discount = 0;
+                if (discount > 90) discount = 90;
+            }
 
             if (!code) {
                 code = 'DEC-' + Math.floor(1000 + Math.random() * 9000);
@@ -1378,12 +1421,16 @@
                 return;
             }
 
-            ALLOWED_ACCESS_KEYS.unshift({ code, owner, discount, created: 'Активен' });
+            ALLOWED_ACCESS_KEYS.unshift({ code, owner, role, discount, created: 'Активен' });
             ownerInput.value = '';
             codeInput.value = '';
             renderAccessKeysList();
             if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(`Ключ ${code} для «${owner}» со скидкой ${discount}% создан!`);
+
+            const toastMsg = role === 'master'
+                ? `Ключ мастера ${code} («${owner}», скидка ${discount}%) создан!`
+                : `Ключ пользователя ${code} («${owner}») создан!`;
+            showToast(toastMsg);
         }
 
         function deleteAccessKey(code) {
@@ -1421,26 +1468,33 @@
                 return;
             }
 
-            container.innerHTML = ALLOWED_ACCESS_KEYS.map(item => `
-                <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-mono font-bold text-xs">${item.code}</span>
-                            <span class="text-xs font-bold text-stone-800">${item.owner}</span>
-                            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-extrabold text-[11px]">Скидка ${item.discount || 0}%</span>
+            container.innerHTML = ALLOWED_ACCESS_KEYS.map(item => {
+                const isMaster = (item.role === 'master') || (!item.role && item.discount > 0);
+                const roleBadge = isMaster
+                    ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-bold text-[10px]">🛠 Мастер • Скидка ${item.discount || 0}%</span>`
+                    : `<span class="px-2 py-0.5 rounded-full bg-stone-200 text-stone-700 font-semibold text-[10px]">👤 Обычный пользователь</span>`;
+
+                return `
+                    <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-mono font-bold text-xs">${item.code}</span>
+                                <span class="text-xs font-bold text-stone-800">${item.owner}</span>
+                                ${roleBadge}
+                            </div>
+                            <span class="text-[10px] text-stone-400 block mt-0.5">Статус: ${item.created}</span>
                         </div>
-                        <span class="text-[10px] text-stone-400 block mt-0.5">Статус: ${item.created}</span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="copyInviteLink('${item.code}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-stone-300 hover:bg-emerald-50 hover:border-emerald-400 text-[11px] font-semibold text-stone-700 transition">
+                                🔗 Ссылка-вход
+                            </button>
+                            <button type="button" onclick="deleteAccessKey('${item.code}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-rose-200 hover:bg-rose-50 text-[11px] font-semibold text-rose-600 transition">
+                                Удалить
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <button type="button" onclick="copyInviteLink('${item.code}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-stone-300 hover:bg-emerald-50 hover:border-emerald-400 text-[11px] font-semibold text-stone-700 transition">
-                            🔗 Ссылка-вход
-                        </button>
-                        <button type="button" onclick="deleteAccessKey('${item.code}')" class="px-2.5 py-1.5 rounded-lg bg-white border border-rose-200 hover:bg-rose-50 text-[11px] font-semibold text-rose-600 transition">
-                            Удалить
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function updateActiveCardStyles() {
@@ -1732,19 +1786,15 @@
             const inactiveBase = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition relative";
             const activeEmerald = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative";
 
-            cashBtn.className = inactiveBase;
-            installBtn.className = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition";
+            if (!cashBtn.classList.contains('hidden')) {
+                cashBtn.className = (method === 'cash') ? activeEmerald : inactiveBase;
+            }
             if (masterBtn && !masterBtn.classList.contains('hidden')) {
-                masterBtn.className = "col-span-2 p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-amber-500/60 text-stone-300 text-left transition relative";
+                masterBtn.className = (method === 'master') ? activeEmerald : inactiveBase;
             }
-
-            if (method === 'cash') {
-                cashBtn.className = activeEmerald;
-            } else if (method === 'installment') {
-                installBtn.className = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition";
-            } else if (method === 'master' && masterBtn && !masterBtn.classList.contains('hidden')) {
-                masterBtn.className = "col-span-2 p-2.5 rounded-xl border border-amber-400 bg-amber-500/25 text-white text-left transition relative shadow-md shadow-amber-950/30";
-            }
+            installBtn.className = (method === 'installment')
+                ? "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition"
+                : "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition";
 
             calculateTotal();
         }
@@ -1902,8 +1952,8 @@
             let finalTotal = total;
             const badgeInfo = document.getElementById('payment-badge-info');
 
-            if (calcState.paymentMethod === 'master' && activeMasterSession && activeMasterSession.discount > 0) {
-                const pct = activeMasterSession.discount;
+            if (calcState.paymentMethod === 'master' && activeMasterSession && activeMasterSession.role === 'master') {
+                const pct = activeMasterSession.discount || 0;
                 discount = Math.round(total * (pct / 100));
                 finalTotal = total - discount;
                 if (discount > 0) {
@@ -1915,7 +1965,7 @@
                 if (badgeInfo) {
                     badgeInfo.innerHTML = `
                         <span>Скидка для мастера (${activeMasterSession.owner}, ${pct}%):</span>
-                        <span class="font-extrabold text-amber-300">−${discount.toLocaleString('ru-RU')} ₽</span>
+                        <span class="font-extrabold text-emerald-300">−${discount.toLocaleString('ru-RU')} ₽</span>
                     `;
                 }
             } else if (calcState.paymentMethod === 'cash') {
@@ -1976,8 +2026,8 @@
 
                 breakdownEl.innerHTML = breakdown.map(item => `
                     <div class="flex justify-between items-center text-xs py-1 border-b border-stone-800/60 last:border-0">
-                        <span class="${item.cost < 0 ? 'text-amber-300 font-bold' : 'text-stone-300'} pr-2">${item.name}</span>
-                        <span class="font-bold ${item.cost < 0 ? 'text-amber-300' : 'text-emerald-400'} whitespace-nowrap">${item.cost > 0 ? item.cost.toLocaleString('ru-RU') + ' ₽' : '−' + Math.abs(item.cost).toLocaleString('ru-RU') + ' ₽'}</span>
+                        <span class="${item.cost < 0 ? 'text-emerald-300 font-bold' : 'text-stone-300'} pr-2">${item.name}</span>
+                        <span class="font-bold text-emerald-400 whitespace-nowrap">${item.cost > 0 ? item.cost.toLocaleString('ru-RU') + ' ₽' : '−' + Math.abs(item.cost).toLocaleString('ru-RU') + ' ₽'}</span>
                     </div>
                 `).join('');
             }
@@ -2027,8 +2077,8 @@
             }
 
             let msg = `Здравствуйте! Рассчитал(а) смету натяжного потолка на сайте компании Decarat:\n\n`;
-            if (activeMasterSession) {
-                msg += `🛠 Мастер / Партнёр: ${activeMasterSession.owner} (ключ: ${activeMasterSession.code})\n`;
+            if (activeMasterSession && activeMasterSession.role === 'master') {
+                msg += `🛠 Мастер: ${activeMasterSession.owner} (ключ: ${activeMasterSession.code})\n`;
             }
             msg += `📐 Площадь: ${calcState.area} м²\n`;
             msg += `📏 Периметр: ${calcState.perimeter} м.п.\n`;
@@ -2049,10 +2099,10 @@
             if (calcState.optCornice) msg += `🪟 Скрытый карниз ПК-5: да\n`;
             if (calcState.optMask) msg += `➖ Маскировочная лента: да\n`;
 
-            if (calcState.paymentMethod === 'master' && activeMasterSession) {
+            if (calcState.paymentMethod === 'master' && activeMasterSession && activeMasterSession.role === 'master') {
                 msg += `\n🛠 Условия: Скидка для мастера ${activeMasterSession.owner} (${activeMasterSession.discount}%)\n`;
                 if (calcState.discountAmount > 0) {
-                    msg += `🎁 Персональная скидка: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
+                    msg += `🎁 Скидка мастера: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
                 }
             } else if (calcState.paymentMethod === 'cash') {
                 msg += `\n💳 Способ оплаты: Наличные (со скидкой 10%)\n`;
@@ -2078,14 +2128,14 @@
             }
 
             let paymentLabel = 'Рассрочка 0%';
-            if (calcState.paymentMethod === 'master' && activeMasterSession) {
+            if (calcState.paymentMethod === 'master' && activeMasterSession && activeMasterSession.role === 'master') {
                 paymentLabel = `Скидка для мастера: ${activeMasterSession.owner} (${activeMasterSession.discount}%)`;
             } else if (calcState.paymentMethod === 'cash') {
                 paymentLabel = 'Оплата наличными (Скидка 10%)';
             }
 
             let text = `Смета натяжного потолка от компании Decarat:\n`;
-            if (activeMasterSession) {
+            if (activeMasterSession && activeMasterSession.role === 'master') {
                 text += `Мастер: ${activeMasterSession.owner} (ключ ${activeMasterSession.code})\n`;
             }
             text += `Площадь: ${calcState.area} м² | Периметр: ${calcState.perimeter} м.п.\n`;
