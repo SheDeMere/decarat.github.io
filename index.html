@@ -139,7 +139,7 @@
             </form>
 
             <div class="pt-3 border-t border-stone-800 flex items-center justify-between text-[11px] text-stone-500">
-                
+            
                 <button type="button" onclick="openAdminModal()" class="text-emerald-400 hover:underline font-semibold">Вход для владельца</button>
             </div>
         </div>
@@ -153,7 +153,7 @@
                     <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 </div>
                 <div>
-                    <span class="text-2xl font-black tracking-tight text-stone-900 block leading-tight">DECARAT</span>
+                    <span class="text-2xl font-black tracking-tight text-stone-900 block leading-tight">DECARAT x SHAHAB</span>
                     <span class="text-[10px] text-stone-500 font-semibold uppercase tracking-widest block">Натяжные потолки & Свет</span>
                 </div>
             </div>
@@ -664,17 +664,17 @@
                         <div class="grid grid-cols-2 gap-2">
                             <button type="button" id="pay-cash-btn" onclick="setPaymentMethod('cash')" class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative">
                                 <span class="absolute -top-2 right-2 text-[9px] font-extrabold bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 px-1.5 py-0.5 rounded-full shadow-sm">−10%</span>
-                                <span class="block text-xs font-bold">💵 Наличными</span>
+                                <span class="block text-xs font-bold">Наличными</span>
                                 <span class="block text-[10px] text-emerald-300 font-semibold mt-0.5">Скидка 10%</span>
                             </button>
                             <!-- Кнопка скидки для мастера (заменяет кнопку Наличными при входе мастера) -->
                             <button type="button" id="pay-master-btn" onclick="setPaymentMethod('master')" class="hidden p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative">
                                 <span id="master-btn-badge" class="absolute -top-2 right-2 text-[9px] font-extrabold bg-emerald-500 text-stone-950 px-1.5 py-0.5 rounded-full shadow-sm">−0%</span>
-                                <span id="master-btn-title" class="block text-xs font-bold truncate">Скидка мастера</span>
+                                <span id="master-btn-title" class="block text-xs font-bold truncate">Скидка для мастера</span>
                                 <span id="master-btn-subtitle" class="block text-[10px] text-emerald-300 font-semibold mt-0.5 truncate">Скидка 0%</span>
                             </button>
                             <button type="button" id="pay-install-btn" onclick="setPaymentMethod('installment')" class="p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition">
-                                <span class="block text-xs font-bold"> Рассрочка</span>
+                                <span class="block text-xs font-bold">💳 Рассрочка</span>
                                 <span class="block text-[10px] text-stone-400 mt-0.5">0% без переплат</span>
                             </button>
                         </div>
@@ -1119,15 +1119,30 @@
                         }
                         if (Array.isArray(data.allowedKeys)) {
                             ALLOWED_ACCESS_KEYS = data.allowedKeys;
+                            const savedCode = getSavedCachedAccessCode();
+
                             if (activeMasterSession && activeMasterSession.code) {
                                 const updatedUser = ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === activeMasterSession.code.toUpperCase());
                                 if (updatedUser) {
                                     applyUserAccessProfile(updatedUser, false);
                                 } else {
+                                    // Ключ был удалён владельцем в админке
+                                    clearSavedAuthCache();
                                     activeMasterSession = null;
+                                    isSessionUnlocked = false;
                                     updateMasterPaymentButtonUI();
                                 }
+                            } else if (savedCode) {
+                                const cachedUser = ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === savedCode);
+                                if (cachedUser) {
+                                    isSessionUnlocked = true;
+                                    unlockSiteUI();
+                                    applyUserAccessProfile(cachedUser, true);
+                                } else {
+                                    clearSavedAuthCache();
+                                }
                             }
+
                             if (typeof renderAccessKeysList === 'function') {
                                 renderAccessKeysList();
                             }
@@ -1188,8 +1203,12 @@
 
         let PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
 
+        // Ключи кэша в localStorage
+        const STORAGE_KEY_ACCESS = 'decarat_saved_access_key';
+        const STORAGE_KEY_ADMIN = 'decarat_saved_admin';
+
         let ADMIN_PIN = '1234';
-        let isAdminLoggedIn = false;
+        let isAdminLoggedIn = localStorage.getItem(STORAGE_KEY_ADMIN) === 'true';
 
         let isAccessRestricted = true;
         let isSessionUnlocked = false;
@@ -1227,6 +1246,27 @@
             discountAmount: 0,
             breakdown: []
         };
+
+        function getSavedCachedAccessCode() {
+            try {
+                return (localStorage.getItem(STORAGE_KEY_ACCESS) || '').trim().toUpperCase();
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function saveAuthToCache(code) {
+            try {
+                if (code) localStorage.setItem(STORAGE_KEY_ACCESS, code.trim().toUpperCase());
+            } catch (e) {}
+        }
+
+        function clearSavedAuthCache() {
+            try {
+                localStorage.removeItem(STORAGE_KEY_ACCESS);
+                localStorage.removeItem(STORAGE_KEY_ADMIN);
+            } catch (e) {}
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             initAccessControl();
@@ -1276,7 +1316,6 @@
             if (!cashBtn || !masterBtn) return;
 
             if (activeMasterSession && activeMasterSession.role === 'master') {
-                // Скрываем кнопку "Наличными" и показываем кнопку "Скидка для мастера"
                 cashBtn.classList.add('hidden');
                 masterBtn.classList.remove('hidden');
                 document.getElementById('master-btn-badge').textContent = `−${activeMasterSession.discount}%`;
@@ -1286,7 +1325,6 @@
                     calcState.paymentMethod = 'master';
                 }
             } else {
-                // Обычный пользователь: показываем "Наличными", скрываем "Скидка для мастера"
                 cashBtn.classList.remove('hidden');
                 masterBtn.classList.add('hidden');
                 if (calcState.paymentMethod === 'master') {
@@ -1298,11 +1336,14 @@
         function initAccessControl() {
             const params = new URLSearchParams(window.location.search);
             const urlKey = (params.get('access') || params.get('key') || '').trim().toUpperCase();
+            const cachedKey = getSavedCachedAccessCode();
 
+            // 1. Проверяем ключ из ссылки (?access=...)
             if (urlKey) {
                 const foundByUrl = ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === urlKey);
                 if (foundByUrl) {
                     isSessionUnlocked = true;
+                    saveAuthToCache(foundByUrl.code);
                     unlockSiteUI();
                     applyUserAccessProfile(foundByUrl, true);
                     const msg = foundByUrl.role === 'master'
@@ -1311,6 +1352,24 @@
                     showToast(msg);
                     return;
                 }
+            }
+
+            // 2. Проверяем сохранённый в кэше (localStorage) ключ
+            if (cachedKey) {
+                const foundCached = ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === cachedKey);
+                if (foundCached) {
+                    isSessionUnlocked = true;
+                    unlockSiteUI();
+                    applyUserAccessProfile(foundCached, true);
+                    return;
+                }
+            }
+
+            // 3. Проверяем сохранённую сессию администратора
+            if (isAdminLoggedIn) {
+                isSessionUnlocked = true;
+                unlockSiteUI();
+                return;
             }
 
             if (!isAccessRestricted) {
@@ -1329,6 +1388,7 @@
             const found = ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === inputVal);
             if (found) {
                 isSessionUnlocked = true;
+                saveAuthToCache(found.code);
                 errorEl.classList.add('hidden');
                 unlockSiteUI();
                 applyUserAccessProfile(found, true);
@@ -1353,13 +1413,15 @@
 
         function lockSiteSession() {
             isSessionUnlocked = false;
+            isAdminLoggedIn = false;
             activeMasterSession = null;
+            clearSavedAuthCache();
             updateMasterPaymentButtonUI();
             setPaymentMethod('cash');
             document.getElementById('access-code-input').value = '';
             document.getElementById('access-code-error').classList.add('hidden');
             lockSiteUI();
-            showToast('Экран заблокирован');
+            showToast('Вы вышли из аккаунта, кэш входа очищен');
         }
 
         function switchAdminTab(tab) {
@@ -1435,6 +1497,9 @@
 
         function deleteAccessKey(code) {
             ALLOWED_ACCESS_KEYS = ALLOWED_ACCESS_KEYS.filter(k => k.code !== code);
+            if (getSavedCachedAccessCode() === code.toUpperCase()) {
+                try { localStorage.removeItem(STORAGE_KEY_ACCESS); } catch (e) {}
+            }
             if (activeMasterSession && activeMasterSession.code === code) {
                 activeMasterSession = null;
                 updateMasterPaymentButtonUI();
@@ -1589,586 +1654,3 @@
 
         function handleAdminLogin(e) {
             e.preventDefault();
-            const pin = document.getElementById('admin-pin-input').value.trim();
-            if (pin === ADMIN_PIN) {
-                isAdminLoggedIn = true;
-                isSessionUnlocked = true;
-                unlockSiteUI();
-                document.getElementById('admin-auth-view').classList.add('hidden');
-                document.getElementById('admin-dashboard-view').classList.remove('hidden');
-                populateAdminForm();
-                renderAccessKeysList();
-            } else {
-                document.getElementById('admin-pin-error').classList.remove('hidden');
-            }
-        }
-
-        function populateAdminForm() {
-            document.getElementById('inp-price-fabric-matte').value = PRICES.fabrics.matte.price;
-            document.getElementById('inp-price-fabric-satin').value = PRICES.fabrics.satin.price;
-            document.getElementById('inp-price-fabric-glossy').value = PRICES.fabrics.glossy.price;
-            document.getElementById('inp-price-fabric-fabric').value = PRICES.fabrics.fabric.price;
-
-            document.getElementById('inp-price-profile-shadow').value = PRICES.profiles.shadow.price;
-            document.getElementById('inp-price-profile-floating').value = PRICES.profiles.floating.price;
-
-            document.getElementById('inp-price-lamp-gx53').value = PRICES.lamps.gx53.price;
-            document.getElementById('inp-price-lamp-tube').value = PRICES.lamps.tube.price;
-            document.getElementById('inp-price-lamp-track').value = PRICES.lamps.track.price;
-
-            document.getElementById('inp-price-led-single').value = PRICES.led.single.price;
-            document.getElementById('inp-price-led-rgb').value = PRICES.led.rgb.price;
-            document.getElementById('inp-price-led-cct').value = PRICES.led.cct.price;
-
-            document.getElementById('inp-price-extra-pipe').value = PRICES.extras.pipe;
-            document.getElementById('inp-price-extra-corner').value = PRICES.extras.corner;
-            document.getElementById('inp-price-extra-chandelier').value = PRICES.extras.chandelier;
-            document.getElementById('inp-price-extra-cornice').value = PRICES.extras.cornice;
-            document.getElementById('inp-price-extra-mask').value = PRICES.extras.mask;
-            document.getElementById('inp-price-extra-vent').value = PRICES.extras.vent;
-        }
-
-        function saveAdminPrices(e) {
-            e.preventDefault();
-
-            PRICES.fabrics.matte.price = parseInt(document.getElementById('inp-price-fabric-matte').value) || 0;
-            PRICES.fabrics.satin.price = parseInt(document.getElementById('inp-price-fabric-satin').value) || 0;
-            PRICES.fabrics.glossy.price = parseInt(document.getElementById('inp-price-fabric-glossy').value) || 0;
-            PRICES.fabrics.fabric.price = parseInt(document.getElementById('inp-price-fabric-fabric').value) || 0;
-
-            PRICES.profiles.shadow.price = parseInt(document.getElementById('inp-price-profile-shadow').value) || 0;
-            PRICES.profiles.floating.price = parseInt(document.getElementById('inp-price-profile-floating').value) || 0;
-
-            PRICES.lamps.gx53.price = parseInt(document.getElementById('inp-price-lamp-gx53').value) || 0;
-            PRICES.lamps.tube.price = parseInt(document.getElementById('inp-price-lamp-tube').value) || 0;
-            PRICES.lamps.track.price = parseInt(document.getElementById('inp-price-lamp-track').value) || 0;
-
-            PRICES.led.single.price = parseInt(document.getElementById('inp-price-led-single').value) || 0;
-            PRICES.led.rgb.price = parseInt(document.getElementById('inp-price-led-rgb').value) || 0;
-            PRICES.led.cct.price = parseInt(document.getElementById('inp-price-led-cct').value) || 0;
-
-            PRICES.extras.pipe = parseInt(document.getElementById('inp-price-extra-pipe').value) || 0;
-            PRICES.extras.corner = parseInt(document.getElementById('inp-price-extra-corner').value) || 0;
-            PRICES.extras.chandelier = parseInt(document.getElementById('inp-price-extra-chandelier').value) || 0;
-            PRICES.extras.cornice = parseInt(document.getElementById('inp-price-extra-cornice').value) || 0;
-            PRICES.extras.mask = parseInt(document.getElementById('inp-price-extra-mask').value) || 0;
-            PRICES.extras.vent = parseInt(document.getElementById('inp-price-extra-vent').value) || 0;
-
-            updateUiPriceLabels();
-            calculateTotal();
-            updateHeroQuickPrice();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            closeAdminModal();
-            showToast('Новые цены успешно применены!');
-        }
-
-        function resetPricesToDefault() {
-            PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
-            populateAdminForm();
-            updateUiPriceLabels();
-            calculateTotal();
-            updateHeroQuickPrice();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Цены сброшены к стандартным значениям');
-        }
-
-        function syncAreaFromSlider(val) {
-            val = parseInt(val) || 0;
-            document.getElementById('input-area').value = val;
-            document.getElementById('area-val-label').textContent = val;
-            calcState.area = val;
-            
-            if (val > 0) {
-                const autoPerimeter = Math.round(4 * Math.sqrt(val) * 1.05);
-                document.getElementById('slider-perimeter').value = autoPerimeter;
-                document.getElementById('input-perimeter').value = autoPerimeter;
-                document.getElementById('perimeter-val-label').textContent = autoPerimeter;
-                calcState.perimeter = autoPerimeter;
-            } else {
-                document.getElementById('slider-perimeter').value = 0;
-                document.getElementById('input-perimeter').value = 0;
-                document.getElementById('perimeter-val-label').textContent = 0;
-                calcState.perimeter = 0;
-            }
-            calculateTotal();
-        }
-
-        function syncAreaFromInput(val) {
-            val = parseInt(val) || 0;
-            document.getElementById('slider-area').value = Math.min(val, 100);
-            document.getElementById('area-val-label').textContent = val;
-            calcState.area = val;
-
-            if (val > 0) {
-                const autoPerimeter = Math.round(4 * Math.sqrt(val) * 1.05);
-                document.getElementById('slider-perimeter').value = Math.min(autoPerimeter, 120);
-                document.getElementById('input-perimeter').value = autoPerimeter;
-                document.getElementById('perimeter-val-label').textContent = autoPerimeter;
-                calcState.perimeter = autoPerimeter;
-            } else {
-                document.getElementById('slider-perimeter').value = 0;
-                document.getElementById('input-perimeter').value = 0;
-                document.getElementById('perimeter-val-label').textContent = 0;
-                calcState.perimeter = 0;
-            }
-            calculateTotal();
-        }
-
-        function syncPerimeterFromSlider(val) {
-            val = parseInt(val) || 0;
-            document.getElementById('input-perimeter').value = val;
-            document.getElementById('perimeter-val-label').textContent = val;
-            calcState.perimeter = val;
-            calculateTotal();
-        }
-
-        function syncPerimeterFromInput(val) {
-            val = parseInt(val) || 0;
-            document.getElementById('slider-perimeter').value = Math.min(val, 120);
-            document.getElementById('perimeter-val-label').textContent = val;
-            calcState.perimeter = val;
-            calculateTotal();
-        }
-
-        function changeExtraCorners(delta) {
-            let newVal = calcState.corners + delta;
-            if (newVal < 0) newVal = 0;
-            calcState.corners = newVal;
-            document.getElementById('corners-count').textContent = newVal;
-            calculateTotal();
-        }
-
-        function changePipes(delta) {
-            let newVal = calcState.pipes + delta;
-            if (newVal < 0) newVal = 0;
-            calcState.pipes = newVal;
-            document.getElementById('pipes-count').textContent = newVal;
-            calculateTotal();
-        }
-
-        function changeLampCount(type, delta) {
-            let newVal = (calcState.lamps[type] || 0) + delta;
-            if (newVal < 0) newVal = 0;
-            calcState.lamps[type] = newVal;
-            document.getElementById(`count-lamp-${type}`).textContent = newVal;
-            calculateTotal();
-        }
-
-        function toggleLedSection(enabled) {
-            calcState.ledEnabled = enabled;
-            const box = document.getElementById('led-settings-box');
-            if (enabled) {
-                box.classList.remove('opacity-50', 'pointer-events-none');
-                if (calcState.ledLength === 0) {
-                    const defaultLen = calcState.perimeter > 0 ? Math.min(calcState.perimeter, 12) : 5;
-                    syncLedLength(defaultLen);
-                }
-            } else {
-                box.classList.add('opacity-50', 'pointer-events-none');
-            }
-            calculateTotal();
-        }
-
-        function syncLedLength(len) {
-            len = parseInt(len) || 0;
-            calcState.ledLength = len;
-            document.getElementById('slider-led-length').value = len;
-            document.getElementById('led-len-display').textContent = len;
-            calculateTotal();
-        }
-
-        function setPaymentMethod(method) {
-            calcState.paymentMethod = method;
-            const cashBtn = document.getElementById('pay-cash-btn');
-            const installBtn = document.getElementById('pay-install-btn');
-            const masterBtn = document.getElementById('pay-master-btn');
-
-            const inactiveBase = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition relative";
-            const activeEmerald = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative";
-
-            if (!cashBtn.classList.contains('hidden')) {
-                cashBtn.className = (method === 'cash') ? activeEmerald : inactiveBase;
-            }
-            if (masterBtn && !masterBtn.classList.contains('hidden')) {
-                masterBtn.className = (method === 'master') ? activeEmerald : inactiveBase;
-            }
-            installBtn.className = (method === 'installment')
-                ? "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition"
-                : "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition";
-
-            calculateTotal();
-        }
-
-        function scrollToTextures(event) {
-            if (event) event.preventDefault();
-            const el = document.getElementById('catalog');
-            if (el) {
-                el.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-
-        function calculateTotal() {
-            updateActiveCardStyles();
-
-            const fabricEl = document.querySelector('input[name="fabric_type"]:checked');
-            calcState.fabricKey = fabricEl ? fabricEl.value : 'matte';
-
-            const profileEl = document.querySelector('input[name="profile_type"]:checked');
-            calcState.profileKey = profileEl ? profileEl.value : 'classic';
-
-            calcState.chandelier = document.getElementById('has-chandelier').checked;
-
-            calcState.ledType = document.getElementById('led-type').value;
-            const ledTempEl = document.querySelector('input[name="led_temp"]:checked');
-            calcState.ledTemp = ledTempEl ? ledTempEl.value : 'neutral';
-
-            calcState.optCornice = document.getElementById('opt-cornice').checked;
-            calcState.optMask = document.getElementById('opt-mask').checked;
-            calcState.optVent = document.getElementById('opt-vent').checked;
-            calcState.optFire = document.getElementById('opt-fire').checked;
-
-            let total = 0;
-            let breakdown = [];
-
-            const fabricObj = PRICES.fabrics[calcState.fabricKey] || PRICES.fabrics.matte;
-            const fabricCost = calcState.area * fabricObj.price;
-            if (calcState.area > 0) {
-                total += fabricCost;
-                breakdown.push({
-                    name: `Полотно: ${fabricObj.name} (${calcState.area} м²)`,
-                    cost: fabricCost
-                });
-            }
-
-            const profileObj = PRICES.profiles[calcState.profileKey] || PRICES.profiles.classic;
-            const profileCost = calcState.perimeter * profileObj.price;
-            if (profileCost > 0 && calcState.perimeter > 0) {
-                total += profileCost;
-                breakdown.push({
-                    name: `Профиль: ${profileObj.name} (${calcState.perimeter} м.п.)`,
-                    cost: profileCost
-                });
-            }
-
-            if (calcState.corners > 0) {
-                const cornerCost = calcState.corners * PRICES.extras.corner;
-                total += cornerCost;
-                breakdown.push({
-                    name: `Дополнительные углы (${calcState.corners} шт.)`,
-                    cost: cornerCost
-                });
-            }
-
-            if (calcState.pipes > 0) {
-                const pipeCost = calcState.pipes * PRICES.extras.pipe;
-                total += pipeCost;
-                breakdown.push({
-                    name: `Обвод труб отопления (${calcState.pipes} шт.)`,
-                    cost: pipeCost
-                });
-            }
-
-            if (calcState.lamps.gx53 > 0) {
-                const gxCost = calcState.lamps.gx53 * PRICES.lamps.gx53.price;
-                total += gxCost;
-                breakdown.push({
-                    name: `Споты GX53 LED со стойкой (${calcState.lamps.gx53} шт.)`,
-                    cost: gxCost
-                });
-            }
-
-            if (calcState.lamps.tube > 0) {
-                const tubeCost = calcState.lamps.tube * PRICES.lamps.tube.price;
-                total += tubeCost;
-                breakdown.push({
-                    name: `Накладные споты-тубусы (${calcState.lamps.tube} шт.)`,
-                    cost: tubeCost
-                });
-            }
-
-            if (calcState.lamps.track > 0) {
-                const trackCost = calcState.lamps.track * PRICES.lamps.track.price;
-                total += trackCost;
-                breakdown.push({
-                    name: `Встраиваемый трек + монтаж (${calcState.lamps.track} м)`,
-                    cost: trackCost
-                });
-            }
-
-            if (calcState.chandelier) {
-                total += PRICES.extras.chandelier;
-                breakdown.push({
-                    name: 'Закладная платформа + монтаж люстры',
-                    cost: PRICES.extras.chandelier
-                });
-            }
-
-            if (calcState.ledEnabled && calcState.ledLength > 0) {
-                const ledObj = PRICES.led[calcState.ledType] || PRICES.led.single;
-                const ledCost = calcState.ledLength * ledObj.price;
-                total += ledCost;
-                breakdown.push({
-                    name: `${ledObj.name} (${calcState.ledLength} м) + БП`,
-                    cost: ledCost
-                });
-            }
-
-            if (calcState.optCornice) {
-                total += PRICES.extras.cornice;
-                breakdown.push({
-                    name: 'Ниша под скрытый карниз ПК-5 (3 м)',
-                    cost: PRICES.extras.cornice
-                });
-            }
-
-            if (calcState.optMask && calcState.perimeter > 0) {
-                const maskCost = calcState.perimeter * PRICES.extras.mask;
-                total += maskCost;
-                breakdown.push({
-                    name: `Маскировочная лента (${calcState.perimeter} м)`,
-                    cost: maskCost
-                });
-            }
-
-            if (calcState.optVent) {
-                total += PRICES.extras.vent;
-                breakdown.push({
-                    name: 'Вывод вентиляции / вытяжки с термокольцом',
-                    cost: PRICES.extras.vent
-                });
-            }
-
-            if (calcState.optFire) {
-                total += PRICES.extras.fire;
-                breakdown.push({
-                    name: 'Монтаж платформы пожарного датчика',
-                    cost: PRICES.extras.fire
-                });
-            }
-
-            calcState.baseTotalPrice = total;
-
-            let discount = 0;
-            let finalTotal = total;
-            const badgeInfo = document.getElementById('payment-badge-info');
-
-            if (calcState.paymentMethod === 'master' && activeMasterSession && activeMasterSession.role === 'master') {
-                const pct = activeMasterSession.discount || 0;
-                discount = Math.round(total * (pct / 100));
-                finalTotal = total - discount;
-                if (discount > 0) {
-                    breakdown.push({
-                        name: `Скидка для мастера: ${activeMasterSession.owner} (${pct}%)`,
-                        cost: -discount
-                    });
-                }
-                if (badgeInfo) {
-                    badgeInfo.innerHTML = `
-                        <span>Скидка для мастера (${activeMasterSession.owner}, ${pct}%):</span>
-                        <span class="font-extrabold text-emerald-300">−${discount.toLocaleString('ru-RU')} ₽</span>
-                    `;
-                }
-            } else if (calcState.paymentMethod === 'cash') {
-                discount = Math.round(total * 0.10);
-                finalTotal = total - discount;
-                if (discount > 0) {
-                    breakdown.push({
-                        name: 'Скидка 10% (при оплате наличными)',
-                        cost: -discount
-                    });
-                }
-                if (badgeInfo) {
-                    badgeInfo.innerHTML = `
-                        <span>Скидка за наличный расчет (10%):</span>
-                        <span id="cash-discount-val" class="font-extrabold text-amber-300">−${discount.toLocaleString('ru-RU')} ₽</span>
-                    `;
-                }
-            } else {
-                const perMonth = finalTotal > 0 ? Math.round(finalTotal / 6) : 0;
-                if (badgeInfo) {
-                    badgeInfo.innerHTML = `
-                        <span>Платеж в рассрочку 0%:</span>
-                        <span class="font-extrabold text-emerald-300">от ${perMonth.toLocaleString('ru-RU')} ₽/мес. на 6 мес.</span>
-                    `;
-                }
-            }
-
-            calcState.totalPrice = finalTotal;
-            calcState.discountAmount = discount;
-            calcState.breakdown = breakdown;
-
-            const totalEl = document.getElementById('total-price');
-            const perM2El = document.getElementById('price-per-m2');
-            const breakdownEl = document.getElementById('breakdown-list');
-
-            if (total === 0) {
-                totalEl.textContent = '0 ₽';
-                perM2El.textContent = '0 ₽ / м²';
-                breakdownEl.innerHTML = `
-                    <div class="py-4 text-center text-stone-400 italic">
-                        Укажите площадь или выберите светильники для начала расчёта
-                    </div>
-                `;
-            } else {
-                if ((calcState.paymentMethod === 'cash' || calcState.paymentMethod === 'master') && discount > 0) {
-                    totalEl.innerHTML = `
-                        <div class="flex items-center justify-center gap-2">
-                            <span class="line-through text-stone-500 text-lg font-normal">${total.toLocaleString('ru-RU')} ₽</span>
-                            <span>${finalTotal.toLocaleString('ru-RU')} ₽</span>
-                        </div>
-                    `;
-                } else {
-                    totalEl.textContent = `${finalTotal.toLocaleString('ru-RU')} ₽`;
-                }
-
-                const perM2 = calcState.area > 0 ? Math.round(finalTotal / calcState.area) : 0;
-                perM2El.textContent = perM2 > 0 ? `≈ ${perM2.toLocaleString('ru-RU')} ₽ / м²` : '—';
-
-                breakdownEl.innerHTML = breakdown.map(item => `
-                    <div class="flex justify-between items-center text-xs py-1 border-b border-stone-800/60 last:border-0">
-                        <span class="${item.cost < 0 ? 'text-emerald-300 font-bold' : 'text-stone-300'} pr-2">${item.name}</span>
-                        <span class="font-bold text-emerald-400 whitespace-nowrap">${item.cost > 0 ? item.cost.toLocaleString('ru-RU') + ' ₽' : '−' + Math.abs(item.cost).toLocaleString('ru-RU') + ' ₽'}</span>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function updateHeroQuickPrice() {
-            const area = 18;
-            const cost = (area * PRICES.fabrics.matte.price) + (6 * PRICES.lamps.gx53.price);
-            const el = document.getElementById('hero-quick-price');
-            if (el) el.textContent = `${cost.toLocaleString('ru-RU')} ₽`;
-        }
-
-        // ================= WHATSAPP ОТПРАВКА =================
-        const WHATSAPP_PHONE = '79298966736';
-
-        function openWhatsAppUrl(msg) {
-            const encodedMsg = encodeURIComponent(msg);
-            const waUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodedMsg}`;
-
-            try {
-                const tempLink = document.createElement('a');
-                tempLink.href = waUrl;
-                tempLink.target = '_blank';
-                tempLink.rel = 'noopener noreferrer';
-                document.body.appendChild(tempLink);
-                tempLink.click();
-                document.body.removeChild(tempLink);
-            } catch (err) {
-                window.location.href = waUrl;
-            }
-        }
-
-        function requestMeasurementInWhatsApp() {
-            let msg = 'Здравствуйте! Хочу вызвать замерщика от компании Decarat на бесплатный замер потолков.';
-            if (calcState.totalPrice > 0) {
-                msg += ` Предварительный расчет на сайте: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽ (Площадь: ${calcState.area} м²). Когда мастер сможет приехать?`;
-            } else {
-                msg += ' Подскажите, когда мастер сможет приехать с образцами полотен и светильников?';
-            }
-            openWhatsAppUrl(msg);
-        }
-
-        function sendCalculationToWhatsApp() {
-            if (calcState.totalPrice === 0) {
-                requestMeasurementInWhatsApp();
-                return;
-            }
-
-            let msg = `Здравствуйте! Рассчитал(а) смету натяжного потолка на сайте компании Decarat:\n\n`;
-            if (activeMasterSession && activeMasterSession.role === 'master') {
-                msg += `🛠 Мастер: ${activeMasterSession.owner} (ключ: ${activeMasterSession.code})\n`;
-            }
-            msg += `📐 Площадь: ${calcState.area} м²\n`;
-            msg += `📏 Периметр: ${calcState.perimeter} м.п.\n`;
-            msg += `✨ Полотно: ${PRICES.fabrics[calcState.fabricKey]?.name || 'Матовое'}\n`;
-            msg += `🚪 Профиль: ${PRICES.profiles[calcState.profileKey]?.name || 'Классический'}\n`;
-
-            if (calcState.lamps.gx53 > 0) msg += `💡 Споты GX53: ${calcState.lamps.gx53} шт.\n`;
-            if (calcState.lamps.tube > 0) msg += `💡 Накладные тубусы: ${calcState.lamps.tube} шт.\n`;
-            if (calcState.lamps.track > 0) msg += `💡 Трековые шины: ${calcState.lamps.track} м\n`;
-            if (calcState.chandelier) msg += `🌟 Центральная люстра: да\n`;
-
-            if (calcState.ledEnabled && calcState.ledLength > 0) {
-                msg += `🌈 LED-лента: ${calcState.ledLength} м (${PRICES.led[calcState.ledType]?.name || 'Одноцветная'})\n`;
-            }
-
-            if (calcState.pipes > 0) msg += `🔧 Обвод труб: ${calcState.pipes} шт.\n`;
-            if (calcState.corners > 0) msg += `📐 Доп. углы: ${calcState.corners} шт.\n`;
-            if (calcState.optCornice) msg += `🪟 Скрытый карниз ПК-5: да\n`;
-            if (calcState.optMask) msg += `➖ Маскировочная лента: да\n`;
-
-            if (calcState.paymentMethod === 'master' && activeMasterSession && activeMasterSession.role === 'master') {
-                msg += `\n🛠 Условия: Скидка для мастера ${activeMasterSession.owner} (${activeMasterSession.discount}%)\n`;
-                if (calcState.discountAmount > 0) {
-                    msg += `🎁 Скидка мастера: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
-                }
-            } else if (calcState.paymentMethod === 'cash') {
-                msg += `\n💳 Способ оплаты: Наличные (со скидкой 10%)\n`;
-                if (calcState.discountAmount > 0) {
-                    msg += `🎁 Скидка 10%: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
-                }
-            } else {
-                const perM = Math.round(calcState.totalPrice / 6);
-                msg += `\n💳 Способ оплаты: Рассрочка 0% без переплат\n`;
-                msg += `📆 Платеж: от ${perM.toLocaleString('ru-RU')} ₽/мес (на 6 месяцев)\n`;
-            }
-
-            msg += `\n💰 ИТОГОВАЯ СТОИМОСТЬ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n\n`;
-            msg += `Хочу подтвердить замер и проконсультироваться с мастером.`;
-
-            openWhatsAppUrl(msg);
-        }
-
-        function copyEstimateToClipboard() {
-            if (calcState.totalPrice === 0) {
-                showToast('Сначала заполните параметры калькулятора');
-                return;
-            }
-
-            let paymentLabel = 'Рассрочка 0%';
-            if (calcState.paymentMethod === 'master' && activeMasterSession && activeMasterSession.role === 'master') {
-                paymentLabel = `Скидка для мастера: ${activeMasterSession.owner} (${activeMasterSession.discount}%)`;
-            } else if (calcState.paymentMethod === 'cash') {
-                paymentLabel = 'Оплата наличными (Скидка 10%)';
-            }
-
-            let text = `Смета натяжного потолка от компании Decarat:\n`;
-            if (activeMasterSession && activeMasterSession.role === 'master') {
-                text += `Мастер: ${activeMasterSession.owner} (ключ ${activeMasterSession.code})\n`;
-            }
-            text += `Площадь: ${calcState.area} м² | Периметр: ${calcState.perimeter} м.п.\n`;
-            text += `Полотно: ${PRICES.fabrics[calcState.fabricKey]?.name}\n`;
-            text += `Условия: ${paymentLabel}\n`;
-            text += `------------------------------------\n`;
-            calcState.breakdown.forEach(item => {
-                const sign = item.cost < 0 ? '−' : '';
-                text += `• ${item.name}: ${sign}${Math.abs(item.cost).toLocaleString('ru-RU')} ₽\n`;
-            });
-            text += `------------------------------------\n`;
-            text += `ИТОГО К ОПЛАТЕ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n`;
-            text += `Телефон для связи: +7 (929) 896-67-36`;
-
-            const tempInput = document.createElement('textarea');
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            showToast('Смета скопирована в буфер обмена!');
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast-message');
-            const textEl = document.getElementById('toast-text');
-            textEl.textContent = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-    </script>
-</body>
-</html>
