@@ -164,6 +164,23 @@
                 <a href="#lights" class="hover:text-emerald-600 transition">Светильники</a>
                 <a href="#contacts" class="hover:text-emerald-600 transition">Контакты</a>
             </div>
+            <!-- Ссылки меню -->
+            <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-stone-600">
+                <a href="#calculator" class="hover:text-emerald-600 transition">Калькулятор</a>
+                <a href="#catalog" onclick="scrollToTextures(event)" class="hover:text-emerald-600 transition">Фактуры полотен</a>
+                <a href="#lights" class="hover:text-emerald-600 transition">Светильники</a>
+                <a href="#contacts" class="hover:text-emerald-600 transition">Контакты</a>
+            </div>
+
+            <!-- Кнопка выхода -->
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="lockSiteSession()" class="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-rose-50 text-stone-700 hover:text-rose-600 border border-stone-200 hover:border-rose-200 text-xs font-bold transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span>Выйти</span>
+                </button>
+            </div>
+        </div>
+    </nav>
         </div>
     </nav>
 
