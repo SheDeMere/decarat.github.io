@@ -139,7 +139,7 @@
             </form>
 
             <div class="pt-3 border-t border-stone-800 flex items-center justify-between text-[11px] text-stone-500">
-              
+                <span>Демо-ключ: <strong class="text-stone-300">DECARAT2026</strong></span>
                 <button type="button" onclick="openAdminModal()" class="text-emerald-400 hover:underline font-semibold">Вход для владельца</button>
             </div>
         </div>
@@ -658,9 +658,9 @@
                         </div>
                     </div>
 
-                    <!-- Выбор способа оплаты: Наличные со скидкой 10% или Рассрочка 0% -->
+                    <!-- Выбор способа оплаты: Наличные (-10%), Рассрочка 0% и Персональная скидка мастера -->
                     <div class="pt-2 pb-4 border-t border-stone-800 space-y-2.5">
-                        <label class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">Способ оплаты:</label>
+                        <label class="text-[11px] font-bold uppercase tracking-wider text-stone-400 block">Способ оплаты и скидка:</label>
                         <div class="grid grid-cols-2 gap-2">
                             <button type="button" id="pay-cash-btn" onclick="setPaymentMethod('cash')" class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative">
                                 <span class="absolute -top-2 right-2 text-[9px] font-extrabold bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-950 px-1.5 py-0.5 rounded-full shadow-sm">−10%</span>
@@ -670,6 +670,12 @@
                             <button type="button" id="pay-install-btn" onclick="setPaymentMethod('installment')" class="p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition">
                                 <span class="block text-xs font-bold">💳 Рассрочка</span>
                                 <span class="block text-[10px] text-stone-400 mt-0.5">0% без переплат</span>
+                            </button>
+                            <!-- Персональная кнопка скидки для мастера по ключу -->
+                            <button type="button" id="pay-master-btn" onclick="setPaymentMethod('master')" class="col-span-2 hidden p-2.5 rounded-xl border border-amber-500/70 bg-amber-500/15 hover:bg-amber-500/25 text-white text-left transition relative">
+                                <span id="master-btn-badge" class="absolute -top-2 right-2 text-[9px] font-extrabold bg-gradient-to-r from-amber-400 to-orange-500 text-stone-950 px-2 py-0.5 rounded-full shadow-sm">−0%</span>
+                                <span id="master-btn-title" class="block text-xs font-bold text-amber-200">🛠 Скидка для мастера</span>
+                                <span id="master-btn-subtitle" class="block text-[10px] text-amber-300/90 font-semibold mt-0.5">Персональная скидка по ключу</span>
                             </button>
                         </div>
                         <div id="payment-badge-info" class="p-2 rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-[11px] text-emerald-300 flex items-center justify-between">
@@ -842,7 +848,7 @@
             <div class="flex items-center justify-between pb-4 border-b border-stone-200 mb-6">
                 <div>
                     <h3 class="text-xl font-bold text-stone-900">Управление сайтом Decarat</h3>
-                    <p class="text-xs text-stone-500">Настройка расценок и выдача персональных ключей доступа</p>
+                    <p class="text-xs text-stone-500">Настройка расценок, персональных скидок мастеров и ключей доступа</p>
                 </div>
                 <button type="button" onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center font-bold text-sm transition">
                     ✕
@@ -992,18 +998,28 @@
                 </div>
 
                 <div class="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 space-y-3">
-                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Создать новый ключ доступа</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <input type="text" id="new-key-owner" placeholder="Имя клиента или партнёра" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <input type="text" id="new-key-code" placeholder="Код (например: VIP2026)" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs uppercase font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Создать новый ключ доступа с персональной скидкой</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                        <div class="sm:col-span-5">
+                            <label class="block text-[10px] font-bold text-stone-600 mb-1">Имя мастера / клиента:</label>
+                            <input type="text" id="new-key-owner" placeholder="Например: Али (мастер)" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="sm:col-span-4">
+                            <label class="block text-[10px] font-bold text-stone-600 mb-1">Пароль / Ключ входа:</label>
+                            <input type="text" id="new-key-code" placeholder="Например: ALI2026" class="w-full px-3 py-2 bg-white border border-stone-300 rounded-xl text-xs uppercase font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label class="block text-[10px] font-bold text-emerald-800 mb-1">Скидка мастера (%):</label>
+                            <input type="number" id="new-key-discount" value="15" min="0" max="90" step="1" placeholder="15" class="w-full px-3 py-2 bg-white border border-emerald-400 rounded-xl text-xs font-bold text-emerald-800 text-center focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
                     </div>
                     <button type="button" onclick="createNewAccessKey()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-sm">
-                        + Создать ключ и сохранить в облако
+                        + Создать ключ, закрепить скидку и сохранить в облако
                     </button>
                 </div>
 
                 <div class="space-y-2">
-                    <span class="text-xs font-bold text-stone-500 uppercase tracking-wider block">Активные пользователи и ключи доступа:</span>
+                    <span class="text-xs font-bold text-stone-500 uppercase tracking-wider block">Активные пользователи, ключи и закреплённые скидки:</span>
                     <div id="access-keys-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
                         <!-- Рендерится через JS -->
                     </div>
@@ -1096,6 +1112,16 @@
                         }
                         if (Array.isArray(data.allowedKeys)) {
                             ALLOWED_ACCESS_KEYS = data.allowedKeys;
+                            // Обновляем данные активного мастера, если он уже авторизован
+                            if (activeMasterSession && activeMasterSession.code) {
+                                const updatedMaster = ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === activeMasterSession.code.toUpperCase());
+                                if (updatedMaster) {
+                                    applyMasterDiscountProfile(updatedMaster, false);
+                                } else {
+                                    activeMasterSession = null;
+                                    updateMasterPaymentButtonUI();
+                                }
+                            }
                             if (typeof renderAccessKeysList === 'function') {
                                 renderAccessKeysList();
                             }
@@ -1161,9 +1187,11 @@
 
         let isAccessRestricted = true;
         let isSessionUnlocked = false;
+        let activeMasterSession = null; // { code, owner, discount }
+
         let ALLOWED_ACCESS_KEYS = [
-            { code: 'DECARAT2026', owner: 'Основной доступ Decarat', created: 'Активен' },
-            { code: 'VIP-CLIENT', owner: 'VIP-клиент (тестовый)', created: 'Активен' }
+            { code: 'DECARAT2026', owner: 'Основной доступ Decarat', discount: 10, created: 'Активен' },
+            { code: 'VIP-CLIENT', owner: 'VIP-клиент (тестовый)', discount: 15, created: 'Активен' }
         ];
 
         let calcState = {
@@ -1187,7 +1215,7 @@
             optMask: false,
             optVent: false,
             optFire: false,
-            paymentMethod: 'cash',
+            paymentMethod: 'cash', // 'cash' (-10%), 'installment' (0%), 'master' (-N%)
             baseTotalPrice: 0,
             totalPrice: 0,
             discountAmount: 0,
@@ -1202,23 +1230,61 @@
             updateHeroQuickPrice();
         });
 
-        // ================= КОНТРОЛЬ ДОСТУПА ПО КЛЮЧАМ И ССЫЛКАМ =================
+        // ================= КОНТРОЛЬ ДОСТУПА ПО КЛЮЧАМ И ПЕРСОНАЛЬНОЙ СКИДКЕ =================
+        function applyMasterDiscountProfile(keyItem, autoSelectMethod = true) {
+            if (!keyItem) return;
+            const discountVal = Math.max(0, Math.min(90, parseFloat(keyItem.discount) || 0));
+            activeMasterSession = {
+                code: keyItem.code,
+                owner: keyItem.owner || 'Мастер',
+                discount: discountVal
+            };
+            updateMasterPaymentButtonUI();
+            if (autoSelectMethod && discountVal > 0) {
+                setPaymentMethod('master');
+            } else {
+                calculateTotal();
+            }
+        }
+
+        function updateMasterPaymentButtonUI() {
+            const masterBtn = document.getElementById('pay-master-btn');
+            if (!masterBtn) return;
+
+            if (activeMasterSession && activeMasterSession.discount > 0) {
+                masterBtn.classList.remove('hidden');
+                document.getElementById('master-btn-badge').textContent = `−${activeMasterSession.discount}%`;
+                document.getElementById('master-btn-title').textContent = `🛠 Скидка для мастера: ${activeMasterSession.owner}`;
+                document.getElementById('master-btn-subtitle').textContent = `Персональная скидка ${activeMasterSession.discount}% (ключ ${activeMasterSession.code})`;
+            } else {
+                masterBtn.classList.add('hidden');
+                if (calcState.paymentMethod === 'master') {
+                    calcState.paymentMethod = 'cash';
+                }
+            }
+        }
+
         function initAccessControl() {
             const params = new URLSearchParams(window.location.search);
             const urlKey = (params.get('access') || params.get('key') || '').trim().toUpperCase();
+
+            if (urlKey) {
+                const foundByUrl = ALLOWED_ACCESS_KEYS.find(item => item.code.toUpperCase() === urlKey);
+                if (foundByUrl) {
+                    isSessionUnlocked = true;
+                    unlockSiteUI();
+                    applyMasterDiscountProfile(foundByUrl, true);
+                    showToast(`Доступ разрешён: ${foundByUrl.owner} (скидка ${foundByUrl.discount || 0}%)`);
+                    return;
+                }
+            }
 
             if (!isAccessRestricted) {
                 unlockSiteUI();
                 return;
             }
 
-            if (urlKey && ALLOWED_ACCESS_KEYS.some(item => item.code.toUpperCase() === urlKey)) {
-                isSessionUnlocked = true;
-                unlockSiteUI();
-                showToast(`Доступ разрешён по приглашению (${urlKey})`);
-            } else {
-                lockSiteUI();
-            }
+            lockSiteUI();
         }
 
         function verifyAccessCode(e) {
@@ -1231,7 +1297,8 @@
                 isSessionUnlocked = true;
                 errorEl.classList.add('hidden');
                 unlockSiteUI();
-                showToast(`Добро пожаловать! Доступ открыт (${found.owner})`);
+                applyMasterDiscountProfile(found, true);
+                showToast(`Добро пожаловать, ${found.owner}! Закреплена скидка ${found.discount || 0}%`);
             } else {
                 errorEl.classList.remove('hidden');
             }
@@ -1249,6 +1316,9 @@
 
         function lockSiteSession() {
             isSessionUnlocked = false;
+            activeMasterSession = null;
+            updateMasterPaymentButtonUI();
+            setPaymentMethod('cash');
             document.getElementById('access-code-input').value = '';
             document.getElementById('access-code-error').classList.add('hidden');
             lockSiteUI();
@@ -1291,8 +1361,13 @@
         function createNewAccessKey() {
             const ownerInput = document.getElementById('new-key-owner');
             const codeInput = document.getElementById('new-key-code');
-            const owner = ownerInput.value.trim() || 'Клиент / Партнёр';
+            const discountInput = document.getElementById('new-key-discount');
+
+            const owner = ownerInput.value.trim() || 'Мастер';
             let code = codeInput.value.trim().toUpperCase().replace(/\s+/g, '-');
+            let discount = parseFloat(discountInput.value);
+            if (isNaN(discount) || discount < 0) discount = 0;
+            if (discount > 90) discount = 90;
 
             if (!code) {
                 code = 'DEC-' + Math.floor(1000 + Math.random() * 9000);
@@ -1303,16 +1378,21 @@
                 return;
             }
 
-            ALLOWED_ACCESS_KEYS.unshift({ code, owner, created: 'Активен' });
+            ALLOWED_ACCESS_KEYS.unshift({ code, owner, discount, created: 'Активен' });
             ownerInput.value = '';
             codeInput.value = '';
             renderAccessKeysList();
             if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(`Ключ ${code} успешно создан!`);
+            showToast(`Ключ ${code} для «${owner}» со скидкой ${discount}% создан!`);
         }
 
         function deleteAccessKey(code) {
             ALLOWED_ACCESS_KEYS = ALLOWED_ACCESS_KEYS.filter(k => k.code !== code);
+            if (activeMasterSession && activeMasterSession.code === code) {
+                activeMasterSession = null;
+                updateMasterPaymentButtonUI();
+                setPaymentMethod('cash');
+            }
             renderAccessKeysList();
             if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
             showToast(`Доступ по ключу ${code} отозван`);
@@ -1344,9 +1424,10 @@
             container.innerHTML = ALLOWED_ACCESS_KEYS.map(item => `
                 <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
                     <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
                             <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-mono font-bold text-xs">${item.code}</span>
                             <span class="text-xs font-bold text-stone-800">${item.owner}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-extrabold text-[11px]">Скидка ${item.discount || 0}%</span>
                         </div>
                         <span class="text-[10px] text-stone-400 block mt-0.5">Статус: ${item.created}</span>
                     </div>
@@ -1646,14 +1727,25 @@
             calcState.paymentMethod = method;
             const cashBtn = document.getElementById('pay-cash-btn');
             const installBtn = document.getElementById('pay-install-btn');
-            
-            if (method === 'cash') {
-                cashBtn.className = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative";
-                installBtn.className = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition";
-            } else {
-                installBtn.className = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative";
-                cashBtn.className = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition relative";
+            const masterBtn = document.getElementById('pay-master-btn');
+
+            const inactiveBase = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition relative";
+            const activeEmerald = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition relative";
+
+            cashBtn.className = inactiveBase;
+            installBtn.className = "p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-stone-600 text-stone-300 text-left transition";
+            if (masterBtn && !masterBtn.classList.contains('hidden')) {
+                masterBtn.className = "col-span-2 p-2.5 rounded-xl border border-stone-700 bg-stone-850 hover:border-amber-500/60 text-stone-300 text-left transition relative";
             }
+
+            if (method === 'cash') {
+                cashBtn.className = activeEmerald;
+            } else if (method === 'installment') {
+                installBtn.className = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/20 text-white text-left transition";
+            } else if (method === 'master' && masterBtn && !masterBtn.classList.contains('hidden')) {
+                masterBtn.className = "col-span-2 p-2.5 rounded-xl border border-amber-400 bg-amber-500/25 text-white text-left transition relative shadow-md shadow-amber-950/30";
+            }
+
             calculateTotal();
         }
 
@@ -1810,7 +1902,23 @@
             let finalTotal = total;
             const badgeInfo = document.getElementById('payment-badge-info');
 
-            if (calcState.paymentMethod === 'cash') {
+            if (calcState.paymentMethod === 'master' && activeMasterSession && activeMasterSession.discount > 0) {
+                const pct = activeMasterSession.discount;
+                discount = Math.round(total * (pct / 100));
+                finalTotal = total - discount;
+                if (discount > 0) {
+                    breakdown.push({
+                        name: `Скидка для мастера: ${activeMasterSession.owner} (${pct}%)`,
+                        cost: -discount
+                    });
+                }
+                if (badgeInfo) {
+                    badgeInfo.innerHTML = `
+                        <span>Скидка для мастера (${activeMasterSession.owner}, ${pct}%):</span>
+                        <span class="font-extrabold text-amber-300">−${discount.toLocaleString('ru-RU')} ₽</span>
+                    `;
+                }
+            } else if (calcState.paymentMethod === 'cash') {
                 discount = Math.round(total * 0.10);
                 finalTotal = total - discount;
                 if (discount > 0) {
@@ -1852,7 +1960,7 @@
                     </div>
                 `;
             } else {
-                if (calcState.paymentMethod === 'cash' && discount > 0) {
+                if ((calcState.paymentMethod === 'cash' || calcState.paymentMethod === 'master') && discount > 0) {
                     totalEl.innerHTML = `
                         <div class="flex items-center justify-center gap-2">
                             <span class="line-through text-stone-500 text-lg font-normal">${total.toLocaleString('ru-RU')} ₽</span>
@@ -1919,6 +2027,9 @@
             }
 
             let msg = `Здравствуйте! Рассчитал(а) смету натяжного потолка на сайте компании Decarat:\n\n`;
+            if (activeMasterSession) {
+                msg += `🛠 Мастер / Партнёр: ${activeMasterSession.owner} (ключ: ${activeMasterSession.code})\n`;
+            }
             msg += `📐 Площадь: ${calcState.area} м²\n`;
             msg += `📏 Периметр: ${calcState.perimeter} м.п.\n`;
             msg += `✨ Полотно: ${PRICES.fabrics[calcState.fabricKey]?.name || 'Матовое'}\n`;
@@ -1938,11 +2049,19 @@
             if (calcState.optCornice) msg += `🪟 Скрытый карниз ПК-5: да\n`;
             if (calcState.optMask) msg += `➖ Маскировочная лента: да\n`;
 
-            msg += `\n💳 Способ оплаты: ${calcState.paymentMethod === 'cash' ? 'Наличные (со скидкой 10%)' : 'Рассрочка 0% без переплат'}\n`;
-            if (calcState.paymentMethod === 'cash' && calcState.discountAmount > 0) {
-                msg += `🎁 Скидка 10%: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
-            } else if (calcState.paymentMethod === 'installment') {
+            if (calcState.paymentMethod === 'master' && activeMasterSession) {
+                msg += `\n🛠 Условия: Скидка для мастера ${activeMasterSession.owner} (${activeMasterSession.discount}%)\n`;
+                if (calcState.discountAmount > 0) {
+                    msg += `🎁 Персональная скидка: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
+                }
+            } else if (calcState.paymentMethod === 'cash') {
+                msg += `\n💳 Способ оплаты: Наличные (со скидкой 10%)\n`;
+                if (calcState.discountAmount > 0) {
+                    msg += `🎁 Скидка 10%: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
+                }
+            } else {
                 const perM = Math.round(calcState.totalPrice / 6);
+                msg += `\n💳 Способ оплаты: Рассрочка 0% без переплат\n`;
                 msg += `📆 Платеж: от ${perM.toLocaleString('ru-RU')} ₽/мес (на 6 месяцев)\n`;
             }
 
@@ -1958,10 +2077,20 @@
                 return;
             }
 
+            let paymentLabel = 'Рассрочка 0%';
+            if (calcState.paymentMethod === 'master' && activeMasterSession) {
+                paymentLabel = `Скидка для мастера: ${activeMasterSession.owner} (${activeMasterSession.discount}%)`;
+            } else if (calcState.paymentMethod === 'cash') {
+                paymentLabel = 'Оплата наличными (Скидка 10%)';
+            }
+
             let text = `Смета натяжного потолка от компании Decarat:\n`;
+            if (activeMasterSession) {
+                text += `Мастер: ${activeMasterSession.owner} (ключ ${activeMasterSession.code})\n`;
+            }
             text += `Площадь: ${calcState.area} м² | Периметр: ${calcState.perimeter} м.п.\n`;
             text += `Полотно: ${PRICES.fabrics[calcState.fabricKey]?.name}\n`;
-            text += `Способ оплаты: ${calcState.paymentMethod === 'cash' ? 'Оплата наличными (Скидка 10%)' : 'Рассрочка 0%'}\n`;
+            text += `Условия: ${paymentLabel}\n`;
             text += `------------------------------------\n`;
             calcState.breakdown.forEach(item => {
                 const sign = item.cost < 0 ? '−' : '';
