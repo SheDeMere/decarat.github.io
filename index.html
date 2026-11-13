@@ -2566,6 +2566,15 @@
             } catch (e) {}
         }
 
+        function resetLocalAuthCache() {
+            clearSavedAuthCache();
+            const inputEl = document.getElementById('access-code-input');
+            if (inputEl) inputEl.value = '';
+            const errorEl = document.getElementById('access-code-error');
+            if (errorEl) errorEl.classList.add('hidden');
+            showToast('Кэш авторизации сброшен');
+        }
+
         function lockSiteUI() {
             const gate = document.getElementById('access-gate-overlay');
             if (gate) {
@@ -2670,16 +2679,20 @@
             clearSavedAuthCache();
             window.activeMasterSession = null;
             window.isSessionUnlocked = false;
+            window.isAdminLoggedIn = false;
             updateMasterPaymentButtonUI();
-            if (window.isAccessRestricted && !window.isAdminLoggedIn) {
+            updateLogoutButtonVisibility();
+            if (window.isAccessRestricted) {
                 lockSiteUI();
+            } else {
+                window.location.reload();
             }
         }
 
         function updateLogoutButtonVisibility() {
             const logoutBtn = document.getElementById('header-logout-btn');
             if (!logoutBtn) return;
-            if (window.isAccessRestricted) {
+            if (window.isAccessRestricted && window.isSessionUnlocked) {
                 logoutBtn.classList.remove('hidden');
             } else {
                 logoutBtn.classList.add('hidden');
@@ -2837,10 +2850,14 @@
 
             if (entered === getStoredAdminPin()) {
                 window.isAdminLoggedIn = true;
+                window.isSessionUnlocked = true;
                 if (errEl) errEl.classList.add('hidden');
+                unlockSiteUI();
+                updateLogoutButtonVisibility();
                 document.getElementById('admin-auth-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
                 refreshAdminDashboardData();
+                showToast('Добро пожаловать в панель управления!');
             } else {
                 if (errEl) errEl.classList.remove('hidden');
             }
@@ -4584,15 +4601,18 @@
                             }
                         }
                         if (typeof data.isAccessRestricted === 'boolean') {
-                            window.isAccessRestricted = data.isAccessRestricted;
-                            const lockCheckbox = document.getElementById('toggle-access-lock');
-                            if (lockCheckbox) lockCheckbox.checked = window.isAccessRestricted;
-                            updateLogoutButtonVisibility();
-                            if (!window.isAccessRestricted) {
-                                unlockSiteUI();
-                            }
-                        }
-                        if (Array.isArray(data.allowedKeys)) {
+                    window.isAccessRestricted = data.isAccessRestricted;
+                    const lockCheckbox = document.getElementById('toggle-access-lock');
+                    if (lockCheckbox) lockCheckbox.checked = window.isAccessRestricted;
+                    updateLogoutButtonVisibility();
+                    
+                    if (window.isAccessRestricted && !window.isSessionUnlocked && !window.isAdminLoggedIn) {
+                        lockSiteUI();
+                    } else if (!window.isAccessRestricted) {
+                        unlockSiteUI();
+                    }
+                }
+                if (Array.isArray(data.allowedKeys)) {
                             window.ALLOWED_ACCESS_KEYS = data.allowedKeys;
                             saveKeysListToCache();
 
