@@ -2309,6 +2309,14 @@
         let isPerimeterManuallyEdited = false;
         window.activeLampCategory = null;
 
+        // Ensure access restriction is checked immediately on load before rendering UI
+        try {
+            const rawLocked = localStorage.getItem('decarat_access_locked_v1');
+            if (rawLocked !== null) {
+                window.isAccessRestricted = rawLocked === 'true';
+            }
+        } catch (e) {}
+
         function syncVariantBasePricesWithAdmin() {
             ['gx53', 'tube', 'track'].forEach(catKey => {
                 const cat = LAMP_VARIANTS_CATALOG[catKey];
@@ -2701,6 +2709,9 @@
 
         function toggleAccessRestriction(enabled) {
             window.isAccessRestricted = Boolean(enabled);
+            try {
+                localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted));
+            } catch (e) {}
             updateLogoutButtonVisibility();
             if (!window.isAccessRestricted) {
                 unlockSiteUI();
@@ -4601,18 +4612,24 @@
                             }
                         }
                         if (typeof data.isAccessRestricted === 'boolean') {
-                    window.isAccessRestricted = data.isAccessRestricted;
-                    const lockCheckbox = document.getElementById('toggle-access-lock');
-                    if (lockCheckbox) lockCheckbox.checked = window.isAccessRestricted;
-                    updateLogoutButtonVisibility();
-                    
-                    if (window.isAccessRestricted && !window.isSessionUnlocked && !window.isAdminLoggedIn) {
-                        lockSiteUI();
-                    } else if (!window.isAccessRestricted) {
-                        unlockSiteUI();
-                    }
-                }
-                if (Array.isArray(data.allowedKeys)) {
+                            window.isAccessRestricted = data.isAccessRestricted;
+                            try {
+                                localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted));
+                            } catch (e) {}
+                            const lockCheckbox = document.getElementById('toggle-access-lock');
+                            if (lockCheckbox) lockCheckbox.checked = window.isAccessRestricted;
+                            updateLogoutButtonVisibility();
+                            
+                            const savedCode = getSavedCachedAccessCode();
+                            const hasValidSession = savedCode && window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === savedCode);
+
+                            if (window.isAccessRestricted && !hasValidSession && !window.isAdminLoggedIn) {
+                                lockSiteUI();
+                            } else if (!window.isAccessRestricted) {
+                                unlockSiteUI();
+                            }
+                        }
+                        if (Array.isArray(data.allowedKeys)) {
                             window.ALLOWED_ACCESS_KEYS = data.allowedKeys;
                             saveKeysListToCache();
 
