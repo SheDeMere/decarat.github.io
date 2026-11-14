@@ -4373,16 +4373,16 @@
             if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
                 msg += `🛠 Мастер: ${window.activeMasterSession.owner} (ключ: ${window.activeMasterSession.code})\n`;
             }
-            msg += `📐 Площадь: ${calcState.area} м²\n`;
-            msg += `📏 Периметр: ${calcState.perimeter} м.п.\n`;
-            msg += `✨ Полотно: ${getFabricById(calcState.fabricKey)?.shortName || getFabricById(calcState.fabricKey)?.name || 'Матовое'}\n`;
-            msg += `🚪 Профиль: ${window.PRICES.profiles[calcState.profileKey]?.name || 'Классический'}\n`;
+            msg += ` Площадь: ${calcState.area} м²\n`;
+            msg += ` Периметр: ${calcState.perimeter} м.п.\n`;
+            msg += ` Полотно: ${getFabricById(calcState.fabricKey)?.shortName || getFabricById(calcState.fabricKey)?.name || 'Матовое'}\n`;
+            msg += ` Профиль: ${window.PRICES.profiles[calcState.profileKey]?.name || 'Классический'}\n`;
 
             ['gx53', 'tube', 'track'].forEach(catKey => {
                 LAMP_VARIANTS_CATALOG[catKey].items.forEach(variant => {
                     const qty = calcState.lampVariants[variant.id] || 0;
                     if (qty > 0) {
-                        msg += `💡 ${variant.name}: ${qty} ${variant.unit}.\n`;
+                        msg += ` ${variant.name}: ${qty} ${variant.unit}.\n`;
                     }
                 });
             });
@@ -4390,31 +4390,31 @@
             if (calcState.chandelier) msg += `🌟 Центральная люстра: да\n`;
 
             if (calcState.ledEnabled && calcState.ledLength > 0) {
-                msg += `🌈 LED-лента: ${calcState.ledLength} м (${window.PRICES.led[calcState.ledType]?.name || 'Одноцветная'})\n`;
+                msg += ` LED-лента: ${calcState.ledLength} м (${window.PRICES.led[calcState.ledType]?.name || 'Одноцветная'})\n`;
             }
 
-            if (calcState.pipes > 0) msg += `🔧 Обвод труб: ${calcState.pipes} шт.\n`;
-            if (calcState.corners > 0) msg += `📐 Доп. углы: ${calcState.corners} шт.\n`;
-            if (calcState.optCornice) msg += `🪟 Скрытый карниз ПК-5: да\n`;
-            if (calcState.optMask) msg += `➖ Маскировочная лента: да\n`;
+            if (calcState.pipes > 0) msg += ` Обвод труб: ${calcState.pipes} шт.\n`;
+            if (calcState.corners > 0) msg += ` Доп. углы: ${calcState.corners} шт.\n`;
+            if (calcState.optCornice) msg += ` Скрытый карниз ПК-5: да\n`;
+            if (calcState.optMask) msg += ` Маскировочная лента: да\n`;
 
             if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
                 msg += `\n🛠 Условия: Скидка для мастера ${window.activeMasterSession.owner} (${window.activeMasterSession.discount}%)\n`;
                 if (calcState.discountAmount > 0) {
-                    msg += `🎁 Скидка мастера: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
+                    msg += ` Скидка мастера: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
                 }
             } else if (calcState.paymentMethod === 'cash') {
-                msg += `\n💳 Способ оплаты: Наличные (со скидкой 10%)\n`;
+                msg += `\n Способ оплаты: Наличные (со скидкой 10%)\n`;
                 if (calcState.discountAmount > 0) {
-                    msg += `🎁 Скидка 10%: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
+                    msg += ` Скидка 10%: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
                 }
             } else {
                 const perM = Math.round(calcState.totalPrice / 6);
-                msg += `\n💳 Способ оплаты: Рассрочка 0% без переплат\n`;
-                msg += `📆 Платеж: от ${perM.toLocaleString('ru-RU')} ₽/мес (на 6 месяцев)\n`;
+                msg += `\n Способ оплаты: Рассрочка 0% без переплат\n`;
+                msg += ` Платеж: от ${perM.toLocaleString('ru-RU')} ₽/мес (на 6 месяцев)\n`;
             }
 
-            msg += `\n💰 ИТОГОВАЯ СТОИМОСТЬ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n\n`;
+            msg += `\n ИТОГОВАЯ СТОИМОСТЬ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n\n`;
             msg += `Хочу подтвердить замер и проконсультироваться с мастером.`;
 
             openWhatsAppUrl(msg);
