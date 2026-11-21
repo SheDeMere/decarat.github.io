@@ -105,6 +105,7 @@
         .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem; }
         .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
         .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
+        .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 2rem; }
         .mx-auto { margin-left: auto; margin-right: auto; }
         .mt-0\.5 { margin-top: 0.125rem; }
         .mt-1 { margin-top: 0.25rem; }
@@ -113,6 +114,7 @@
         .mt-3 { margin-top: 0.75rem; }
         .mt-3\.5 { margin-top: 0.875rem; }
         .mt-4 { margin-top: 1rem; }
+        .mt-5 { margin-top: 1.25rem; }
         .mt-6 { margin-top: 1.5rem; }
         .mb-1 { margin-bottom: 0.25rem; }
         .mb-1\.5 { margin-bottom: 0.375rem; }
@@ -415,6 +417,52 @@
         .fill-current { fill: currentColor; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
 
+        /* Admin Access Toggle Switch */
+        .admin-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            width: 52px;
+            height: 28px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .admin-switch input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .admin-switch-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #d6d3d1;
+            border-radius: 9999px;
+            border: 1px solid #c7c2be;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .admin-switch-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background-color: #ffffff;
+            border-radius: 9999px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .admin-switch input:checked + .admin-switch-track {
+            background-color: #059669;
+            border-color: #047857;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+        }
+        .admin-switch input:checked + .admin-switch-track .admin-switch-thumb {
+            transform: translateX(24px);
+        }
+
         /* Hover States */
         .hover\:bg-stone-50:hover { background-color: #fafaf9; }
         .hover\:bg-stone-100:hover { background-color: #f5f5f4; }
@@ -535,7 +583,7 @@
             background: #ffffff;
             border: 1px solid #e7e5e4;
             border-radius: 20px;
-            padding: 20px;
+            padding: 22px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         }
         .admin-label {
@@ -543,7 +591,7 @@
             font-size: 11px;
             font-weight: 700;
             color: #44403c;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
@@ -605,7 +653,7 @@
         .admin-grid-row {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 20px;
         }
         @media (min-width: 640px) {
             .admin-grid-2 {
@@ -619,8 +667,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 14px;
-            padding: 14px 16px;
+            gap: 18px;
+            padding: 16px 18px;
             background: #fafaf9;
             border-radius: 14px;
             border: 1px solid #e7e5e4;
@@ -647,65 +695,41 @@
             border-color: #d6d3d1;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
         }
-
-        @media (min-width: 768px) {
-            .admin-body {
-                flex-direction: row;
-            }
-            .admin-sidebar {
-                flex-direction: column;
-                width: 235px;
-                padding: 20px 14px;
-                border-bottom: none;
-                border-right: 1px solid #e7e5e4;
-                overflow-x: visible;
-                overflow-y: auto;
-            }
-            .admin-nav-btn {
-                width: 100%;
-                padding: 11px 12px;
-            }
-            .admin-content {
-                padding: 24px 28px 32px;
-            }
+        .admin-upload-zone {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            height: 44px;
+            padding: 0 12px;
+            background: #fafaf9;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.18s ease;
         }
-
-        /* Toggle Switch Peer */
-        .peer:checked ~ .peer-checked\:bg-emerald-600 { background-color: #059669; }
-        .peer:checked ~ .peer-checked\:after\:translate-x-full::after { transform: translateX(100%); }
-        .after\:content-\[\'\'\]::after { content: ''; }
-        .after\:absolute::after { position: absolute; }
-        .after\:top-\[2px\]::after { top: 2px; }
-        .after\:left-\[2px\]::after { left: 2px; }
-        .after\:bg-white::after { background-color: #ffffff; }
-        .after\:border-stone-300::after { border-color: #d6d3d1; }
-        .after\:border::after { border-width: 1px; }
-        .after\:rounded-full::after { border-radius: 9999px; }
-        .after\:h-5::after { height: 1.25rem; }
-        .after\:w-5::after { width: 1.25rem; }
-        .after\:transition-all::after { transition: all 0.15s; }
-
-        /* Responsive Breakpoints */
-        @media (min-width: 640px) {
-            .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-            .sm\:p-5 { padding: 1.25rem; }
-            .sm\:p-7 { padding: 1.75rem; }
-            .sm\:p-8 { padding: 2rem; }
-            .sm\:py-20 { padding-top: 5rem; padding-bottom: 5rem; }
-            .sm\:py-24 { padding-top: 6rem; padding-bottom: 6rem; }
-            .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-            .sm\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-            .sm\:col-span-2 { grid-column: span 2 / span 2; }
-            .sm\:col-span-3 { grid-column: span 3 / span 3; }
-            .sm\:col-span-4 { grid-column: span 4 / span 4; }
-            .sm\:text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-            .sm\:text-base { font-size: 1rem; line-height: 1.5rem; }
-            .sm\:text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-            .sm\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
-            .sm\:text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-            .sm\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
-            .sm\:text-5xl { font-size: 3rem; line-height: 1.15; }
+        .admin-upload-zone:hover {
+            background: #ecfdf5;
+            border-color: #10b981;
+        }
+        .admin-upload-zone.has-file {
+            background: #ecfdf5;
+            border-style: solid;
+            border-color: #34d399;
+        }
+        .admin-upload-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid #e7e5e4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #059669;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
         @media (min-width: 768px) {
@@ -773,8 +797,77 @@
         .animate-sphere-1 { animation: floatSphere1 14s ease-in-out infinite alternate; }
         .animate-sphere-2 { animation: floatSphere2 16s ease-in-out infinite alternate; }
 
+        /* Custom Range Sliders */
         input[type="range"] {
-            accent-color: #059669;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #10b981 0%, #059669 var(--range-progress, 0%), #e7e5e4 var(--range-progress, 0%), #e7e5e4 100%);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+            outline: none;
+            cursor: pointer;
+            transition: box-shadow 0.2s ease;
+        }
+        input[type="range"]:hover {
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 0 0 4px rgba(16, 185, 129, 0.12);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f5f5f4 100%);
+            border: 3px solid #059669;
+            box-shadow: 0 3px 8px rgba(6, 95, 70, 0.28), 0 1px 2px rgba(0, 0, 0, 0.15);
+            cursor: grab;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.12);
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4), 0 0 0 5px rgba(16, 185, 129, 0.18);
+        }
+        input[type="range"]:active::-webkit-slider-thumb {
+            cursor: grabbing;
+            transform: scale(1.06);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.45), 0 0 0 7px rgba(16, 185, 129, 0.24);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background: #ffffff;
+            border: 3px solid #059669;
+            box-shadow: 0 3px 8px rgba(6, 95, 70, 0.28);
+            cursor: grab;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.12);
+            border-color: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4), 0 0 0 5px rgba(16, 185, 129, 0.18);
+        }
+        input[type="range"].led-range-slider {
+            height: 9px;
+            background: linear-gradient(90deg, #34d399 0%, #10b981 var(--range-progress, 0%), #44403c var(--range-progress, 0%), #44403c 100%);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        input[type="range"].led-range-slider::-webkit-slider-thumb {
+            width: 22px;
+            height: 22px;
+            background: #1c1917;
+            border: 3px solid #34d399;
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.55);
+        }
+        input[type="range"].led-range-slider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            background: #1c1917;
+            border: 3px solid #34d399;
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.55);
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -859,14 +952,14 @@
         <div class="absolute inset-0 opacity-15 hero-dots"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
+                <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-snug">
                         Идеальные натяжные потолки от компании <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-emerald-400 to-teal-200">Decarat</span>
                     </h1>
-                    <p class="text-stone-300 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                    <p class="text-stone-300 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal pt-1">
                         Рассчитайте точную смету с полотном, теневыми профилями, спотами, магнитными треками и светодиодной LED-подсветкой прямо на сайте за 1 минуту.
                     </p>
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
                         <a href="#calculator" class="px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm shadow-xl transform hover:-translate-y-0.5 transition duration-200">
                             Перейти к калькулятору
                         </a>
@@ -878,14 +971,14 @@
 
     <!-- СЕКЦИЯ КАЛЬКУЛЯТОРА -->
     <section id="calculator" class="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-12">
-            <span class="text-xs font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+        <div class="text-center max-w-2xl mx-auto mb-12 space-y-4">
+            <span class="inline-flex text-xs font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200">
                 Прозрачный онлайн-расчет
             </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mt-3 tracking-tight">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mt-4 tracking-tight leading-snug">
                 Калькулятор натяжного потолка
             </h2>
-            <p class="text-stone-500 text-sm mt-2">
+            <p class="text-stone-500 text-sm mt-3 leading-relaxed">
                 Укажите размеры, выберите фактуру полотна, светильники и светодиодную ленту. Смета формируется мгновенно.
             </p>
         </div>
@@ -913,7 +1006,7 @@
                                 <span class="font-extrabold text-stone-900 text-sm"><span id="area-val-label">0</span> м²</span>
                             </div>
                             <div class="flex items-center gap-4">
-                                <input type="range" id="slider-area" min="0" max="100" value="0" step="1" oninput="syncAreaFromSlider(this.value)" onchange="syncAreaFromSlider(this.value)" class="w-full h-3 bg-stone-200 rounded-lg cursor-pointer">
+                                <input type="range" id="slider-area" min="0" max="100" value="0" step="1" oninput="syncAreaFromSlider(this.value)" onchange="syncAreaFromSlider(this.value)" class="w-full cursor-pointer">
                                 <div class="flex items-center gap-1.5 shrink-0">
                                     <input type="number" id="input-area" min="0" max="300" step="0.5" value="0" oninput="syncAreaFromInput(this.value)" class="w-16 px-2 py-1 text-xs bg-stone-50 border border-stone-300 rounded-lg text-stone-900 font-bold text-center">
                                     <span class="text-xs text-stone-500 whitespace-nowrap">м²</span>
@@ -943,7 +1036,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-4">
-                                <input type="range" id="slider-rubber-insert" min="0" max="120" value="0" step="1" oninput="syncRubberInsertFromSlider(this.value)" onchange="syncRubberInsertFromSlider(this.value)" class="w-full h-3 bg-stone-200 rounded-lg cursor-pointer">
+                                <input type="range" id="slider-rubber-insert" min="0" max="120" value="0" step="1" oninput="syncRubberInsertFromSlider(this.value)" onchange="syncRubberInsertFromSlider(this.value)" class="w-full cursor-pointer">
                                 <div class="flex items-center gap-1.5 shrink-0">
                                     <input type="number" id="input-rubber-insert" min="0" max="500" step="0.5" value="0" oninput="syncRubberInsertFromInput(this.value)" class="w-16 px-2 py-1 text-xs bg-stone-50 border border-stone-300 rounded-lg text-stone-900 font-bold text-center">
                                     <span class="text-xs text-stone-500 whitespace-nowrap">м.п.</span>
@@ -961,7 +1054,7 @@
                                 <span class="font-extrabold text-stone-900 text-sm"><span id="dismantle-val-label">0</span> м²</span>
                             </div>
                             <div class="flex items-center gap-4">
-                                <input type="range" id="slider-dismantle" min="0" max="100" value="0" step="1" oninput="syncDismantleFromSlider(this.value)" onchange="syncDismantleFromSlider(this.value)" class="w-full h-3 bg-stone-200 rounded-lg cursor-pointer">
+                                <input type="range" id="slider-dismantle" min="0" max="100" value="0" step="1" oninput="syncDismantleFromSlider(this.value)" onchange="syncDismantleFromSlider(this.value)" class="w-full cursor-pointer">
                                 <div class="flex items-center gap-1.5 shrink-0">
                                     <input type="number" id="input-dismantle" min="0" max="300" step="0.5" value="0" oninput="syncDismantleFromInput(this.value)" class="w-16 px-2 py-1 text-xs bg-stone-50 border border-stone-300 rounded-lg text-stone-900 font-bold text-center">
                                     <span class="text-xs text-stone-500 whitespace-nowrap">м²</span>
@@ -1172,7 +1265,7 @@
                             </div>
 
                             <!-- Сетка карточек разновидностей выбранной категории -->
-                            <div id="lamp-variants-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div id="lamp-variants-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 <!-- Заполняется динамически JS -->
                             </div>
                         </div>
@@ -1217,7 +1310,7 @@
                                     <div>
                                         <label class="text-xs text-stone-300 block mb-1.5 font-medium">Длина светодиодной ленты (м):</label>
                                         <div class="flex items-center gap-3">
-                                            <input type="range" id="slider-led-length" min="0" max="40" value="0" step="1" oninput="syncLedLength(this.value)" onchange="syncLedLength(this.value)" class="w-full h-2 bg-stone-700 rounded-lg cursor-pointer">
+                                            <input type="range" id="slider-led-length" min="0" max="40" value="0" step="1" oninput="syncLedLength(this.value)" onchange="syncLedLength(this.value)" class="w-full led-range-slider cursor-pointer">
                                             <span class="text-sm font-bold text-emerald-400 w-12 text-right"><span id="led-len-display">0</span> м</span>
                                         </div>
                                     </div>
@@ -1260,9 +1353,9 @@
                     </div>
 
                     <!-- Дополнительные удобства -->
-                    <div class="mt-6 pt-5 border-t border-stone-100 space-y-3">
-                        <label class="text-xs font-bold text-stone-500 uppercase tracking-wider block">Другие важные моменты монтажа:</label>
-                        <div id="extra-services-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="mt-6 pt-5 border-t border-stone-100 space-y-4">
+                        <label class="text-xs sm:text-sm font-bold text-stone-600 uppercase tracking-wider block">Другие важные моменты монтажа:</label>
+                        <div id="extra-services-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
                             <!-- Рендерится динамически JS -->
                         </div>
                     </div>
@@ -1349,7 +1442,7 @@
     <footer id="contacts" class="bg-stone-950 text-stone-300 pt-16 pb-12 border-t border-stone-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-stone-800">
-                <div class="space-y-4 md:col-span-1">
+                <div class="space-y-5 md:col-span-1">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black text-xl shadow-lg">
                             D
@@ -1359,7 +1452,7 @@
                     <p class="text-xs text-stone-400 leading-relaxed">
                         Профессиональный монтаж натяжных потолков любой сложности: теневые EuroKraab, парящие линии, светодиодная подсветка и дизайнерский свет.
                     </p>
-                    <div class="text-xs text-stone-500">
+                    <div class="text-xs text-stone-500 pt-1">
                         © 2026 Компания Decarat. Все права защищены.
                     </div>
                     <div class="pt-2 flex flex-wrap items-center gap-4">
@@ -1370,8 +1463,8 @@
                 </div>
 
                 <div>
-                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Материалы</h4>
-                    <ul class="space-y-2 text-xs text-stone-400">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-5">Материалы</h4>
+                    <ul class="space-y-3 text-xs text-stone-400">
                         <li><a href="#calculator" class="hover:text-emerald-400 transition">Матовые полотна MSD</a></li>
                         <li><a href="#calculator" class="hover:text-emerald-400 transition">Сатиновые перламутровые</a></li>
                         <li><a href="#calculator" class="hover:text-emerald-400 transition">Глянцевые зеркальные</a></li>
@@ -1381,8 +1474,8 @@
                 </div>
 
                 <div>
-                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Освещение</h4>
-                    <ul class="space-y-2 text-xs text-stone-400">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-5">Освещение</h4>
+                    <ul class="space-y-3 text-xs text-stone-400">
                         <li><a href="#calculator" class="hover:text-emerald-400 transition">Светильники GX53 LED</a></li>
                         <li><a href="#calculator" class="hover:text-emerald-400 transition">Накладные споты-тубусы</a></li>
                         <li><a href="#calculator" class="hover:text-emerald-400 transition">Магнитные шинопроводы</a></li>
@@ -1391,12 +1484,12 @@
                     </ul>
                 </div>
 
-                <div class="space-y-3">
-                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Связь с нами</h4>
-                    <div class="text-xs text-stone-400 space-y-2">
+                <div class="space-y-4">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-5">Связь с нами</h4>
+                    <div class="text-xs text-stone-400 space-y-3">
                         <p class="flex items-center gap-2">
                             <span class="text-emerald-400">📞</span>
-                            <a href="tel:+79389049668" class="hover:text-white font-bold text-white text-sm">+7 (929) 896-67-36</a>
+                            <a id="footer-phone-link" href="tel:+79298966736" class="hover:text-white font-bold text-white text-sm">+7 (929) 896-67-36</a>
                         </p>
                         <p class="flex items-center gap-2">
                             <span class="text-emerald-400">💬</span>
@@ -1413,7 +1506,7 @@
                             <span>Ежедневно с 08:00 до 21:00</span>
                         </p>
                     </div>
-                    <div class="pt-2">
+                    <div class="pt-3">
                         <button type="button" onclick="requestMeasurementInWhatsApp()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs transition text-center shadow-lg">
                             Бесплатный вызов на замер
                         </button>
@@ -1448,20 +1541,42 @@
 
     <!-- МОДАЛЬНОЕ ОКНО: ИНФОРМАЦИЯ ДЛЯ КЛИЕНТОВ -->
     <div id="clients-info-modal" onclick="closeClientsInfoModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div onclick="event.stopPropagation()" style="max-width: 1000px;" class="bg-white rounded-3xl w-full max-h-[82vh] flex flex-col overflow-hidden shadow-2xl border border-stone-200 animate-variants-panel">
-            <div class="flex items-center justify-between p-4 sm:p-5 border-b border-stone-100 bg-white/95 backdrop-blur-md z-10 shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <div id="clients-modal-shell" onclick="event.stopPropagation()" style="max-width: 420px;" class="bg-white rounded-3xl w-full max-h-[82vh] flex flex-col overflow-hidden shadow-2xl border border-stone-200 animate-variants-panel">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-stone-100 bg-white/95 backdrop-blur-md z-10 shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     </div>
-                    <div>
-                        <h3 class="text-sm sm:text-base font-extrabold text-stone-900">О клиентах</h3>
+                    <div class="space-y-1 py-0.5">
+                        <h3 class="text-base sm:text-lg font-extrabold text-stone-900 leading-tight">О клиентах</h3>
+                        <p id="clients-topbar-subtitle" class="text-xs text-stone-500 leading-relaxed">Авторизация владельца</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeClientsInfoModal()" class="w-8 h-8 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 flex items-center justify-center font-bold text-xs transition">✕</button>
+                <button type="button" onclick="closeClientsInfoModal()" class="w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 flex items-center justify-center font-bold text-sm transition shrink-0">✕</button>
             </div>
 
-            <div class="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
+            <!-- Экран ввода PIN-кода администратора для доступа к разделу клиентов -->
+            <div id="clients-login-box" class="p-5 sm:p-6 bg-stone-50 flex-1 overflow-y-auto flex items-center justify-center">
+                <div class="admin-card w-full space-y-4">
+                    <div class="text-center space-y-1.5">
+                        <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <h4 class="text-sm sm:text-base font-extrabold text-stone-900">Доступ только для администратора</h4>
+                        <p class="text-xs text-stone-500">Введите PIN-код администратора для просмотра базы клиентов</p>
+                    </div>
+                    <form onsubmit="verifyClientsPin(event)" class="space-y-3">
+                        <input type="password" id="clients-pin-input" placeholder="••••" maxlength="10" class="admin-input text-center font-extrabold tracking-widest text-base">
+                        <p id="clients-pin-error" class="text-xs text-rose-600 hidden text-center font-medium">Неверный PIN-код</p>
+                        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition">
+                            Открыть базу клиентов
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Основной контент базы клиентов после ввода PIN-кода -->
+            <div id="clients-content-box" class="hidden p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
                 <form onsubmit="addClientRecord(event)" class="bg-stone-50 rounded-2xl p-4 sm:p-5 border border-stone-200 space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -1510,6 +1625,418 @@
         </div>
     </div>
 
+    <!-- МОДАЛЬНАЯ АДМИН-ПАНЕЛЬ УПРАВЛЕНИЯ ЦЕНАМИ И ДОСТУПОМ -->
+    <div id="admin-modal" onclick="closeAdminModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-5">
+        <div id="admin-modal-shell" onclick="event.stopPropagation()" style="max-width: 420px;" class="admin-shell animate-variants-panel">
+            <!-- Шапка админ-панели -->
+            <div class="admin-topbar">
+                <div class="flex items-center gap-4">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center shadow-md shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    </div>
+                    <div class="space-y-1.5 py-0.5">
+                        <div class="flex items-center gap-2.5">
+                            <h3 class="text-base sm:text-lg font-extrabold text-stone-900 leading-tight">Панель управления</h3>
+                            <span id="admin-topbar-badge" class="hidden text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Decarat Admin</span>
+                        </div>
+                        <p id="admin-topbar-subtitle" class="text-xs text-stone-500 leading-relaxed">Авторизация владельца</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAdminModal()" class="w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 flex items-center justify-center font-bold text-sm transition shrink-0">✕</button>
+            </div>
+
+            <!-- Экран авторизации в админ-панель -->
+            <div id="admin-login-box" class="p-5 sm:p-6 bg-stone-50 flex-1 overflow-y-auto flex items-center justify-center">
+                <div class="admin-card w-full space-y-4">
+                    <div class="text-center space-y-1.5">
+                        <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <h4 class="text-sm sm:text-base font-extrabold text-stone-900">Вход в панель администратора</h4>
+                        <p class="text-xs text-stone-500">Введите PIN-код владельца (по умолчанию: <strong class="text-stone-800">1234</strong>)</p>
+                    </div>
+                    <form onsubmit="verifyAdminPin(event)" class="space-y-3">
+                        <input type="password" id="admin-pin-input" placeholder="••••" maxlength="10" class="admin-input text-center font-extrabold tracking-widest text-base">
+                        <p id="admin-pin-error" class="text-xs text-rose-600 hidden text-center font-medium">Неверный PIN-код</p>
+                        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition">
+                            Войти в управление
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Контент админки после авторизации -->
+            <div id="admin-content-box" class="admin-body hidden">
+                <!-- Боковая навигация по разделам -->
+                <aside class="admin-sidebar custom-scrollbar">
+                    <button type="button" onclick="switchAdminTab('fabrics')" id="admin-tab-btn-fabrics" class="admin-nav-btn is-active">
+                        <span class="admin-nav-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
+                        </span>
+                        <div class="min-w-0">
+                            <span class="block leading-tight">Полотна и профили</span>
+                            <span class="text-[10px] font-medium text-stone-400 block mt-0.5"><span id="admin-nav-fabrics-count">4</span> фактуры</span>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="switchAdminTab('lamps')" id="admin-tab-btn-lamps" class="admin-nav-btn">
+                        <span class="admin-nav-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        </span>
+                        <div class="min-w-0">
+                            <span class="block leading-tight">Светильники и фото</span>
+                            <span class="text-[10px] font-medium text-stone-400 block mt-0.5">Модели, цены, фото</span>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="switchAdminTab('led')" id="admin-tab-btn-led" class="admin-nav-btn">
+                        <span class="admin-nav-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </span>
+                        <div class="min-w-0">
+                            <span class="block leading-tight">LED-ленты</span>
+                            <span class="text-[10px] font-medium text-stone-400 block mt-0.5"><span id="admin-nav-led-count">3</span> варианта</span>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="switchAdminTab('services')" id="admin-tab-btn-services" class="admin-nav-btn">
+                        <span class="admin-nav-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </span>
+                        <div class="min-w-0">
+                            <span class="block leading-tight">Доп. работы</span>
+                            <span class="text-[10px] font-medium text-stone-400 block mt-0.5"><span id="admin-nav-services-count">7</span> позиций</span>
+                        </div>
+                    </button>
+
+                    <button type="button" onclick="switchAdminTab('access')" id="admin-tab-btn-access" class="admin-nav-btn">
+                        <span class="admin-nav-icon">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        </span>
+                        <div class="min-w-0">
+                            <span class="block leading-tight">Доступ и ключи</span>
+                            <span class="text-[10px] font-medium text-stone-400 block mt-0.5"><span id="admin-nav-keys-count">0</span> кодов</span>
+                        </div>
+                    </button>
+
+                    <div class="hidden md:block pt-4 mt-auto">
+                        <div class="p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200/70 text-[11px] text-emerald-900 space-y-1">
+                            <div class="font-bold flex items-center gap-1.5">
+                                <span id="cloud-sync-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span id="cloud-sync-status">Облако подключено</span>
+                            </div>
+                            <p class="text-emerald-800/80 leading-snug">Все изменения автоматически сохраняются в базе данных и доступны на всех устройствах.</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Рабочая область выбранного раздела -->
+                <div class="admin-content custom-scrollbar">
+
+                    <!-- ВКЛАДКА 1: ПОЛОТНА И ПРОФИЛИ -->
+                    <div id="admin-section-fabrics" class="space-y-6">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <h4 class="text-base font-extrabold text-stone-900">Полотна и профили примыкания</h4>
+                                <p class="text-xs text-stone-500 mt-0.5">Управляйте фактурами полотен в каталоге (шаг 2) и стоимостью профилей за пог. метр</p>
+                            </div>
+                            <button type="button" onclick="resetAllPrices()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-xs font-bold text-stone-700 transition">
+                                Сбросить всё к заводским
+                            </button>
+                        </div>
+
+                        <!-- Добавить новую фактуру полотна -->
+                        <div class="admin-card space-y-5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700">+ Добавить новое полотно в калькулятор</span>
+                                <span class="text-[11px] text-stone-400">Появится в Шаге 2</span>
+                            </div>
+                            <div class="admin-grid-row admin-grid-3">
+                                <div>
+                                    <label class="admin-label">Название полотна *</label>
+                                    <input type="text" id="new-fabric-name" placeholder="Например: Bauf 270 Матовый" class="admin-input">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Цена (₽ / м²) *</label>
+                                    <input type="number" id="new-fabric-price" min="0" step="10" placeholder="850" class="admin-input">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Фотография (необязательно)</label>
+                                    <label id="new-fabric-upload-zone" class="admin-upload-zone">
+                                        <input type="file" id="new-fabric-file" accept="image/*" onchange="handleAdminFileZoneChange(this, 'new-fabric')" class="hidden">
+                                        <span id="new-fabric-thumb" class="admin-upload-thumb">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        </span>
+                                        <span id="new-fabric-file-label" class="text-xs font-semibold text-stone-600 truncate flex-1 text-center">Выбрать фото</span>
+                                        <button type="button" id="new-fabric-clear-btn" onclick="clearAdminFileZone(event, 'new-fabric')" class="hidden w-6 h-6 rounded-lg bg-white hover:bg-rose-50 text-stone-400 hover:text-rose-600 border border-stone-200 flex items-center justify-center text-[11px] font-bold shrink-0" title="Очистить фото">✕</button>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="admin-grid-row admin-grid-3 items-end">
+                                <div style="grid-column: span 2 / span 2;">
+                                    <label class="admin-label">Краткое описание</label>
+                                    <input type="text" id="new-fabric-desc" placeholder="Премиальное плотное полотно без запаха..." class="admin-input">
+                                </div>
+                                <div class="mt-2 sm:mt-0">
+                                    <button type="button" onclick="addNewFabricFromAdmin()" class="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition">
+                                        Добавить полотно
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Список фактур полотен -->
+                        <div class="space-y-3">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-stone-600 block">Текущие полотна в каталоге</span>
+                            <div id="admin-fabrics-list" class="space-y-2.5"></div>
+                        </div>
+
+                        <!-- Цены профилей -->
+                        <div class="admin-card space-y-4">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-stone-600 block">Стоимость профилей примыкания (₽ / пог. м)</span>
+                            <div class="admin-grid-row admin-grid-2">
+                                <div>
+                                    <label class="admin-label">Теневой зазор (EuroKraab)</label>
+                                    <input type="number" id="adm-prof-shadow" min="0" step="10" class="admin-input font-bold">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Парящий профиль под LED</label>
+                                    <input type="number" id="adm-prof-floating" min="0" step="10" class="admin-input font-bold">
+                                </div>
+                            </div>
+                            <div class="flex justify-end pt-2">
+                                <button type="button" onclick="saveAdminPrices()" class="px-6 h-11 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-extrabold transition">
+                                    Сохранить цены профилей
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ВКЛАДКА 2: СВЕТИЛЬНИКИ И ФОТО -->
+                    <div id="admin-section-lamps" class="space-y-6 hidden">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <h4 class="text-base font-extrabold text-stone-900">Каталог светильников и фото</h4>
+                                <p class="text-xs text-stone-500 mt-0.5">Добавляйте модели спотов, тубусов и треков, меняйте цены и загружайте фотографии</p>
+                            </div>
+                            <button type="button" onclick="resetLampCatalogToDefault()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-xs font-bold text-stone-700 transition">
+                                Восстановить каталог
+                            </button>
+                        </div>
+
+                        <div class="admin-card space-y-5">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 block">+ Добавить модель светильника</span>
+                            <div class="admin-grid-row admin-grid-3">
+                                <div>
+                                    <label class="admin-label">Категория</label>
+                                    <select id="new-lamp-category" class="admin-input font-semibold">
+                                        <option value="gx53">GX53 (Встраиваемый спот)</option>
+                                        <option value="tube">Цилиндрический тубус</option>
+                                        <option value="track">Магнитный трек 48V</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="admin-label">Название модели *</label>
+                                    <input type="text" id="new-lamp-name" placeholder="Например: GX53 Хром (12W)" class="admin-input">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="admin-label">Цена (₽) *</label>
+                                        <input type="number" id="new-lamp-price" min="0" step="10" placeholder="600" class="admin-input">
+                                    </div>
+                                    <div>
+                                        <label class="admin-label">Ед. изм.</label>
+                                        <select id="new-lamp-unit" class="admin-input font-semibold">
+                                            <option value="шт">шт</option>
+                                            <option value="м">м</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="admin-grid-row admin-grid-3 items-end">
+                                <div>
+                                    <label class="admin-label">Описание модели</label>
+                                    <input type="text" id="new-lamp-desc" placeholder="Мощность, цвет, особенности..." class="admin-input">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Фото с устройства (необязательно)</label>
+                                    <label id="new-lamp-upload-zone" class="admin-upload-zone">
+                                        <input type="file" id="new-lamp-file" accept="image/*" onchange="handleAdminFileZoneChange(this, 'new-lamp')" class="hidden">
+                                        <span id="new-lamp-thumb" class="admin-upload-thumb">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        </span>
+                                        <span id="new-lamp-file-label" class="text-xs font-semibold text-stone-600 truncate flex-1 text-center">Выбрать фото</span>
+                                        <button type="button" id="new-lamp-clear-btn" onclick="clearAdminFileZone(event, 'new-lamp')" class="hidden w-6 h-6 rounded-lg bg-white hover:bg-rose-50 text-stone-400 hover:text-rose-600 border border-stone-200 flex items-center justify-center text-[11px] font-bold shrink-0" title="Очистить фото">✕</button>
+                                    </label>
+                                </div>
+                                <div class="mt-2 sm:mt-0">
+                                    <button type="button" onclick="addNewLampVariantFromAdmin()" class="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition">
+                                        Добавить в каталог
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="admin-lamp-variants-list" class="space-y-4"></div>
+                    </div>
+
+                    <!-- ВКЛАДКА 3: LED-ЛЕНТЫ -->
+                    <div id="admin-section-led" class="space-y-6 hidden">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <h4 class="text-base font-extrabold text-stone-900">Светодиодные LED-ленты</h4>
+                                <p class="text-xs text-stone-500 mt-0.5">Управление видами светодиодной подсветки и стоимостью за 1 пог. метр</p>
+                            </div>
+                            <button type="button" onclick="resetLedCatalogToDefault()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-xs font-bold text-stone-700 transition">
+                                Восстановить LED
+                            </button>
+                        </div>
+
+                        <div class="admin-card space-y-5">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 block">+ Добавить LED-ленту</span>
+                            <div class="admin-grid-row admin-grid-3">
+                                <div>
+                                    <label class="admin-label">Название LED-ленты *</label>
+                                    <input type="text" id="new-led-name" placeholder="Например: COB без точек 24V" class="admin-input">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Цена (₽ / пог. м) *</label>
+                                    <input type="number" id="new-led-price" min="0" step="10" placeholder="1250" class="admin-input">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Краткое описание</label>
+                                    <input type="text" id="new-led-desc" placeholder="Сплошная линия света без точек..." class="admin-input">
+                                </div>
+                            </div>
+                            <div class="flex justify-end pt-3 mt-1">
+                                <button type="button" onclick="addNewLedFromAdmin()" class="px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition">
+                                    Добавить LED-ленту
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="admin-led-list" class="space-y-2.5"></div>
+                    </div>
+
+                    <!-- ВКЛАДКА 4: ДОПОЛНИТЕЛЬНЫЕ РАБОТЫ -->
+                    <div id="admin-section-services" class="space-y-6 hidden">
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <h4 class="text-base font-extrabold text-stone-900">Дополнительные работы и монтаж</h4>
+                                <p class="text-xs text-stone-500 mt-0.5">Редактируйте расценки на углы, трубы, люстры и добавляйте новые позиции</p>
+                            </div>
+                            <button type="button" onclick="resetExtraServicesToDefault()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-xs font-bold text-stone-700 transition">
+                                Восстановить услуги
+                            </button>
+                        </div>
+
+                        <div class="admin-card space-y-5">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 block">+ Добавить дополнительную работу</span>
+                            <div class="admin-grid-row admin-grid-3">
+                                <div>
+                                    <label class="admin-label">Название работы *</label>
+                                    <input type="text" id="new-service-name" placeholder="Например: Вытяжка с обратным клапаном" class="admin-input">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="admin-label">Цена (₽) *</label>
+                                        <input type="number" id="new-service-price" min="0" step="10" placeholder="750" class="admin-input">
+                                    </div>
+                                    <div>
+                                        <label class="admin-label">Расчёт</label>
+                                        <select id="new-service-unit" class="admin-input font-semibold">
+                                            <option value="fixed">за услугу</option>
+                                            <option value="per_m">за м.п.</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="admin-label">Примечание</label>
+                                    <input type="text" id="new-service-desc" placeholder="Краткое описание услуги..." class="admin-input">
+                                </div>
+                            </div>
+                            <div class="flex justify-end pt-3 mt-1">
+                                <button type="button" onclick="addNewExtraServiceFromAdmin()" class="px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition">
+                                    Добавить работу
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="admin-extra-services-list" class="space-y-2.5"></div>
+                    </div>
+
+                    <!-- ВКЛАДКА 5: ДОСТУП И КЛЮЧИ -->
+                    <div id="admin-section-access" class="space-y-6 hidden">
+                        <div class="admin-card flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <h4 class="text-sm sm:text-base font-extrabold text-stone-900">Закрытый режим по ключам доступа</h4>
+                                <p class="text-xs text-stone-500 mt-0.5">При включении калькулятор откроется только после ввода персонального кода</p>
+                            </div>
+                            <label class="admin-switch" title="Включить или выключить закрытый режим">
+                                <input type="checkbox" id="adm-access-lock-toggle" onchange="toggleAccessRestriction(this.checked)">
+                                <span class="admin-switch-track">
+                                    <span class="admin-switch-thumb"></span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="admin-card space-y-5">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 block">+ Выдать новый ключ доступа</span>
+                            <div class="admin-grid-row admin-grid-3">
+                                <div>
+                                    <label class="admin-label">Код доступа *</label>
+                                    <input type="text" id="new-access-code" placeholder="MASTER2026" class="admin-input uppercase font-bold tracking-wider">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Кому выдан (заметка)</label>
+                                    <input type="text" id="new-access-label" placeholder="Бригада №1 / Клиент" class="admin-input">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Роль</label>
+                                    <select id="new-access-role" onchange="handleNewKeyRoleChange(this.value)" class="admin-input font-semibold">
+                                        <option value="client">Клиент (базовый прайс)</option>
+                                        <option value="master">Мастер (со скидкой)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="admin-grid-row admin-grid-3 items-end pt-2">
+                                <div id="new-access-discount-wrap" class="hidden">
+                                    <label class="admin-label text-emerald-800">Скидка мастера (%)</label>
+                                    <input type="number" id="new-access-discount" min="1" max="90" value="15" placeholder="15" class="admin-input font-extrabold text-emerald-800">
+                                </div>
+                                <div class="sm:col-span-2 flex justify-end mt-2 sm:mt-0">
+                                    <button type="button" onclick="addAccessCodeFromAdmin()" class="w-full sm:w-auto px-6 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition">
+                                        Выдать ключ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-stone-600">Активные ключи</span>
+                                <span id="active-keys-count" class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">0</span>
+                            </div>
+                            <div id="admin-access-keys-list" class="space-y-2.5"></div>
+                        </div>
+
+                        <!-- Смена PIN-кода администратора -->
+                        <div class="admin-card space-y-4">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-stone-600 block">Безопасность: PIN-код администратора</span>
+                            <div class="flex flex-wrap sm:flex-nowrap gap-3.5">
+                                <input type="password" id="new-admin-pin-input" maxlength="10" placeholder="Новый PIN-код (мин. 4 символа)" class="admin-input flex-1">
+                                <button type="button" onclick="changeAdminPin()" class="px-5 h-11 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-extrabold transition whitespace-nowrap">
+                                    Обновить PIN
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- КОМПАКТНОЕ МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ПОЗИЦИИ -->
     <div id="admin-edit-item-modal" onclick="closeAdminEditModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
         <div onclick="event.stopPropagation()" class="bg-white rounded-3xl p-5 sm:p-6 max-w-sm w-full shadow-2xl border border-stone-200 space-y-4 animate-variants-panel">
@@ -1521,7 +2048,7 @@
                 <button type="button" onclick="closeAdminEditModal()" class="w-8 h-8 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center text-xs font-bold transition">✕</button>
             </div>
 
-            <form onsubmit="saveAdminEditedItem(event)" class="space-y-3.5">
+            <form onsubmit="saveAdminEditedItem(event)" class="space-y-4">
                 <input type="hidden" id="edit-item-type">
                 <input type="hidden" id="edit-item-cat">
                 <input type="hidden" id="edit-item-id">
@@ -1544,7 +2071,7 @@
                     </select>
                 </div>
 
-                <div class="flex items-end gap-3">
+                <div class="flex items-end gap-4">
                     <div class="flex-1">
                         <label id="edit-item-price-label" class="admin-label text-emerald-800">Цена (₽)</label>
                         <input type="number" id="edit-item-price" min="0" step="10" class="admin-input-sm w-full font-extrabold text-emerald-800">
@@ -1567,20 +2094,21 @@
 
                 <div id="edit-item-photo-box" class="pt-1">
                     <label class="admin-label">Фотография товара</label>
-                    <div class="flex items-center justify-center gap-3 p-2.5 rounded-2xl bg-stone-50 border border-stone-200">
-                        <div id="edit-item-photo-preview" class="w-12 h-12 rounded-xl bg-white border border-stone-200 overflow-hidden flex items-center justify-center shrink-0">
-                            <span class="text-[9px] font-bold text-stone-400">Нет фото</span>
+                    <label class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-stone-50 hover:bg-emerald-50/50 border border-dashed border-stone-300 hover:border-emerald-400 cursor-pointer transition">
+                        <input type="file" accept="image/*" onchange="handleEditModalFileUpload(this)" class="hidden">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div id="edit-item-photo-preview" class="w-12 h-12 rounded-xl bg-white border border-stone-200 overflow-hidden flex items-center justify-center shrink-0 text-emerald-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                            <div class="min-w-0">
+                                <span class="text-xs font-bold text-stone-800 block truncate">Загрузить новое фото</span>
+                                <span class="text-[11px] text-stone-500 block truncate">JPG, PNG или WEBP</span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <label class="px-3 py-2 rounded-xl bg-white hover:bg-stone-100 border border-stone-300 text-xs font-bold text-stone-700 cursor-pointer transition whitespace-nowrap">
-                                Загрузить фото
-                                <input type="file" accept="image/*" onchange="handleEditModalFileUpload(this)" class="hidden">
-                            </label>
-                            <button type="button" id="edit-item-remove-photo-btn" onclick="clearEditModalPhoto()" class="hidden px-2.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-xs font-bold text-rose-600 transition">
-                                Удалить
-                            </button>
-                        </div>
-                    </div>
+                        <button type="button" id="edit-item-remove-photo-btn" onclick="event.preventDefault(); event.stopPropagation(); clearEditModalPhoto();" class="hidden px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 border border-rose-200 text-[11px] font-bold text-rose-600 transition shrink-0">
+                            Удалить
+                        </button>
+                    </label>
                 </div>
 
                 <div class="pt-2 flex gap-2.5">
@@ -1593,6 +2121,11 @@
 
     <!-- ОСНОВНОЙ СКРИПТ КАЛЬКУЛЯТОРА, КАТАЛОГА, АДМИНКИ И ДОСТУПА -->
     <script>
+        const COMPANY_PHONE = {
+            digits: '79298966736',
+            formatted: '+7 (929) 896-67-36'
+        };
+
         const STORAGE_KEY_ADMIN_PIN = 'decarat_admin_pin_v1';
         function getStoredAdminPin() {
             try {
@@ -2229,8 +2762,8 @@
                         <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
                             <span class="text-sm font-black text-emerald-700">${Number(variant.price).toLocaleString('ru-RU')} ₽/${variant.unit}</span>
                             <div class="flex items-center gap-1.5">
-                                <button type="button" onclick="changeLampVariantQty('${catKey}', '${variant.id}', -1)" class="w-8 h-8 rounded-xl bg-stone-100 hover:bg-stone-200 font-bold text-xs text-stone-800 transition">-</button>
-                                <span class="w-6 text-center font-extrabold text-sm text-stone-900">${qty}</span>
+                                <button type="button" onclick="changeLampVariantQty('${catKey}', '${variant.id}', -1)" class="w-8 h-8 rounded-xl bg-stone-100 hover:bg-stone-200 font-bold text-xs text-stone-700 transition">-</button>
+                                <span class="w-7 text-center font-extrabold text-sm text-stone-900">${qty}</span>
                                 <button type="button" onclick="changeLampVariantQty('${catKey}', '${variant.id}', 1)" class="w-8 h-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-xs text-white transition">+</button>
                             </div>
                         </div>
@@ -2306,10 +2839,72 @@
         function openClientsInfoModal() {
             const modal = document.getElementById('clients-info-modal');
             if (!modal) return;
-            renderClientsRecordsList();
+
+            const shell = document.getElementById('clients-modal-shell');
+            const subtitle = document.getElementById('clients-topbar-subtitle');
+            const loginBox = document.getElementById('clients-login-box');
+            const contentBox = document.getElementById('clients-content-box');
+            const pinErr = document.getElementById('clients-pin-error');
+            const pinInp = document.getElementById('clients-pin-input');
+
+            if (pinErr) pinErr.classList.add('hidden');
+            if (pinInp) pinInp.value = '';
+
+            const unlocked = Boolean(window.isAdminAuthenticated);
+            if (shell) shell.style.maxWidth = unlocked ? '1000px' : '420px';
+            if (subtitle) {
+                subtitle.textContent = unlocked
+                    ? 'База заявок, контактов и сохранённых расчётов'
+                    : 'Авторизация владельца';
+            }
+
+            if (unlocked) {
+                if (loginBox) loginBox.classList.add('hidden');
+                if (contentBox) contentBox.classList.remove('hidden');
+                renderClientsRecordsList();
+            } else {
+                if (loginBox) loginBox.classList.remove('hidden');
+                if (contentBox) contentBox.classList.add('hidden');
+                if (pinInp) setTimeout(() => pinInp.focus(), 50);
+            }
+
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
             syncBodyScrollLock();
+        }
+
+        function unlockSiteForAdmin() {
+            const overlay = document.getElementById('access-gate-overlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+            }
+            syncBodyScrollLock();
+        }
+
+        function verifyClientsPin(e) {
+            if (e) e.preventDefault();
+            const pinInp = document.getElementById('clients-pin-input');
+            const pinErr = document.getElementById('clients-pin-error');
+            const val = (pinInp ? pinInp.value : '').trim();
+
+            if (val === getStoredAdminPin()) {
+                window.isAdminAuthenticated = true;
+                unlockSiteForAdmin();
+                if (pinErr) pinErr.classList.add('hidden');
+
+                const shell = document.getElementById('clients-modal-shell');
+                const subtitle = document.getElementById('clients-topbar-subtitle');
+                if (shell) shell.style.maxWidth = '1000px';
+                if (subtitle) subtitle.textContent = 'База заявок, контактов и сохранённых расчётов';
+
+                document.getElementById('clients-login-box')?.classList.add('hidden');
+                document.getElementById('clients-content-box')?.classList.remove('hidden');
+                renderClientsRecordsList();
+                showToast('Доступ к базе клиентов открыт');
+            } else if (pinErr) {
+                pinErr.classList.remove('hidden');
+            }
         }
 
         function closeClientsInfoModal() {
@@ -2365,18 +2960,27 @@
                 return;
             }
 
-            window.CLIENTS_RECORDS.unshift({
+            const newClient = {
                 id: 'client_' + Date.now(),
                 name,
                 phone,
                 city,
                 price,
                 note,
-                createdAt: new Date().toLocaleDateString('ru-RU')
-            });
+                createdAt: new Date().toLocaleDateString('ru-RU'),
+                createdAtTs: Date.now()
+            };
+
+            window.CLIENTS_RECORDS.unshift(newClient);
 
             saveClientsListToCache();
             renderClientsRecordsList();
+            if (window.cloudSync && window.cloudSync.enabled) {
+                if (typeof window.cloudSync.saveClient === 'function') {
+                    window.cloudSync.saveClient(newClient);
+                }
+                window.cloudSync.saveAll();
+            }
 
             if (nameInp) nameInp.value = '';
             if (phoneInp) phoneInp.value = '';
@@ -2384,29 +2988,19 @@
             if (priceInp) priceInp.value = '';
             if (noteInp) noteInp.value = '';
 
-            showToast(`Клиент «${name}» добавлен`);
+            showToast(`Клиент «${name}» добавлен и сохранён в облако`);
         }
 
         function deleteClientRecord(clientId) {
             window.CLIENTS_RECORDS = window.CLIENTS_RECORDS.filter(c => c.id !== clientId);
             saveClientsListToCache();
             renderClientsRecordsList();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-
-            if (nameInp) nameInp.value = '';
-            if (phoneInp) phoneInp.value = '';
-            if (cityInp) cityInp.value = '';
-            if (priceInp) priceInp.value = '';
-            if (noteInp) noteInp.value = '';
-
-            showToast(`Клиент «${name}» добавлен`);
-        }
-
-        function deleteClientRecord(clientId) {
-            window.CLIENTS_RECORDS = window.CLIENTS_RECORDS.filter(c => c.id !== clientId);
-            saveClientsListToCache();
-            renderClientsRecordsList();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            if (window.cloudSync && window.cloudSync.enabled) {
+                if (typeof window.cloudSync.deleteClient === 'function') {
+                    window.cloudSync.deleteClient(clientId);
+                }
+                window.cloudSync.saveAll();
+            }
             showToast('Запись клиента удалена');
         }
 
@@ -2428,27 +3022,40 @@
             if (badgeEl) badgeEl.textContent = String(records.length);
 
             if (filtered.length === 0) {
-                listEl.innerHTML = `<div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 text-center text-xs text-stone-400">${query ? 'Ничего не найдено по запросу' : 'Список клиентов пока пуст'}</div>`;
+                listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400 bg-stone-50 rounded-2xl border border-dashed border-stone-200">${query ? 'По вашему запросу клиенты не найдены' : 'Список клиентов пока пуст'}</div>`;
                 return;
             }
 
             listEl.innerHTML = filtered.map(c => `
-                <div class="p-3.5 rounded-2xl bg-white border border-stone-200 flex items-start justify-between gap-3">
+                <div class="bg-white rounded-2xl p-3.5 border border-stone-200 flex items-start justify-between gap-3 shadow-sm">
                     <div class="min-w-0 flex-1 space-y-1">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-xs sm:text-sm font-extrabold text-stone-900">${c.name || 'Без имени'}</span>
+                            <span class="text-xs sm:text-sm font-extrabold text-stone-900">${c.name || ''}</span>
                             ${c.city ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">${c.city}</span>` : ''}
-                            ${c.createdAt ? `<span class="text-[11px] text-stone-400">${c.createdAt}</span>` : ''}
+                            ${c.createdAt ? `<span class="text-[10px] font-medium text-stone-400">${c.createdAt}</span>` : ''}
                         </div>
                         <div class="text-xs font-bold text-emerald-700">${c.phone || ''}</div>
                         ${c.note ? `<div class="text-[11px] text-stone-500">${c.note}</div>` : ''}
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <span class="text-xs sm:text-sm font-black text-stone-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl whitespace-nowrap">${Number(c.price || 0).toLocaleString('ru-RU')} ₽</span>
-                        <button type="button" onclick="deleteClientRecord('${c.id}')" title="Удалить клиента" class="w-8 h-8 rounded-xl bg-stone-50 hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition">✕</button>
+                        ${c.price > 0 ? `<span class="text-xs font-extrabold text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl whitespace-nowrap">${Number(c.price).toLocaleString('ru-RU')} ₽</span>` : ''}
+                        <button type="button" onclick="deleteClientRecord('${c.id}')" class="w-8 h-8 rounded-xl bg-stone-50 hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center text-xs font-bold transition" title="Удалить клиента">✕</button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function updateRangeFill(slider) {
+            if (!slider) return;
+            const min = parseFloat(slider.min) || 0;
+            const max = parseFloat(slider.max) || 100;
+            const val = parseFloat(slider.value) || 0;
+            const pct = max > min ? Math.min(100, Math.max(0, ((val - min) / (max - min)) * 100)) : 0;
+            slider.style.setProperty('--range-progress', `${pct}%`);
+        }
+
+        function updateAllRangeFills() {
+            document.querySelectorAll('input[type="range"]').forEach(updateRangeFill);
         }
 
         function syncAreaFromSlider(val) {
@@ -2458,14 +3065,15 @@
             const lbl = document.getElementById('area-val-label');
             if (inp) inp.value = num;
             if (lbl) lbl.textContent = num;
+            updateRangeFill(document.getElementById('slider-area'));
             if (!isPerimeterManuallyEdited) {
                 const autoP = num > 0 ? Math.round(Math.sqrt(num) * 4) : 0;
                 calcState.perimeter = autoP;
-                const pSlider = document.getElementById('slider-perimeter');
                 const pInp = document.getElementById('input-perimeter');
+                const pSlider = document.getElementById('slider-perimeter');
                 const pLbl = document.getElementById('perimeter-val-label');
-                if (pSlider) pSlider.value = Math.min(120, autoP);
                 if (pInp) pInp.value = autoP;
+                if (pSlider) pSlider.value = Math.min(120, autoP);
                 if (pLbl) pLbl.textContent = autoP;
             }
             calculateTotal();
@@ -2476,16 +3084,19 @@
             calcState.area = num;
             const slider = document.getElementById('slider-area');
             const lbl = document.getElementById('area-val-label');
-            if (slider) slider.value = Math.min(100, num);
+            if (slider) {
+                slider.value = Math.min(100, num);
+                updateRangeFill(slider);
+            }
             if (lbl) lbl.textContent = num;
             if (!isPerimeterManuallyEdited) {
                 const autoP = num > 0 ? Math.round(Math.sqrt(num) * 4) : 0;
                 calcState.perimeter = autoP;
-                const pSlider = document.getElementById('slider-perimeter');
                 const pInp = document.getElementById('input-perimeter');
+                const pSlider = document.getElementById('slider-perimeter');
                 const pLbl = document.getElementById('perimeter-val-label');
-                if (pSlider) pSlider.value = Math.min(120, autoP);
                 if (pInp) pInp.value = autoP;
+                if (pSlider) pSlider.value = Math.min(120, autoP);
                 if (pLbl) pLbl.textContent = autoP;
             }
             calculateTotal();
@@ -2498,6 +3109,41 @@
             const inp = document.getElementById('input-perimeter');
             const lbl = document.getElementById('perimeter-val-label');
             if (inp) inp.value = num;
+            if (lbl) lbl.textContent = num;
+            calculateTotal();
+        }
+
+        function syncPerimeterFromInput(val) {
+            isPerimeterManuallyEdited = true;
+            const num = Math.max(0, parseFloat(val) || 0);
+            calcState.perimeter = num;
+            const slider = document.getElementById('slider-perimeter');
+            const lbl = document.getElementById('perimeter-val-label');
+            if (slider) slider.value = Math.min(120, num);
+            if (lbl) lbl.textContent = num;
+            calculateTotal();
+        }
+
+        function syncRubberInsertFromSlider(val) {
+            const num = Math.max(0, parseFloat(val) || 0);
+            calcState.rubberInsertLength = num;
+            const inp = document.getElementById('input-rubber-insert');
+            const lbl = document.getElementById('rubber-insert-val-label');
+            if (inp) inp.value = num;
+            if (lbl) lbl.textContent = num;
+            updateRangeFill(document.getElementById('slider-rubber-insert'));
+            calculateTotal();
+        }
+
+        function syncRubberInsertFromInput(val) {
+            const num = Math.max(0, parseFloat(val) || 0);
+            calcState.rubberInsertLength = num;
+            const slider = document.getElementById('slider-rubber-insert');
+            const lbl = document.getElementById('rubber-insert-val-label');
+            if (slider) {
+                slider.value = Math.min(120, num);
+                updateRangeFill(slider);
+            }
             if (lbl) lbl.textContent = num;
             calculateTotal();
         }
@@ -2556,6 +3202,7 @@
             const lbl = document.getElementById('dismantle-val-label');
             if (inp) inp.value = num;
             if (lbl) lbl.textContent = num;
+            updateRangeFill(document.getElementById('slider-dismantle'));
             calculateTotal();
         }
 
@@ -2564,7 +3211,10 @@
             calcState.dismantleArea = num;
             const slider = document.getElementById('slider-dismantle');
             const lbl = document.getElementById('dismantle-val-label');
-            if (slider) slider.value = Math.min(100, num);
+            if (slider) {
+                slider.value = Math.min(100, num);
+                updateRangeFill(slider);
+            }
             if (lbl) lbl.textContent = num;
             calculateTotal();
         }
@@ -2589,6 +3239,7 @@
             const defaultId = cat.defaultVariantId || cat.items[0].id;
             if (delta > 0) {
                 calcState.lampVariants[defaultId] = (calcState.lampVariants[defaultId] || 0) + delta;
+                openLampCategoryVariants(catKey);
             } else {
                 const activeItem = [...cat.items].reverse().find(i => (calcState.lampVariants[i.id] || 0) > 0);
                 if (activeItem) {
@@ -2596,7 +3247,13 @@
                 }
             }
             syncCategoryCountersUI();
-            if (window.activeLampCategory === catKey) {
+
+            const items = window.LAMP_VARIANTS_CATALOG[catKey]?.items || [];
+            const totalCatQty = items.reduce((sum, item) => sum + (calcState.lampVariants[item.id] || 0), 0);
+
+            if (delta < 0 && totalCatQty === 0 && window.activeLampCategory === catKey) {
+                closeLampVariantsDrawer();
+            } else if (window.activeLampCategory === catKey) {
                 renderLampVariantsGrid(catKey);
             }
             calculateTotal();
@@ -2607,6 +3264,7 @@
             calcState.ledLength = num;
             const lbl = document.getElementById('led-len-display');
             if (lbl) lbl.textContent = num;
+            updateRangeFill(document.getElementById('slider-led-length'));
             calculateTotal();
         }
 
@@ -2618,12 +3276,12 @@
                 const checked = Boolean(calcState.selectedExtraServices[srv.id]);
                 const priceUnitText = srv.unit === 'per_m' ? `${Number(srv.price).toLocaleString('ru-RU')} ₽/м.п.` : `${Number(srv.price).toLocaleString('ru-RU')} ₽`;
                 return `
-                    <label class="flex items-start gap-2.5 p-3 rounded-xl border ${checked ? 'border-emerald-500 bg-emerald-50/50' : 'border-stone-200 bg-stone-50/50'} cursor-pointer transition">
-                        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleExtraService('${srv.id}', this.checked)" class="mt-0.5 w-4 h-4 rounded border-stone-300">
-                        <div class="min-w-0 flex-1">
-                            <span class="font-bold text-stone-900 block leading-snug">${srv.name}</span>
-                            ${srv.desc ? `<span class="text-[11px] text-stone-500 block">${srv.desc}</span>` : ''}
-                            <span class="text-[11px] font-extrabold text-emerald-700 mt-0.5 block">+ ${priceUnitText}</span>
+                    <label class="w-full flex items-start gap-3 p-4 rounded-2xl border ${checked ? 'border-emerald-500 bg-emerald-50/50' : 'border-stone-200 bg-stone-50/50'} cursor-pointer transition">
+                        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleExtraService('${srv.id}', this.checked)" class="mt-1 w-4 h-4 rounded border-stone-300 shrink-0">
+                        <div class="min-w-0 flex-1 w-full text-justify space-y-1">
+                            <span class="text-sm font-bold text-stone-900 block leading-snug w-full">${srv.name}</span>
+                            ${srv.desc ? `<span class="text-xs text-stone-500 block leading-relaxed w-full">${srv.desc}</span>` : ''}
+                            <span class="text-xs font-extrabold text-emerald-700 pt-0.5 block text-left">+ ${priceUnitText}</span>
                         </div>
                     </label>
                 `;
@@ -2802,7 +3460,12 @@
 
         function sendCalculationToWhatsApp() {
             const text = encodeURIComponent(buildEstimateText());
-            window.open(`https://wa.me/79298966736?text=${text}`, '_blank');
+            window.open(`https://wa.me/${COMPANY_PHONE.digits}?text=${text}`, '_blank');
+        }
+
+        function requestMeasurementInWhatsApp() {
+            const text = encodeURIComponent('Здравствуйте! Хочу записаться на бесплатный замер натяжного потолка Decarat.');
+            window.open(`https://wa.me/${COMPANY_PHONE.digits}?text=${text}`, '_blank');
         }
 
         function requestMeasurementInWhatsApp() {
@@ -2901,6 +3564,7 @@
         }
 
         function lockSiteSession() {
+            window.isAdminAuthenticated = false;
             localStorage.removeItem(STORAGE_KEY_AUTH_CODE);
             if (window.isAccessRestricted) {
                 initAccessControl();
@@ -2914,12 +3578,744 @@
             showToast('Кэш доступа очищен');
         }
 
+        window.isAdminAuthenticated = false;
+        window.activeAdminTab = 'fabrics';
+        window.pendingEditPhotoDataUrl = null;
+
+        function updateAdminSidebarCounts() {
+            const fabEl = document.getElementById('admin-nav-fabrics-count');
+            if (fabEl) fabEl.textContent = String(window.FABRICS_LIST.length);
+
+            const ledEl = document.getElementById('admin-nav-led-count');
+            if (ledEl) ledEl.textContent = String(window.LED_LIST.length);
+
+            const srvEl = document.getElementById('admin-nav-services-count');
+            if (srvEl) srvEl.textContent = String(window.EXTRA_SERVICES_LIST.length);
+
+            const keysEl = document.getElementById('admin-nav-keys-count');
+            if (keysEl) keysEl.textContent = String(getAllowedKeys().length);
+        }
+
+        function switchAdminTab(tabName) {
+            window.activeAdminTab = tabName;
+            ['fabrics', 'lamps', 'led', 'services', 'access'].forEach(key => {
+                const btn = document.getElementById(`admin-tab-btn-${key}`);
+                const sec = document.getElementById(`admin-section-${key}`);
+                if (btn) btn.classList.toggle('is-active', key === tabName);
+                if (sec) sec.classList.toggle('hidden', key !== tabName);
+            });
+        }
+
+        function setAdminModalLayout(isAuthenticated) {
+            const shell = document.getElementById('admin-modal-shell');
+            const badge = document.getElementById('admin-topbar-badge');
+            const subtitle = document.getElementById('admin-topbar-subtitle');
+            if (shell) {
+                shell.style.maxWidth = isAuthenticated ? '1040px' : '420px';
+            }
+            if (badge) {
+                badge.classList.toggle('hidden', !isAuthenticated);
+            }
+            if (subtitle) {
+                subtitle.textContent = isAuthenticated
+                    ? 'Настройка прайса, каталога светильников, LED-подсветки и ключей доступа'
+                    : 'Авторизация владельца';
+            }
+        }
+
         function openAdminModal() {
-            showToast('Для изменения настроек используйте редактирование элементов');
+            const modal = document.getElementById('admin-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+
+            const loginBox = document.getElementById('admin-login-box');
+            const contentBox = document.getElementById('admin-content-box');
+            const pinErr = document.getElementById('admin-pin-error');
+            const pinInp = document.getElementById('admin-pin-input');
+
+            if (pinErr) pinErr.classList.add('hidden');
+            if (pinInp) pinInp.value = '';
+
+            setAdminModalLayout(Boolean(window.isAdminAuthenticated));
+
+            if (window.isAdminAuthenticated) {
+                if (loginBox) loginBox.classList.add('hidden');
+                if (contentBox) contentBox.classList.remove('hidden');
+                renderAllAdminSections();
+            } else {
+                if (loginBox) loginBox.classList.remove('hidden');
+                if (contentBox) contentBox.classList.add('hidden');
+                if (pinInp) setTimeout(() => pinInp.focus(), 50);
+            }
+            syncBodyScrollLock();
+        }
+
+        function verifyAdminPin(e) {
+            if (e) e.preventDefault();
+            const pinInp = document.getElementById('admin-pin-input');
+            const pinErr = document.getElementById('admin-pin-error');
+            const val = (pinInp ? pinInp.value : '').trim();
+            if (val === getStoredAdminPin()) {
+                window.isAdminAuthenticated = true;
+                unlockSiteForAdmin();
+                setAdminModalLayout(true);
+                if (pinErr) pinErr.classList.add('hidden');
+                document.getElementById('admin-login-box')?.classList.add('hidden');
+                document.getElementById('admin-content-box')?.classList.remove('hidden');
+                renderAllAdminSections();
+                showToast('Вы вошли в панель управления');
+            } else if (pinErr) {
+                pinErr.classList.remove('hidden');
+            }
         }
 
         function closeAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
             syncBodyScrollLock();
+        }
+
+        function renderAllAdminSections() {
+            const shadowInp = document.getElementById('adm-prof-shadow');
+            const floatInp = document.getElementById('adm-prof-floating');
+            if (shadowInp) shadowInp.value = window.PRICES.profiles.shadow.price;
+            if (floatInp) floatInp.value = window.PRICES.profiles.floating.price;
+
+            renderAdminFabricsList();
+            renderAdminLampVariantsList();
+            renderAdminLedList();
+            renderAdminExtraServicesList();
+            renderAdminAccessKeysList();
+
+            const lockToggle = document.getElementById('adm-access-lock-toggle');
+            if (lockToggle) lockToggle.checked = Boolean(window.isAccessRestricted);
+            updateAdminSidebarCounts();
+        }
+
+        function renderAdminFabricsList() {
+            const listEl = document.getElementById('admin-fabrics-list');
+            if (!listEl) return;
+            listEl.innerHTML = window.FABRICS_LIST.map(f => `
+                <div class="admin-item-card flex items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <div class="text-xs sm:text-sm font-bold text-stone-900 truncate">${f.name}</div>
+                        <div class="text-[11px] text-stone-500 truncate mt-0.5">${f.desc || ''}</div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-xl whitespace-nowrap">${Number(f.price).toLocaleString('ru-RU')} ₽/м²</span>
+                        <button type="button" onclick="openAdminEditModal('fabric', '', '${f.id}')" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать">✎</button>
+                        ${window.FABRICS_LIST.length > 1 ? `<button type="button" onclick="deleteFabricFromAdmin('${f.id}')" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить">✕</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addNewFabricFromAdmin() {
+            const nameInp = document.getElementById('new-fabric-name');
+            const priceInp = document.getElementById('new-fabric-price');
+            const descInp = document.getElementById('new-fabric-desc');
+            const fileInp = document.getElementById('new-fabric-file');
+
+            const name = (nameInp ? nameInp.value : '').trim();
+            const price = parseInt(priceInp ? priceInp.value : '0', 10);
+            const desc = (descInp ? descInp.value : '').trim();
+
+            if (!name || isNaN(price) || price <= 0) {
+                showToast('Укажите название и корректную цену полотна');
+                return;
+            }
+
+            const finalizeAdd = (imgData) => {
+                const newId = 'fabric_' + Date.now();
+                window.FABRICS_LIST.push({
+                    id: newId,
+                    name,
+                    shortName: name,
+                    desc,
+                    price,
+                    badge: '',
+                    img: imgData || '',
+                    placeholderTitle: name,
+                    placeholderStyle: 'bg-emerald-50 text-emerald-800'
+                });
+                saveFabricsCatalogToCache();
+                renderFabricsGrid();
+                renderAdminFabricsList();
+                updateAdminSidebarCounts();
+                calculateTotal();
+                if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+
+                if (nameInp) nameInp.value = '';
+                if (priceInp) priceInp.value = '';
+                if (descInp) descInp.value = '';
+                clearAdminFileZone(null, 'new-fabric');
+                showToast(`Полотно «${name}» добавлено`);
+            };
+
+            const file = fileInp && fileInp.files && fileInp.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => finalizeAdd(ev.target.result);
+                reader.readAsDataURL(file);
+            } else {
+                finalizeAdd('');
+            }
+        }
+
+        function deleteFabricFromAdmin(fabricId) {
+            if (window.FABRICS_LIST.length <= 1) return;
+            window.FABRICS_LIST = window.FABRICS_LIST.filter(f => f.id !== fabricId);
+            if (calcState.fabricKey === fabricId && window.FABRICS_LIST[0]) {
+                calcState.fabricKey = window.FABRICS_LIST[0].id;
+            }
+            saveFabricsCatalogToCache();
+            renderFabricsGrid();
+            renderAdminFabricsList();
+            updateAdminSidebarCounts();
+            calculateTotal();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Полотно удалено');
+        }
+
+        function saveAdminPrices() {
+            const shadowInp = document.getElementById('adm-prof-shadow');
+            const floatInp = document.getElementById('adm-prof-floating');
+            if (shadowInp) {
+                const p = Math.max(0, parseInt(shadowInp.value, 10) || 0);
+                window.PRICES.profiles.shadow.price = p;
+                const lbl = document.getElementById('price-display-profile-shadow');
+                if (lbl) lbl.textContent = `+ ${p.toLocaleString('ru-RU')} ₽ / пог. метр`;
+            }
+            if (floatInp) {
+                const p = Math.max(0, parseInt(floatInp.value, 10) || 0);
+                window.PRICES.profiles.floating.price = p;
+                const lbl = document.getElementById('price-display-profile-floating');
+                if (lbl) lbl.textContent = `+ ${p.toLocaleString('ru-RU')} ₽ / пог. метр`;
+            }
+            calculateTotal();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Цены профилей обновлены');
+        }
+
+        function resetAllPrices() {
+            window.PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
+            window.FABRICS_LIST = JSON.parse(JSON.stringify(DEFAULT_FABRICS_LIST));
+            saveFabricsCatalogToCache();
+            renderFabricsGrid();
+            renderAllAdminSections();
+            syncPriceLabels();
+            calculateTotal();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Цены и полотна сброшены к заводским');
+        }
+
+        function renderAdminLampVariantsList() {
+            const container = document.getElementById('admin-lamp-variants-list');
+            if (!container) return;
+            container.innerHTML = ['gx53', 'tube', 'track'].map(catKey => {
+                const cat = window.LAMP_VARIANTS_CATALOG[catKey];
+                if (!cat) return '';
+                return `
+                    <div class="admin-card space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+                            <h5 class="text-xs sm:text-sm font-extrabold text-stone-900">${cat.title}</h5>
+                            <span class="text-[11px] text-stone-400">${cat.items.length} поз.</span>
+                        </div>
+                        <div class="space-y-2">
+                            ${cat.items.map(v => `
+                                <div class="admin-price-row">
+                                    <img src="${v.img || LAMP_FALLBACK_SVG}" onerror="this.onerror=null;this.src=LAMP_FALLBACK_SVG" class="w-10 h-10 rounded-xl object-contain bg-white border border-stone-200 p-1 shrink-0">
+                                    <div class="min-w-0 flex-1 text-left">
+                                        <div class="text-xs font-bold text-stone-900 truncate">${v.name}</div>
+                                        <div class="text-[11px] text-stone-500 truncate">${v.desc || ''}</div>
+                                    </div>
+                                    <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl whitespace-nowrap">${Number(v.price).toLocaleString('ru-RU')} ₽/${v.unit}</span>
+                                    <button type="button" onclick="openAdminEditModal('lamp', '${catKey}', '${v.id}')" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition">✎</button>
+                                    ${cat.items.length > 1 ? `<button type="button" onclick="deleteLampVariantFromAdmin('${catKey}', '${v.id}')" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition">✕</button>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addNewLampVariantFromAdmin() {
+            const catKey = document.getElementById('new-lamp-category')?.value || 'gx53';
+            const nameInp = document.getElementById('new-lamp-name');
+            const priceInp = document.getElementById('new-lamp-price');
+            const unitVal = document.getElementById('new-lamp-unit')?.value || 'шт';
+            const descInp = document.getElementById('new-lamp-desc');
+            const fileInp = document.getElementById('new-lamp-file');
+
+            const name = (nameInp ? nameInp.value : '').trim();
+            const price = parseInt(priceInp ? priceInp.value : '0', 10);
+            const desc = (descInp ? descInp.value : '').trim();
+
+            if (!name || isNaN(price) || price <= 0) {
+                showToast('Укажите название и цену светильника');
+                return;
+            }
+
+            const finalizeAdd = (imgData) => {
+                const cat = window.LAMP_VARIANTS_CATALOG[catKey];
+                if (!cat) return;
+                cat.items.push({
+                    id: `${catKey}_${Date.now()}`,
+                    name,
+                    desc,
+                    unit: unitVal,
+                    price,
+                    img: imgData || LAMP_FALLBACK_SVG
+                });
+                syncVariantBasePricesWithAdmin();
+                saveLampCatalogToCache();
+                syncPriceLabels();
+                renderAdminLampVariantsList();
+                if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
+                if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+
+                if (nameInp) nameInp.value = '';
+                if (priceInp) priceInp.value = '';
+                if (descInp) descInp.value = '';
+                clearAdminFileZone(null, 'new-lamp');
+                showToast(`Светильник «${name}» добавлен`);
+            };
+
+            const file = fileInp && fileInp.files && fileInp.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => finalizeAdd(ev.target.result);
+                reader.readAsDataURL(file);
+            } else {
+                finalizeAdd('');
+            }
+        }
+
+        function deleteLampVariantFromAdmin(catKey, variantId) {
+            const cat = window.LAMP_VARIANTS_CATALOG[catKey];
+            if (!cat || cat.items.length <= 1) return;
+            cat.items = cat.items.filter(i => i.id !== variantId);
+            delete calcState.lampVariants[variantId];
+            syncCategoryCountersUI();
+            syncVariantBasePricesWithAdmin();
+            saveLampCatalogToCache();
+            syncPriceLabels();
+            renderAdminLampVariantsList();
+            if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
+            calculateTotal();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Модель светильника удалена');
+        }
+
+        function resetLampCatalogToDefault() {
+            window.LAMP_VARIANTS_CATALOG = JSON.parse(JSON.stringify(DEFAULT_LAMP_VARIANTS_CATALOG));
+            syncVariantBasePricesWithAdmin();
+            saveLampCatalogToCache();
+            syncPriceLabels();
+            renderAdminLampVariantsList();
+            if (window.activeLampCategory) renderLampVariantsGrid(window.activeLampCategory);
+            calculateTotal();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Каталог светильников восстановлен');
+        }
+
+        function renderAdminExtraServicesList() {
+            const listEl = document.getElementById('admin-extra-services-list');
+            if (!listEl) return;
+            listEl.innerHTML = window.EXTRA_SERVICES_LIST.map(s => `
+                <div class="admin-item-card flex items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <div class="text-xs sm:text-sm font-bold text-stone-900 truncate">${s.name}</div>
+                        ${s.desc ? `<div class="text-[11px] text-stone-500 truncate mt-0.5">${s.desc}</div>` : ''}
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-xl whitespace-nowrap">${Number(s.price).toLocaleString('ru-RU')} ₽${s.unit === 'per_m' ? '/м.п.' : ''}</span>
+                        <button type="button" onclick="openAdminEditModal('service', '', '${s.id}')" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать">✎</button>
+                        <button type="button" onclick="deleteExtraServiceFromAdmin('${s.id}')" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addNewExtraServiceFromAdmin() {
+            const nameInp = document.getElementById('new-service-name');
+            const priceInp = document.getElementById('new-service-price');
+            const unitVal = document.getElementById('new-service-unit')?.value || 'fixed';
+            const descInp = document.getElementById('new-service-desc');
+
+            const name = (nameInp ? nameInp.value : '').trim();
+            const price = parseInt(priceInp ? priceInp.value : '0', 10);
+            const desc = (descInp ? descInp.value : '').trim();
+
+            if (!name || isNaN(price) || price <= 0) {
+                showToast('Укажите название и цену услуги');
+                return;
+            }
+
+            window.EXTRA_SERVICES_LIST.push({
+                id: 'srv_' + Date.now(),
+                name,
+                desc,
+                price,
+                unit: unitVal,
+                inStep4: true,
+                isBuiltin: false
+            });
+
+            saveExtraServicesToCache();
+            renderExtraServicesGrid();
+            renderAdminExtraServicesList();
+            updateAdminSidebarCounts();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+
+            if (nameInp) nameInp.value = '';
+            if (priceInp) priceInp.value = '';
+            if (descInp) descInp.value = '';
+            showToast(`Услуга «${name}» добавлена`);
+        }
+
+        function deleteExtraServiceFromAdmin(srvId) {
+            window.EXTRA_SERVICES_LIST = window.EXTRA_SERVICES_LIST.filter(s => s.id !== srvId);
+            delete calcState.selectedExtraServices[srvId];
+            saveExtraServicesToCache();
+            renderExtraServicesGrid();
+            renderAdminExtraServicesList();
+            updateAdminSidebarCounts();
+            calculateTotal();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Услуга удалена');
+        }
+
+        function resetExtraServicesToDefault() {
+            window.EXTRA_SERVICES_LIST = JSON.parse(JSON.stringify(DEFAULT_EXTRA_SERVICES_LIST));
+            saveExtraServicesToCache();
+            syncPriceLabels();
+            renderExtraServicesGrid();
+            renderAdminExtraServicesList();
+            updateAdminSidebarCounts();
+            calculateTotal();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Дополнительные работы восстановлены');
+        }
+
+        function toggleAccessRestriction(locked) {
+            window.isAccessRestricted = Boolean(locked);
+            try {
+                localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted));
+            } catch (e) {}
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast(window.isAccessRestricted ? 'Закрытый доступ включён' : 'Свободный доступ включён');
+        }
+
+        function handleNewKeyRoleChange(role) {
+            const wrap = document.getElementById('new-access-discount-wrap');
+            if (wrap) wrap.classList.toggle('hidden', role !== 'master');
+        }
+
+        function renderAdminAccessKeysList() {
+            const listEl = document.getElementById('admin-access-keys-list');
+            const countEl = document.getElementById('active-keys-count');
+            const keys = getAllowedKeys();
+            if (countEl) countEl.textContent = String(keys.length);
+            if (!listEl) return;
+
+            listEl.innerHTML = keys.map((k, idx) => {
+                const isMaster = k.role === 'master';
+                const badge = isMaster
+                    ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">Мастер -${k.discount || 15}%</span>`
+                    : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">Клиент</span>`;
+                return `
+                    <div class="admin-item-card flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs sm:text-sm font-extrabold text-emerald-800 tracking-wider">${k.code}</span>
+                                ${badge}
+                            </div>
+                            ${k.label ? `<div class="text-[11px] text-stone-500 mt-0.5 truncate">${k.label}</div>` : ''}
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="openAdminEditModal('key', '', '${idx}')" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition">✎</button>
+                            <button type="button" onclick="deleteAccessKeyFromAdmin(${idx})" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addAccessCodeFromAdmin() {
+            const codeInp = document.getElementById('new-access-code');
+            const labelInp = document.getElementById('new-access-label');
+            const roleSel = document.getElementById('new-access-role');
+            const discInp = document.getElementById('new-access-discount');
+
+            const code = (codeInp ? codeInp.value : '').trim().toUpperCase();
+            const label = (labelInp ? labelInp.value : '').trim();
+            const role = roleSel ? roleSel.value : 'client';
+            const discount = role === 'master' ? Math.min(90, Math.max(1, parseInt(discInp ? discInp.value : '15', 10) || 15)) : 0;
+
+            if (!code) {
+                showToast('Введите код доступа');
+                return;
+            }
+            const keys = getAllowedKeys();
+            keys.push({ code, label, role, discount, active: true });
+            saveAllowedKeys(keys);
+            if (codeInp) codeInp.value = '';
+            if (labelInp) labelInp.value = '';
+            renderAdminAccessKeysList();
+            updateAdminSidebarCounts();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast(`Ключ ${code} выдан`);
+        }
+
+        function deleteAccessKeyFromAdmin(idx) {
+            const keys = getAllowedKeys();
+            keys.splice(idx, 1);
+            saveAllowedKeys(keys);
+            renderAdminAccessKeysList();
+            updateAdminSidebarCounts();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Ключ удалён');
+        }
+
+        function changeAdminPin() {
+            const inp = document.getElementById('new-admin-pin-input');
+            const newPin = (inp ? inp.value : '').trim();
+            if (newPin.length < 4) {
+                showToast('PIN-код должен содержать минимум 4 символа');
+                return;
+            }
+            saveStoredAdminPin(newPin);
+            window.isAdminAuthenticated = false;
+            if (inp) inp.value = '';
+            showToast('PIN-код администратора и базы клиентов обновлён');
+        }
+
+        function handleEditKeyRoleChange(role) {
+            const priceLabel = document.getElementById('edit-item-price-label');
+            if (priceLabel) {
+                priceLabel.textContent = role === 'master' ? 'Скидка мастера (%)' : 'Скидка (%)';
+            }
+        }
+
+        function openAdminEditModal(type, catKey, itemId) {
+            const modal = document.getElementById('admin-edit-item-modal');
+            if (!modal) return;
+
+            document.getElementById('edit-item-type').value = type;
+            document.getElementById('edit-item-cat').value = catKey || '';
+            document.getElementById('edit-item-id').value = itemId;
+            window.pendingEditPhotoDataUrl = null;
+
+            const unitWrap = document.getElementById('edit-item-unit-wrap');
+            const srvUnitWrap = document.getElementById('edit-item-service-unit-wrap');
+            const roleWrap = document.getElementById('edit-item-role-wrap');
+            const photoBox = document.getElementById('edit-item-photo-box');
+            const previewEl = document.getElementById('edit-item-photo-preview');
+            const removeBtn = document.getElementById('edit-item-remove-photo-btn');
+            const priceLabel = document.getElementById('edit-item-price-label');
+
+            unitWrap.classList.add('hidden');
+            srvUnitWrap.classList.add('hidden');
+            roleWrap.classList.add('hidden');
+            photoBox.classList.add('hidden');
+            if (priceLabel) priceLabel.textContent = 'Цена (₽)';
+
+            let item = null;
+            if (type === 'fabric') {
+                item = getFabricById(itemId);
+                photoBox.classList.remove('hidden');
+            } else if (type === 'lamp') {
+                item = (window.LAMP_VARIANTS_CATALOG[catKey]?.items || []).find(i => i.id === itemId);
+                unitWrap.classList.remove('hidden');
+                photoBox.classList.remove('hidden');
+                if (item) document.getElementById('edit-item-unit').value = item.unit || 'шт';
+            } else if (type === 'led') {
+                item = getLedById(itemId);
+            } else if (type === 'service') {
+                item = getExtraServiceById(itemId);
+                srvUnitWrap.classList.remove('hidden');
+                if (item) document.getElementById('edit-item-service-unit').value = item.unit || 'fixed';
+            } else if (type === 'key') {
+                const keys = getAllowedKeys();
+                const k = keys[Number(itemId)];
+                if (!k) return;
+                roleWrap.classList.remove('hidden');
+                document.getElementById('edit-item-name').value = k.code || '';
+                document.getElementById('edit-item-desc').value = k.label || '';
+                document.getElementById('edit-item-role').value = k.role || 'client';
+                document.getElementById('edit-item-price').value = k.discount || 0;
+                handleEditKeyRoleChange(k.role || 'client');
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+                syncBodyScrollLock();
+                return;
+            }
+
+            if (!item) return;
+            document.getElementById('edit-item-name').value = item.name || '';
+            document.getElementById('edit-item-desc').value = item.desc || '';
+            document.getElementById('edit-item-price').value = item.price || 0;
+
+            if (item.img) {
+                previewEl.innerHTML = `<img src="${item.img}" class="w-full h-full object-cover">`;
+                removeBtn.classList.remove('hidden');
+            } else {
+                previewEl.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+                removeBtn.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            syncBodyScrollLock();
+        }
+
+        function handleAdminFileZoneChange(input, prefix) {
+            const zone = document.getElementById(`${prefix}-upload-zone`);
+            const thumb = document.getElementById(`${prefix}-thumb`);
+            const label = document.getElementById(`${prefix}-file-label`);
+            const clearBtn = document.getElementById(`${prefix}-clear-btn`);
+            const file = input && input.files && input.files[0];
+
+            if (!file) {
+                clearAdminFileZone(null, prefix);
+                return;
+            }
+
+            if (zone) zone.classList.add('has-file');
+            if (label) {
+                label.textContent = file.name;
+                label.classList.remove('text-stone-600');
+                label.classList.add('text-emerald-800');
+            }
+            if (clearBtn) clearBtn.classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                if (thumb) {
+                    thumb.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearAdminFileZone(e, prefix) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            const fileInp = document.getElementById(`${prefix}-file`);
+            const zone = document.getElementById(`${prefix}-upload-zone`);
+            const thumb = document.getElementById(`${prefix}-thumb`);
+            const label = document.getElementById(`${prefix}-file-label`);
+            const clearBtn = document.getElementById(`${prefix}-clear-btn`);
+
+            if (fileInp) fileInp.value = '';
+            if (zone) zone.classList.remove('has-file');
+            if (thumb) {
+                thumb.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+            }
+            if (label) {
+                label.textContent = 'Выбрать фото';
+                label.classList.remove('text-emerald-800');
+                label.classList.add('text-stone-600');
+            }
+            if (clearBtn) clearBtn.classList.add('hidden');
+        }
+
+        function handleEditModalFileUpload(input) {
+            const file = input && input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                window.pendingEditPhotoDataUrl = ev.target.result;
+                document.getElementById('edit-item-photo-preview').innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`;
+                document.getElementById('edit-item-remove-photo-btn').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearEditModalPhoto() {
+            window.pendingEditPhotoDataUrl = '';
+            document.getElementById('edit-item-photo-preview').innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+            document.getElementById('edit-item-remove-photo-btn').classList.add('hidden');
+        }
+
+        function saveAdminEditedItem(e) {
+            if (e) e.preventDefault();
+            const type = document.getElementById('edit-item-type').value;
+            const catKey = document.getElementById('edit-item-cat').value;
+            const itemId = document.getElementById('edit-item-id').value;
+            const name = document.getElementById('edit-item-name').value.trim();
+            const desc = document.getElementById('edit-item-desc').value.trim();
+            const price = Math.max(0, parseInt(document.getElementById('edit-item-price').value, 10) || 0);
+
+            if (type === 'fabric') {
+                const item = getFabricById(itemId);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    if (window.pendingEditPhotoDataUrl !== null) item.img = window.pendingEditPhotoDataUrl;
+                    saveFabricsCatalogToCache();
+                    renderFabricsGrid();
+                }
+            } else if (type === 'lamp') {
+                const item = (window.LAMP_VARIANTS_CATALOG[catKey]?.items || []).find(i => i.id === itemId);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    item.unit = document.getElementById('edit-item-unit').value;
+                    if (window.pendingEditPhotoDataUrl !== null) item.img = window.pendingEditPhotoDataUrl;
+                    syncVariantBasePricesWithAdmin();
+                    saveLampCatalogToCache();
+                    if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
+                }
+            } else if (type === 'led') {
+                const item = getLedById(itemId);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    syncLedPricesMap();
+                    saveLedCatalogToCache();
+                    renderLedSelectOptions();
+                }
+            } else if (type === 'service') {
+                const item = getExtraServiceById(itemId);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    item.unit = document.getElementById('edit-item-service-unit').value;
+                    saveExtraServicesToCache();
+                    renderExtraServicesGrid();
+                }
+            } else if (type === 'key') {
+                const keys = getAllowedKeys();
+                const k = keys[Number(itemId)];
+                if (k) {
+                    const role = document.getElementById('edit-item-role').value;
+                    k.code = name.toUpperCase();
+                    k.label = desc;
+                    k.role = role;
+                    k.discount = role === 'master' ? Math.min(90, Math.max(1, price)) : 0;
+                    saveAllowedKeys(keys);
+                }
+            }
+
+            syncPriceLabels();
+            renderAllAdminSections();
+            calculateTotal();
+            closeAdminEditModal();
+            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
+            showToast('Изменения сохранены');
         }
 
         function closeAdminEditModal() {
@@ -2930,8 +4326,6 @@
             }
             syncBodyScrollLock();
         }
-
-        function updateAdminSidebarCounts() {}
 
         function syncPriceLabels() {
             const maskSrv = getExtraServiceById('mask');
@@ -2964,15 +4358,258 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            const footerPhoneLink = document.getElementById('footer-phone-link');
+            if (footerPhoneLink) {
+                footerPhoneLink.href = `tel:+${COMPANY_PHONE.digits}`;
+                footerPhoneLink.textContent = COMPANY_PHONE.formatted;
+            }
             syncVariantBasePricesWithAdmin();
             syncPriceLabels();
             renderFabricsGrid();
             renderLedSelectOptions();
             renderExtraServicesGrid();
             renderClientsRecordsList();
+            updateAllRangeFills();
             calculateTotal();
             initAccessControl();
         });
+    </script>
+
+    <!-- МОДУЛЬ ОБЛАЧНОЙ СИНХРОНИЗАЦИИ FIREBASE FIRESTORE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        (async function initDecaratCloudSync() {
+            const dotEl = document.getElementById('cloud-sync-dot');
+            const statusEl = document.getElementById('cloud-sync-status');
+
+            const updateCloudBadge = (state, text) => {
+                if (dotEl) {
+                    dotEl.className = state === 'ok'
+                        ? 'w-2 h-2 rounded-full bg-emerald-500'
+                        : state === 'sync'
+                            ? 'w-2 h-2 rounded-full bg-amber-400 animate-pulse'
+                            : 'w-2 h-2 rounded-full bg-stone-400';
+                }
+                if (statusEl) statusEl.textContent = text;
+            };
+
+            try {
+                if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                    updateCloudBadge('off', 'Локальный режим');
+                    return;
+                }
+
+                const firebaseConfig = typeof __firebase_config === 'string'
+                    ? JSON.parse(__firebase_config)
+                    : __firebase_config;
+
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'decarat-ceiling-app';
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+
+                updateCloudBadge('sync', 'Подключение к облаку...');
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                const user = auth.currentUser;
+                if (!user) {
+                    updateCloudBadge('off', 'Нет авторизации');
+                    return;
+                }
+
+                const stateDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'main_state');
+                const clientsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'decarat_clients');
+                let isApplyingRemote = false;
+
+                window.cloudSync = {
+                    enabled: true,
+                    async saveClient(clientObj) {
+                        if (!auth.currentUser || !clientObj || !clientObj.id) return;
+                        try {
+                            const clientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_clients', String(clientObj.id));
+                            await setDoc(clientDocRef, {
+                                id: String(clientObj.id),
+                                name: String(clientObj.name || ''),
+                                phone: String(clientObj.phone || ''),
+                                city: String(clientObj.city || ''),
+                                price: Number(clientObj.price) || 0,
+                                note: String(clientObj.note || ''),
+                                createdAt: String(clientObj.createdAt || ''),
+                                createdAtTs: Number(clientObj.createdAtTs) || Date.now()
+                            }, { merge: true });
+                        } catch (err) {
+                            console.error('Ошибка сохранения клиента в Firebase:', err);
+                        }
+                    },
+                    async deleteClient(clientId) {
+                        if (!auth.currentUser || !clientId) return;
+                        try {
+                            const clientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_clients', String(clientId));
+                            await deleteDoc(clientDocRef);
+                        } catch (err) {
+                            console.error('Ошибка удаления клиента из Firebase:', err);
+                        }
+                    },
+                    async saveAll() {
+                        if (!auth.currentUser || isApplyingRemote) return;
+                        try {
+                            updateCloudBadge('sync', 'Сохранение в Firebase...');
+                            const payload = {
+                                pricesJson: JSON.stringify(window.PRICES || {}),
+                                fabricsJson: JSON.stringify(window.FABRICS_LIST || []),
+                                lampsJson: JSON.stringify(window.LAMP_VARIANTS_CATALOG || {}),
+                                ledJson: JSON.stringify(window.LED_LIST || []),
+                                servicesJson: JSON.stringify(window.EXTRA_SERVICES_LIST || []),
+                                keysJson: JSON.stringify(getAllowedKeys()),
+                                clientsJson: JSON.stringify(window.CLIENTS_RECORDS || []),
+                                isAccessRestricted: Boolean(window.isAccessRestricted),
+                                adminPin: getStoredAdminPin(),
+                                updatedAt: Date.now()
+                            };
+                            await setDoc(stateDocRef, payload, { merge: true });
+                            updateCloudBadge('ok', 'Сохранено в Firebase');
+                        } catch (err) {
+                            console.error('Ошибка сохранения в Firebase:', err);
+                            updateCloudBadge('off', 'Ошибка сохранения');
+                        }
+                    }
+                };
+
+                onSnapshot(clientsColRef, (snapshot) => {
+                    const remoteClients = [];
+                    snapshot.forEach((docSnap) => {
+                        const d = docSnap.data();
+                        if (d && (d.name || d.phone)) {
+                            remoteClients.push({
+                                id: d.id || docSnap.id,
+                                name: d.name || '',
+                                phone: d.phone || '',
+                                city: d.city || '',
+                                price: Number(d.price) || 0,
+                                note: d.note || '',
+                                createdAt: d.createdAt || '',
+                                createdAtTs: Number(d.createdAtTs) || 0
+                            });
+                        }
+                    });
+
+                    if (remoteClients.length > 0) {
+                        remoteClients.sort((a, b) => (b.createdAtTs || 0) - (a.createdAtTs || 0));
+                        window.CLIENTS_RECORDS = remoteClients;
+                        saveClientsListToCache();
+                        renderClientsRecordsList();
+                    } else if (Array.isArray(window.CLIENTS_RECORDS) && window.CLIENTS_RECORDS.length > 0) {
+                        window.CLIENTS_RECORDS.forEach((c) => window.cloudSync.saveClient(c));
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки на коллекцию клиентов:', error);
+                });
+
+                onSnapshot(stateDocRef, (snap) => {
+                    if (!snap.exists()) {
+                        window.cloudSync.saveAll();
+                        return;
+                    }
+                    const data = snap.data() || {};
+                    isApplyingRemote = true;
+                    try {
+                        if (data.pricesJson) {
+                            const parsedPrices = JSON.parse(data.pricesJson);
+                            window.PRICES = { ...window.DEFAULT_PRICES, ...parsedPrices };
+                        }
+                        if (data.fabricsJson) {
+                            const parsedFabrics = JSON.parse(data.fabricsJson);
+                            if (Array.isArray(parsedFabrics) && parsedFabrics.length > 0) {
+                                window.FABRICS_LIST = parsedFabrics;
+                                saveFabricsCatalogToCache();
+                            }
+                        }
+                        if (data.lampsJson) {
+                            const parsedLamps = JSON.parse(data.lampsJson);
+                            if (parsedLamps && parsedLamps.gx53 && parsedLamps.tube && parsedLamps.track) {
+                                window.LAMP_VARIANTS_CATALOG = parsedLamps;
+                                saveLampCatalogToCache();
+                            }
+                        }
+                        if (data.ledJson) {
+                            const parsedLed = JSON.parse(data.ledJson);
+                            if (Array.isArray(parsedLed) && parsedLed.length > 0) {
+                                window.LED_LIST = parsedLed;
+                                syncLedPricesMap();
+                                saveLedCatalogToCache();
+                            }
+                        }
+                        if (data.servicesJson) {
+                            const parsedServices = JSON.parse(data.servicesJson);
+                            if (Array.isArray(parsedServices) && parsedServices.length > 0) {
+                                window.EXTRA_SERVICES_LIST = parsedServices;
+                                saveExtraServicesToCache();
+                            }
+                        }
+                        if (data.keysJson) {
+                            const parsedKeys = JSON.parse(data.keysJson);
+                            if (Array.isArray(parsedKeys)) {
+                                saveAllowedKeys(parsedKeys);
+                            }
+                        }
+                        if (data.clientsJson && (!Array.isArray(window.CLIENTS_RECORDS) || window.CLIENTS_RECORDS.length === 0)) {
+                            const parsedClients = JSON.parse(data.clientsJson);
+                            if (Array.isArray(parsedClients) && parsedClients.length > 0) {
+                                window.CLIENTS_RECORDS = parsedClients;
+                                saveClientsListToCache();
+                                parsedClients.forEach((c) => window.cloudSync.saveClient(c));
+                            }
+                        }
+                        if (typeof data.isAccessRestricted === 'boolean') {
+                            window.isAccessRestricted = data.isAccessRestricted;
+                            try {
+                                localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted));
+                            } catch (e) {}
+                        }
+                        if (typeof data.adminPin === 'string' && data.adminPin.length >= 4) {
+                            try {
+                                localStorage.setItem(STORAGE_KEY_ADMIN_PIN, data.adminPin);
+                            } catch (e) {}
+                        }
+
+                        syncVariantBasePricesWithAdmin();
+                        syncPriceLabels();
+                        renderFabricsGrid();
+                        renderLedSelectOptions();
+                        renderExtraServicesGrid();
+                        renderClientsRecordsList();
+                        if (window.activeLampCategory) {
+                            renderLampVariantsGrid(window.activeLampCategory);
+                        }
+                        if (window.isAdminAuthenticated) {
+                            renderAllAdminSections();
+                        } else {
+                            initAccessControl();
+                        }
+                        calculateTotal();
+                        updateCloudBadge('ok', 'Синхронизировано с Firebase');
+                    } catch (parseErr) {
+                        console.error('Ошибка применения данных из Firebase:', parseErr);
+                    } finally {
+                        isApplyingRemote = false;
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки Firestore:', error);
+                    updateCloudBadge('off', 'Ошибка связи с облаком');
+                });
+            } catch (err) {
+                console.error('Ошибка инициализации Firebase:', err);
+                updateCloudBadge('off', 'Локальный режим');
+            }
+        })();
     </script>
 </body>
 </html>
