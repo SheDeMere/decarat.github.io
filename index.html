@@ -2934,11 +2934,82 @@
             } catch (e) {}
         }
 
+        function compressImageDataUrl(dataUrl, maxDim = 480, quality = 0.72) {
+            return new Promise((resolve) => {
+                if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+                    resolve(dataUrl || '');
+                    return;
+                }
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        let w = img.width || maxDim;
+                        let h = img.height || maxDim;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) {
+                                h = Math.round((h * maxDim) / w);
+                                w = maxDim;
+                            } else {
+                                w = Math.round((w * maxDim) / h);
+                                h = maxDim;
+                            }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) {
+                            resolve(dataUrl);
+                            return;
+                        }
+                        ctx.drawImage(img, 0, 0, w, h);
+                        const compressed = canvas.toDataURL('image/jpeg', quality);
+                        resolve(compressed.length < dataUrl.length ? compressed : dataUrl);
+                    } catch (err) {
+                        resolve(dataUrl);
+                    }
+                };
+                img.onerror = () => resolve(dataUrl);
+                img.src = dataUrl;
+            });
+        }
+
+        window.__pendingClientOps = window.__pendingClientOps || new Map();
+
+        function queueClientSync(type, payload) {
+            if (type === 'save' && payload && payload.id) {
+                const idStr = String(payload.id);
+                if (window.cloudSync && window.cloudSync.enabled && typeof window.cloudSync.saveClient === 'function') {
+                    window.cloudSync.saveClient(payload);
+                } else {
+                    window.__pendingClientOps.set(idStr, { type: 'save', data: payload });
+                }
+            } else if (type === 'delete' && payload) {
+                const idStr = String(payload);
+                if (window.cloudSync && window.cloudSync.enabled && typeof window.cloudSync.deleteClient === 'function') {
+                    window.cloudSync.deleteClient(idStr);
+                } else {
+                    window.__pendingClientOps.set(idStr, { type: 'delete' });
+                }
+            }
+        }
+
+        function queueCloudSync(scope = 'all') {
+            window.__pendingCloudSyncScopes = window.__pendingCloudSyncScopes || new Set();
+            window.__pendingCloudSyncScopes.add(scope);
+            if (window.cloudSync && window.cloudSync.enabled && typeof window.cloudSync.saveAll === 'function') {
+                window.cloudSync.saveAll();
+            }
+        }
+        window.queueCloudSync = queueCloudSync;
+        window.queueClientSync = queueClientSync;
+
         function fillClientPriceFromCalc() {
             const priceInp = document.getElementById('client-input-price');
-            if (priceInp) {
-                priceInp.value = calcState.totalPrice || 0;
-            }
+            if (!priceInp) return;
+            const total = Math.max(0, Math.round(Number(calcState.totalPrice) || 0));
+            priceInp.value = total;
+            showToast(`Подставлена сумма из сметы: ${total.toLocaleString('ru-RU')} ₽`);
         }
 
         function addClientRecord(e) {
@@ -2956,51 +3027,49 @@
             const note = (noteInp ? noteInp.value : '').trim();
 
             if (!name || !phone) {
-                showToast('Укажите имя и номер телефона клиента');
+                showToast('Укажите имя и телефон клиента');
                 return;
             }
 
+            const now = new Date();
+            const createdAt = now.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }) + ' ' + now.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
             const newClient = {
-                id: 'client_' + Date.now(),
+                id: 'client_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
                 name,
                 phone,
                 city,
                 price,
                 note,
-                createdAt: new Date().toLocaleDateString('ru-RU'),
-                createdAtTs: Date.now()
+                createdAt,
+                createdAtTs: now.getTime()
             };
 
             window.CLIENTS_RECORDS.unshift(newClient);
-
             saveClientsListToCache();
             renderClientsRecordsList();
-            if (window.cloudSync && window.cloudSync.enabled) {
-                if (typeof window.cloudSync.saveClient === 'function') {
-                    window.cloudSync.saveClient(newClient);
-                }
-                window.cloudSync.saveAll();
-            }
+            queueClientSync('save', newClient);
 
             if (nameInp) nameInp.value = '';
             if (phoneInp) phoneInp.value = '';
             if (cityInp) cityInp.value = '';
             if (priceInp) priceInp.value = '';
             if (noteInp) noteInp.value = '';
-
-            showToast(`Клиент «${name}» добавлен и сохранён в облако`);
+            showToast(`Клиент «${name}» добавлен`);
         }
 
         function deleteClientRecord(clientId) {
-            window.CLIENTS_RECORDS = window.CLIENTS_RECORDS.filter(c => c.id !== clientId);
+            window.CLIENTS_RECORDS = window.CLIENTS_RECORDS.filter(c => String(c.id) !== String(clientId));
             saveClientsListToCache();
             renderClientsRecordsList();
-            if (window.cloudSync && window.cloudSync.enabled) {
-                if (typeof window.cloudSync.deleteClient === 'function') {
-                    window.cloudSync.deleteClient(clientId);
-                }
-                window.cloudSync.saveAll();
-            }
+            queueClientSync('delete', clientId);
             showToast('Запись клиента удалена');
         }
 
@@ -3011,40 +3080,1090 @@
             if (!listEl) return;
 
             const query = (searchInp ? searchInp.value : '').trim().toLowerCase();
-            const records = Array.isArray(window.CLIENTS_RECORDS) ? window.CLIENTS_RECORDS : [];
-            const filtered = query
-                ? records.filter(c => {
-                    const hay = `${c.name || ''} ${c.phone || ''} ${c.city || ''} ${c.note || ''} ${c.createdAt || ''}`.toLowerCase();
-                    return hay.includes(query);
-                })
-                : records;
+            const filtered = window.CLIENTS_RECORDS.filter(c => {
+                if (!query) return true;
+                return (
+                    String(c.name || '').toLowerCase().includes(query) ||
+                    String(c.phone || '').toLowerCase().includes(query) ||
+                    String(c.city || '').toLowerCase().includes(query) ||
+                    String(c.note || '').toLowerCase().includes(query)
+                );
+            });
 
-            if (badgeEl) badgeEl.textContent = String(records.length);
+            if (badgeEl) {
+                badgeEl.textContent = String(window.CLIENTS_RECORDS.length);
+            }
 
             if (filtered.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400 bg-stone-50 rounded-2xl border border-dashed border-stone-200">${query ? 'По вашему запросу клиенты не найдены' : 'Список клиентов пока пуст'}</div>`;
+                listEl.innerHTML = `<div class="text-center py-6 text-xs text-stone-400 bg-stone-50 rounded-2xl border border-stone-200/70">Список клиентов пуст</div>`;
                 return;
             }
 
-            listEl.innerHTML = filtered.map(c => `
-                <div class="bg-white rounded-2xl p-3.5 border border-stone-200 flex items-start justify-between gap-3 shadow-sm">
-                    <div class="min-w-0 flex-1 space-y-1">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-xs sm:text-sm font-extrabold text-stone-900">${c.name || ''}</span>
-                            ${c.city ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">${c.city}</span>` : ''}
-                            ${c.createdAt ? `<span class="text-[10px] font-medium text-stone-400">${c.createdAt}</span>` : ''}
+            listEl.innerHTML = filtered.map(c => {
+                const phoneDigits = String(c.phone || '').replace(/\D/g, '');
+                const waPhone = phoneDigits.startsWith('8') && phoneDigits.length === 11
+                    ? '7' + phoneDigits.slice(1)
+                    : phoneDigits;
+                return `
+                    <div class="bg-stone-50 rounded-2xl p-3.5 border border-stone-200 flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1 space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs sm:text-sm font-extrabold text-stone-900">${c.name}</span>
+                                ${c.city ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-stone-200 text-stone-600">${c.city}</span>` : ''}
+                                ${c.createdAt ? `<span class="text-[10px] text-stone-400">${c.createdAt}</span>` : ''}
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 text-xs">
+                                <a href="tel:+${waPhone}" class="font-bold text-emerald-700 hover:underline">${c.phone}</a>
+                                ${c.price > 0 ? `<span class="font-extrabold text-stone-800">${Number(c.price).toLocaleString('ru-RU')} ₽</span>` : ''}
+                            </div>
+                            ${c.note ? `<p class="text-[11px] text-stone-500 leading-snug">${c.note}</p>` : ''}
                         </div>
-                        <div class="text-xs font-bold text-emerald-700">${c.phone || ''}</div>
-                        ${c.note ? `<div class="text-[11px] text-stone-500">${c.note}</div>` : ''}
+                        <button type="button" onclick="deleteClientRecord('${c.id}')" title="Удалить клиента" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center text-xs font-bold shrink-0 transition">
+                            ✕
+                        </button>
                     </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        ${c.price > 0 ? `<span class="text-xs font-extrabold text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl whitespace-nowrap">${Number(c.price).toLocaleString('ru-RU')} ₽</span>` : ''}
-                        <button type="button" onclick="deleteClientRecord('${c.id}')" class="w-8 h-8 rounded-xl bg-stone-50 hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center text-xs font-bold transition" title="Удалить клиента">✕</button>
+                `;
+            }).join('');
+        }
+
+        // УПРАВЛЕНИЕ ФАЙЛОВЫМИ ЗОНАМИ В АДМИН-ПАНЕЛИ
+        function handleAdminFileZoneChange(input, prefix) {
+            const file = input && input.files && input.files[0];
+            const zone = document.getElementById(`${prefix}-upload-zone`);
+            const thumb = document.getElementById(`${prefix}-thumb`);
+            const label = document.getElementById(`${prefix}-file-label`);
+            const clearBtn = document.getElementById(`${prefix}-clear-btn`);
+
+            if (!file) {
+                clearAdminFileZone(null, prefix);
+                return;
+            }
+
+            if (zone) zone.classList.add('has-file');
+            if (label) label.textContent = file.name;
+            if (clearBtn) clearBtn.classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                if (thumb) {
+                    thumb.innerHTML = `<img src="${ev.target.result}" alt="" class="w-full h-full object-cover">`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearAdminFileZone(e, prefix) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            const input = document.getElementById(`${prefix}-file`);
+            const zone = document.getElementById(`${prefix}-upload-zone`);
+            const thumb = document.getElementById(`${prefix}-thumb`);
+            const label = document.getElementById(`${prefix}-file-label`);
+            const clearBtn = document.getElementById(`${prefix}-clear-btn`);
+
+            if (input) input.value = '';
+            if (zone) zone.classList.remove('has-file');
+            if (label) label.textContent = 'Выбрать фото';
+            if (clearBtn) clearBtn.classList.add('hidden');
+            if (thumb) {
+                thumb.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+            }
+        }
+
+        // УПРАВЛЕНИЕ ПОЛОТНАМИ И ПРОФИЛЯМИ В АДМИН-ПАНЕЛИ
+        function renderAdminFabricsList() {
+            const container = document.getElementById('admin-fabrics-list');
+            if (!container) return;
+
+            container.innerHTML = window.FABRICS_LIST.map(item => `
+                <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="w-12 h-12 rounded-xl overflow-hidden bg-stone-100 border border-stone-200 flex items-center justify-center shrink-0">
+                            ${item.img
+                                ? `<img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src=LAMP_FALLBACK_SVG" class="w-full h-full object-cover">`
+                                : `<span class="text-[10px] font-bold text-stone-500 text-center px-1">ПВХ</span>`}
+                        </div>
+                        <div class="min-w-0 flex-1 space-y-1">
+                            <span class="text-xs sm:text-sm font-bold text-stone-900 block truncate">${item.name}</span>
+                            ${item.desc ? `<span class="text-[11px] text-stone-500 block truncate">${item.desc}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <div class="bg-stone-50 border border-stone-200 rounded-xl px-3.5 h-9 flex items-center">
+                            <span class="text-xs font-extrabold text-stone-900 whitespace-nowrap">${Number(item.price).toLocaleString('ru-RU')} ₽/м²</span>
+                        </div>
+                        <button type="button" onclick="openAdminEditModal('fabric', '', '${item.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать полотно">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                        <button type="button" onclick="deleteFabricFromAdmin('${item.id}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить полотно">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
                     </div>
                 </div>
             `).join('');
         }
 
+        function addNewFabricFromAdmin() {
+            const nameInp = document.getElementById('new-fabric-name');
+            const priceInp = document.getElementById('new-fabric-price');
+            const descInp = document.getElementById('new-fabric-desc');
+            const fileInp = document.getElementById('new-fabric-file');
+
+            const name = (nameInp ? nameInp.value : '').trim();
+            const price = parseInt(priceInp ? priceInp.value : '0', 10);
+            const desc = (descInp ? descInp.value : '').trim();
+
+            if (!name) {
+                showToast('Введите название полотна');
+                if (nameInp) nameInp.focus();
+                return;
+            }
+            if (isNaN(price) || price <= 0) {
+                showToast('Укажите корректную цену за м²');
+                if (priceInp) priceInp.focus();
+                return;
+            }
+
+            const finalizeAdd = (imgData) => {
+                const newFabric = {
+                    id: 'fabric_' + Date.now(),
+                    name,
+                    shortName: name,
+                    desc,
+                    price,
+                    badge: '',
+                    img: imgData || '',
+                    placeholderTitle: name,
+                    placeholderStyle: 'bg-emerald-50 text-emerald-800'
+                };
+                window.FABRICS_LIST.push(newFabric);
+                saveFabricsCatalogToCache();
+                renderFabricsGrid();
+                renderAdminFabricsList();
+                updateAdminSidebarCounts();
+                calculateTotal();
+                queueCloudSync('fabrics');
+
+                if (nameInp) nameInp.value = '';
+                if (priceInp) priceInp.value = '';
+                if (descInp) descInp.value = '';
+                clearAdminFileZone(null, 'new-fabric');
+                showToast(`Полотно «${name}» добавлено`);
+            };
+
+            const file = fileInp && fileInp.files && fileInp.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    const compressed = await compressImageDataUrl(ev.target.result);
+                    finalizeAdd(compressed);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                finalizeAdd('');
+            }
+        }
+
+        function deleteFabricFromAdmin(fabricId) {
+            if (window.FABRICS_LIST.length <= 1) {
+                showToast('В каталоге должно оставаться хотя бы одно полотно');
+                return;
+            }
+            window.FABRICS_LIST = window.FABRICS_LIST.filter(f => f.id !== fabricId);
+            if (calcState.fabricKey === fabricId && window.FABRICS_LIST[0]) {
+                calcState.fabricKey = window.FABRICS_LIST[0].id;
+            }
+            saveFabricsCatalogToCache();
+            renderFabricsGrid();
+            renderAdminFabricsList();
+            updateAdminSidebarCounts();
+            calculateTotal();
+            queueCloudSync('fabrics');
+            showToast('Полотно удалено');
+        }
+
+        function saveAdminPrices() {
+            const shadowInp = document.getElementById('adm-prof-shadow');
+            const floatingInp = document.getElementById('adm-prof-floating');
+            if (shadowInp) {
+                const val = parseInt(shadowInp.value, 10);
+                if (!isNaN(val) && val >= 0) window.PRICES.profiles.shadow.price = val;
+            }
+            if (floatingInp) {
+                const val = parseInt(floatingInp.value, 10);
+                if (!isNaN(val) && val >= 0) window.PRICES.profiles.floating.price = val;
+            }
+            syncPriceLabels();
+            calculateTotal();
+            queueCloudSync('settings');
+            showToast('Цены профилей обновлены');
+        }
+
+        function resetAllPrices() {
+            window.PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
+            window.FABRICS_LIST = JSON.parse(JSON.stringify(DEFAULT_FABRICS_LIST));
+            window.LAMP_VARIANTS_CATALOG = JSON.parse(JSON.stringify(DEFAULT_LAMP_VARIANTS_CATALOG));
+            window.LED_LIST = JSON.parse(JSON.stringify(DEFAULT_LED_LIST));
+            window.EXTRA_SERVICES_LIST = JSON.parse(JSON.stringify(DEFAULT_EXTRA_SERVICES_LIST));
+
+            syncLedPricesMap();
+            syncVariantBasePricesWithAdmin();
+            saveFabricsCatalogToCache();
+            saveLampCatalogToCache();
+            saveLedCatalogToCache();
+            saveExtraServicesToCache();
+
+            renderFabricsGrid();
+            renderLedSelectOptions();
+            renderExtraServicesGrid();
+            renderAllAdminSections();
+            syncPriceLabels();
+            calculateTotal();
+            queueCloudSync('all');
+            showToast('Цены и каталоги сброшены к заводским');
+        }
+
+        // УПРАВЛЕНИЕ СВЕТИЛЬНИКАМИ В АДМИН-ПАНЕЛИ
+        function renderAdminLampVariantsList() {
+            const container = document.getElementById('admin-lamp-variants-list');
+            if (!container) return;
+
+            const categories = ['gx53', 'tube', 'track'];
+            container.innerHTML = categories.map(catKey => {
+                const cat = window.LAMP_VARIANTS_CATALOG[catKey];
+                if (!cat) return '';
+                const itemsHtml = (cat.items || []).map(item => `
+                    <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <img src="${item.img || LAMP_FALLBACK_SVG}" alt="${item.name}" onerror="this.onerror=null;this.src=LAMP_FALLBACK_SVG" class="w-12 h-12 rounded-xl object-contain bg-stone-50 border border-stone-200 p-1 shrink-0">
+                            <div class="min-w-0 flex-1 space-y-1">
+                                <span class="text-xs sm:text-sm font-bold text-stone-900 block truncate">${item.name}</span>
+                                ${item.desc ? `<span class="text-[11px] text-stone-500 block truncate">${item.desc}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="bg-stone-50 border border-stone-200 rounded-xl px-3.5 h-9 flex items-center">
+                                <span class="text-xs font-extrabold text-stone-900 whitespace-nowrap">${Number(item.price).toLocaleString('ru-RU')} ₽/${item.unit || 'шт'}</span>
+                            </div>
+                            <button type="button" onclick="openAdminEditModal('lamp', '${catKey}', '${item.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать светильник">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button type="button" onclick="deleteLampVariantFromAdmin('${catKey}', '${item.id}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить светильник">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="space-y-2.5">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-stone-600 block">${cat.title}</span>
+                        <div class="space-y-2.5">${itemsHtml}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addNewLampVariantFromAdmin() {
+            const catSel = document.getElementById('new-lamp-category');
+            const nameInp = document.getElementById('new-lamp-name');
+            const priceInp = document.getElementById('new-lamp-price');
+            const unitSel = document.getElementById('new-lamp-unit');
+            const descInp = document.getElementById('new-lamp-desc');
+            const fileInp = document.getElementById('new-lamp-file');
+
+            const catKey = catSel ? catSel.value : 'gx53';
+            const name = (nameInp ? nameInp.value : '').trim();
+            const price = parseInt(priceInp ? priceInp.value : '0', 10);
+            const unit = unitSel ? unitSel.value : 'шт';
+            const desc = (descInp ? descInp.value : '').trim();
+
+            if (!name) {
+                showToast('Введите название модели светильника');
+                if (nameInp) nameInp.focus();
+                return;
+            }
+            if (isNaN(price) || price <= 0) {
+                showToast('Укажите корректную цену светильника');
+                if (priceInp) priceInp.focus();
+                return;
+            }
+
+            const finalizeAdd = (imgData) => {
+                const cat = window.LAMP_VARIANTS_CATALOG[catKey];
+                if (!cat) return;
+                cat.items.push({
+                    id: `${catKey}_custom_${Date.now()}`,
+                    name,
+                    desc,
+                    unit,
+                    price,
+                    img: imgData || LAMP_FALLBACK_SVG
+                });
+
+                syncVariantBasePricesWithAdmin();
+                saveLampCatalogToCache();
+                syncPriceLabels();
+                renderAdminLampVariantsList();
+                if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
+                calculateTotal();
+                queueCloudSync('lamps');
+
+                if (nameInp) nameInp.value = '';
+                if (priceInp) priceInp.value = '';
+                if (descInp) descInp.value = '';
+                clearAdminFileZone(null, 'new-lamp');
+                showToast(`Светильник «${name}» добавлен`);
+            };
+
+            const file = fileInp && fileInp.files && fileInp.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    const compressed = await compressImageDataUrl(ev.target.result);
+                    finalizeAdd(compressed);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                finalizeAdd('');
+            }
+        }
+
+        function deleteLampVariantFromAdmin(catKey, variantId) {
+            const cat = window.LAMP_VARIANTS_CATALOG[catKey];
+            if (!cat) return;
+            if ((cat.items || []).length <= 1) {
+                showToast('В категории должна оставаться хотя бы одна модель');
+                return;
+            }
+            cat.items = cat.items.filter(v => v.id !== variantId);
+            delete calcState.lampVariants[variantId];
+            syncVariantBasePricesWithAdmin();
+            saveLampCatalogToCache();
+            syncCategoryCountersUI();
+            syncPriceLabels();
+            renderAdminLampVariantsList();
+            if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
+            calculateTotal();
+            queueCloudSync('lamps');
+            showToast('Модель светильника удалена');
+        }
+
+        function resetLampCatalogToDefault() {
+            window.LAMP_VARIANTS_CATALOG = JSON.parse(JSON.stringify(DEFAULT_LAMP_VARIANTS_CATALOG));
+            syncVariantBasePricesWithAdmin();
+            saveLampCatalogToCache();
+            syncCategoryCountersUI();
+            syncPriceLabels();
+            renderAdminLampVariantsList();
+            if (window.activeLampCategory) renderLampVariantsGrid(window.activeLampCategory);
+            calculateTotal();
+            queueCloudSync('lamps');
+            showToast('Каталог светильников восстановлен');
+        }
+
+        // ДОПОЛНИТЕЛЬНЫЕ РАБОТЫ В КАЛЬКУЛЯТОРЕ И АДМИНКЕ
+        function renderExtraServicesGrid() {
+            const grid = document.getElementById('extra-services-grid');
+            if (!grid) return;
+
+            const step4Services = window.EXTRA_SERVICES_LIST.filter(s => s.inStep4);
+            grid.innerHTML = step4Services.map(srv => {
+                const isChecked = Boolean(calcState.selectedExtraServices[srv.id]);
+                const priceSuffix = srv.unit === 'per_m' ? `₽ / пог. м` : `₽`;
+                return `
+                    <label class="border ${isChecked ? 'border-emerald-600 bg-emerald-50/50 shadow-sm' : 'border-stone-200 hover:border-emerald-300 bg-stone-50/50'} rounded-2xl p-4 cursor-pointer transition flex items-start gap-3.5 w-full">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleExtraServiceItem('${srv.id}', this.checked)" class="w-5 h-5 mt-0.5 rounded border-stone-300 shrink-0">
+                        <div class="flex-1 w-full min-w-0 space-y-1">
+                            <div class="flex items-start justify-between gap-2 w-full">
+                                <span class="text-sm font-bold text-stone-900 leading-snug">${srv.name}</span>
+                                <span class="text-xs font-extrabold text-emerald-700 whitespace-nowrap shrink-0">+${Number(srv.price).toLocaleString('ru-RU')} ${priceSuffix}</span>
+                            </div>
+                            ${srv.desc ? `<p class="text-xs text-stone-500 leading-relaxed w-full">${srv.desc}</p>` : ''}
+                        </div>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function toggleExtraServiceItem(serviceId, checked) {
+            calcState.selectedExtraServices[serviceId] = Boolean(checked);
+            renderExtraServicesGrid();
+            calculateTotal();
+        }
+
+        function renderAdminExtraServicesList() {
+            const container = document.getElementById('admin-extra-services-list');
+            if (!container) return;
+
+            container.innerHTML = window.EXTRA_SERVICES_LIST.map(srv => {
+                const priceSuffix = srv.unit === 'per_m' ? '₽/м' : '₽';
+                return `
+                    <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
+                        <div class="min-w-0 flex-1 pr-2 space-y-1">
+                            <span class="text-xs sm:text-sm font-bold text-stone-900 block truncate">${srv.name}</span>
+                            ${srv.desc ? `<span class="text-[11px] text-stone-500 block truncate">${srv.desc}</span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="bg-stone-50 border border-stone-200 rounded-xl px-3.5 h-9 flex items-center">
+                                <span class="text-xs font-extrabold text-stone-900 whitespace-nowrap">${Number(srv.price).toLocaleString('ru-RU')} ${priceSuffix}</span>
+                            </div>
+                            <button type="button" onclick="openAdminEditModal('service', '', '${srv.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать работу">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button type="button" onclick="deleteExtraServiceFromAdmin('${srv.id}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить работу">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addNewExtraServiceFromAdmin() {
+            const nameInp = document.getElementById('new-service-name');
+            const priceInp = document.getElementById('new-service-price');
+            const unitSel = document.getElementById('new-service-unit');
+            const descInp = document.getElementById('new-service-desc');
+
+            const name = (nameInp ? nameInp.value : '').trim();
+            const price = parseInt(priceInp ? priceInp.value : '0', 10);
+            const unit = unitSel ? unitSel.value : 'fixed';
+            const desc = (descInp ? descInp.value : '').trim();
+
+            if (!name) {
+                showToast('Введите название работы');
+                if (nameInp) nameInp.focus();
+                return;
+            }
+            if (isNaN(price) || price <= 0) {
+                showToast('Укажите корректную цену');
+                if (priceInp) priceInp.focus();
+                return;
+            }
+
+            window.EXTRA_SERVICES_LIST.push({
+                id: 'service_custom_' + Date.now(),
+                name,
+                desc,
+                price,
+                unit,
+                inStep4: true,
+                isBuiltin: false
+            });
+
+            saveExtraServicesToCache();
+            renderExtraServicesGrid();
+            renderAdminExtraServicesList();
+            updateAdminSidebarCounts();
+            queueCloudSync('catalogs');
+
+            if (nameInp) nameInp.value = '';
+            if (priceInp) priceInp.value = '';
+            if (descInp) descInp.value = '';
+            showToast(`Работа «${name}» добавлена`);
+        }
+
+        function deleteExtraServiceFromAdmin(serviceId) {
+            if (window.EXTRA_SERVICES_LIST.length <= 1) {
+                showToast('В списке должна оставаться хотя бы одна позиция');
+                return;
+            }
+            window.EXTRA_SERVICES_LIST = window.EXTRA_SERVICES_LIST.filter(s => s.id !== serviceId);
+            delete calcState.selectedExtraServices[serviceId];
+            saveExtraServicesToCache();
+            renderExtraServicesGrid();
+            renderAdminExtraServicesList();
+            updateAdminSidebarCounts();
+            calculateTotal();
+            queueCloudSync('catalogs');
+            showToast('Услуга удалена');
+        }
+
+        function resetExtraServicesToDefault() {
+            window.EXTRA_SERVICES_LIST = JSON.parse(JSON.stringify(DEFAULT_EXTRA_SERVICES_LIST));
+            saveExtraServicesToCache();
+            syncPriceLabels();
+            renderExtraServicesGrid();
+            renderAdminExtraServicesList();
+            updateAdminSidebarCounts();
+            calculateTotal();
+            queueCloudSync('catalogs');
+            showToast('Дополнительные работы восстановлены');
+        }
+
+        // КОНТРОЛЬ ДОСТУПА И КЛЮЧИ (КЛИЕНТ / МАСТЕР)
+        function getAllowedKeys() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_ALLOWED_KEYS);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch (e) {}
+            return [{ code: 'DECARAT2026', label: 'Базовый доступ', role: 'client', discount: 0, active: true }];
+        }
+
+        function saveAllowedKeys(keys) {
+            try {
+                localStorage.setItem(STORAGE_KEY_ALLOWED_KEYS, JSON.stringify(keys));
+            } catch (e) {}
+        }
+
+        function getActiveMasterDiscountPercent() {
+            try {
+                const savedCode = (localStorage.getItem(STORAGE_KEY_AUTH_CODE) || '').trim().toUpperCase();
+                if (!savedCode) return 0;
+                const keys = getAllowedKeys();
+                const found = keys.find(k => k.active !== false && String(k.code || '').toUpperCase() === savedCode);
+                if (found && found.role === 'master') {
+                    return Math.min(90, Math.max(0, Number(found.discount) || 0));
+                }
+            } catch (e) {}
+            return 0;
+        }
+
+        function initAccessControl() {
+            const overlay = document.getElementById('access-gate-overlay');
+            if (!overlay) return;
+
+            if (!window.isAccessRestricted || window.isAdminAuthenticated) {
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+                syncBodyScrollLock();
+                return;
+            }
+
+            let savedCode = '';
+            try {
+                savedCode = (localStorage.getItem(STORAGE_KEY_AUTH_CODE) || '').trim().toUpperCase();
+            } catch (e) {}
+
+            const keys = getAllowedKeys();
+            const isValid = savedCode && keys.some(k => k.active !== false && String(k.code || '').toUpperCase() === savedCode);
+
+            if (isValid) {
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+            } else {
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'flex';
+            }
+            syncBodyScrollLock();
+        }
+
+        function verifyAccessCode(e) {
+            if (e) e.preventDefault();
+            const inp = document.getElementById('access-code-input');
+            const errEl = document.getElementById('access-code-error');
+            const code = (inp ? inp.value : '').trim().toUpperCase();
+            const keys = getAllowedKeys();
+            const matched = keys.find(k => k.active !== false && String(k.code || '').toUpperCase() === code);
+
+            if (matched) {
+                try {
+                    localStorage.setItem(STORAGE_KEY_AUTH_CODE, code);
+                } catch (err) {}
+                if (errEl) errEl.classList.add('hidden');
+                const overlay = document.getElementById('access-gate-overlay');
+                if (overlay) {
+                    overlay.classList.add('hidden');
+                    overlay.style.display = 'none';
+                }
+                syncBodyScrollLock();
+                calculateTotal();
+                showToast(matched.role === 'master'
+                    ? `Вход выполнен: Мастер (скидка ${matched.discount || 0}%)`
+                    : 'Доступ к калькулятору открыт');
+            } else if (errEl) {
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        function lockSiteSession() {
+            window.isAdminAuthenticated = false;
+            try {
+                localStorage.removeItem(STORAGE_KEY_AUTH_CODE);
+            } catch (e) {}
+            calculateTotal();
+            if (window.isAccessRestricted) {
+                initAccessControl();
+            } else {
+                window.isAccessRestricted = true;
+                try {
+                    localStorage.setItem('decarat_access_locked_v1', 'true');
+                } catch (e) {}
+                queueCloudSync('settings');
+                initAccessControl();
+            }
+            showToast('Экран заблокирован');
+        }
+
+        function resetLocalAuthCache() {
+            try {
+                localStorage.removeItem(STORAGE_KEY_AUTH_CODE);
+            } catch (e) {}
+            const inp = document.getElementById('access-code-input');
+            const errEl = document.getElementById('access-code-error');
+            if (inp) inp.value = '';
+            if (errEl) errEl.classList.add('hidden');
+            showToast('Локальный кэш входа очищен');
+        }
+
+        function toggleAccessRestriction(locked) {
+            window.isAccessRestricted = Boolean(locked);
+            try {
+                localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted));
+            } catch (e) {}
+            queueCloudSync('settings');
+            showToast(window.isAccessRestricted ? 'Закрытый доступ включён' : 'Свободный доступ включён');
+        }
+
+        function handleNewKeyRoleChange(role) {
+            const wrap = document.getElementById('new-access-discount-wrap');
+            if (!wrap) return;
+            if (role === 'master') {
+                wrap.classList.remove('hidden');
+            } else {
+                wrap.classList.add('hidden');
+            }
+        }
+
+        function addAccessCodeFromAdmin() {
+            const codeInp = document.getElementById('new-access-code');
+            const labelInp = document.getElementById('new-access-label');
+            const roleSel = document.getElementById('new-access-role');
+            const discInp = document.getElementById('new-access-discount');
+
+            const code = (codeInp ? codeInp.value : '').trim().toUpperCase();
+            const label = (labelInp ? labelInp.value : '').trim() || 'Персональный доступ';
+            const role = roleSel ? roleSel.value : 'client';
+            const discount = role === 'master' ? Math.min(90, Math.max(1, parseInt(discInp ? discInp.value : '15', 10) || 15)) : 0;
+
+            if (!code) {
+                showToast('Введите код доступа');
+                if (codeInp) codeInp.focus();
+                return;
+            }
+
+            const keys = getAllowedKeys();
+            if (keys.some(k => String(k.code || '').toUpperCase() === code)) {
+                showToast('Такой код уже существует');
+                return;
+            }
+
+            keys.unshift({ code, label, role, discount, active: true });
+            saveAllowedKeys(keys);
+
+            if (codeInp) codeInp.value = '';
+            if (labelInp) labelInp.value = '';
+            renderAdminAccessKeysList();
+            updateAdminSidebarCounts();
+            queueCloudSync('settings');
+            showToast(`Ключ ${code} выдан`);
+        }
+
+        function deleteAccessKeyFromAdmin(idx) {
+            const keys = getAllowedKeys();
+            keys.splice(idx, 1);
+            saveAllowedKeys(keys);
+            renderAdminAccessKeysList();
+            updateAdminSidebarCounts();
+            queueCloudSync('settings');
+            showToast('Ключ удалён');
+        }
+
+        function renderAdminAccessKeysList() {
+            const listEl = document.getElementById('admin-access-keys-list');
+            const countEl = document.getElementById('active-keys-count');
+            const toggleEl = document.getElementById('adm-access-lock-toggle');
+
+            if (toggleEl) toggleEl.checked = Boolean(window.isAccessRestricted);
+            const keys = getAllowedKeys();
+            if (countEl) countEl.textContent = String(keys.length);
+            if (!listEl) return;
+
+            if (keys.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-5 text-xs text-stone-400 bg-white rounded-2xl border border-stone-200">Нет выданных ключей</div>`;
+                return;
+            }
+
+            listEl.innerHTML = keys.map((k, idx) => `
+                <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
+                    <div class="min-w-0 flex-1 space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-xs sm:text-sm font-black text-stone-900 tracking-wider">${k.code}</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${k.role === 'master' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-stone-100 text-stone-600'}">
+                                ${k.role === 'master' ? `Мастер (-${k.discount || 0}%)` : 'Клиент'}
+                            </span>
+                        </div>
+                        <span class="text-[11px] text-stone-500 block truncate">${k.label || ''}</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        <button type="button" onclick="openAdminEditModal('key', '', '${idx}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать ключ">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                        <button type="button" onclick="deleteAccessKeyFromAdmin(${idx})" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить ключ">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeAdminPin() {
+            const inp = document.getElementById('new-admin-pin-input');
+            const newPin = (inp ? inp.value : '').trim();
+            if (newPin.length < 4) {
+                showToast('PIN-код должен содержать минимум 4 символа');
+                if (inp) inp.focus();
+                return;
+            }
+            saveStoredAdminPin(newPin);
+            if (inp) inp.value = '';
+            showToast('PIN-код администратора обновлён');
+        }
+
+        // МОДАЛЬНОЕ ОКНО АДМИН-ПАНЕЛИ И ВКЛАДКИ
+        function openAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            if (!modal) return;
+
+            const shell = document.getElementById('admin-modal-shell');
+            const badge = document.getElementById('admin-topbar-badge');
+            const subtitle = document.getElementById('admin-topbar-subtitle');
+            const loginBox = document.getElementById('admin-login-box');
+            const contentBox = document.getElementById('admin-content-box');
+            const pinErr = document.getElementById('admin-pin-error');
+            const pinInp = document.getElementById('admin-pin-input');
+
+            if (pinErr) pinErr.classList.add('hidden');
+            if (pinInp) pinInp.value = '';
+
+            const unlocked = Boolean(window.isAdminAuthenticated);
+            if (shell) shell.style.maxWidth = unlocked ? '1040px' : '420px';
+            if (badge) badge.classList.toggle('hidden', !unlocked);
+            if (subtitle) {
+                subtitle.textContent = unlocked
+                    ? 'Цены, каталог полотен, светильники и ключи доступа'
+                    : 'Авторизация владельца';
+            }
+
+            if (unlocked) {
+                if (loginBox) loginBox.classList.add('hidden');
+                if (contentBox) contentBox.classList.remove('hidden');
+                renderAllAdminSections();
+            } else {
+                if (loginBox) loginBox.classList.remove('hidden');
+                if (contentBox) contentBox.classList.add('hidden');
+                if (pinInp) setTimeout(() => pinInp.focus(), 50);
+            }
+
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            syncBodyScrollLock();
+        }
+
+        function verifyAdminPin(e) {
+            if (e) e.preventDefault();
+            const pinInp = document.getElementById('admin-pin-input');
+            const pinErr = document.getElementById('admin-pin-error');
+            const val = (pinInp ? pinInp.value : '').trim();
+
+            if (val === getStoredAdminPin()) {
+                window.isAdminAuthenticated = true;
+                unlockSiteForAdmin();
+                if (pinErr) pinErr.classList.add('hidden');
+
+                const shell = document.getElementById('admin-modal-shell');
+                const badge = document.getElementById('admin-topbar-badge');
+                const subtitle = document.getElementById('admin-topbar-subtitle');
+                if (shell) shell.style.maxWidth = '1040px';
+                if (badge) badge.classList.remove('hidden');
+                if (subtitle) subtitle.textContent = 'Цены, каталог полотен, светильники и ключи доступа';
+
+                document.getElementById('admin-login-box')?.classList.add('hidden');
+                document.getElementById('admin-content-box')?.classList.remove('hidden');
+                renderAllAdminSections();
+                showToast('Вход в панель управления выполнен');
+            } else if (pinErr) {
+                pinErr.classList.remove('hidden');
+            }
+        }
+
+        function closeAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            syncBodyScrollLock();
+        }
+
+        function switchAdminTab(tabKey) {
+            const tabs = ['fabrics', 'lamps', 'led', 'services', 'access'];
+            tabs.forEach(t => {
+                const sec = document.getElementById(`admin-section-${t}`);
+                const btn = document.getElementById(`admin-tab-btn-${t}`);
+                if (sec) sec.classList.toggle('hidden', t !== tabKey);
+                if (btn) btn.classList.toggle('is-active', t === tabKey);
+            });
+        }
+
+        function updateAdminSidebarCounts() {
+            const fEl = document.getElementById('admin-nav-fabrics-count');
+            const lEl = document.getElementById('admin-nav-led-count');
+            const sEl = document.getElementById('admin-nav-services-count');
+            const kEl = document.getElementById('admin-nav-keys-count');
+            if (fEl) fEl.textContent = String(window.FABRICS_LIST.length);
+            if (lEl) lEl.textContent = String(window.LED_LIST.length);
+            if (sEl) sEl.textContent = String(window.EXTRA_SERVICES_LIST.length);
+            if (kEl) kEl.textContent = String(getAllowedKeys().length);
+        }
+
+        function renderAllAdminSections() {
+            const shadowInp = document.getElementById('adm-prof-shadow');
+            const floatingInp = document.getElementById('adm-prof-floating');
+            if (shadowInp) shadowInp.value = window.PRICES.profiles.shadow.price;
+            if (floatingInp) floatingInp.value = window.PRICES.profiles.floating.price;
+
+            renderAdminFabricsList();
+            renderAdminLampVariantsList();
+            renderAdminLedList();
+            renderAdminExtraServicesList();
+            renderAdminAccessKeysList();
+            updateAdminSidebarCounts();
+        }
+
+        // МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ПОЗИЦИИ В АДМИН-ПАНЕЛИ
+        window.pendingEditPhotoDataUrl = null;
+
+        function handleEditKeyRoleChange(role) {
+            const priceLabel = document.getElementById('edit-item-price-label');
+            const priceInp = document.getElementById('edit-item-price');
+            if (role === 'master') {
+                if (priceLabel) priceLabel.textContent = 'Скидка мастера (%)';
+                if (priceInp) priceInp.disabled = false;
+            } else {
+                if (priceLabel) priceLabel.textContent = 'Скидка (%)';
+                if (priceInp) {
+                    priceInp.value = 0;
+                    priceInp.disabled = true;
+                }
+            }
+        }
+
+        function openAdminEditModal(type, catKey, itemId) {
+            const modal = document.getElementById('admin-edit-item-modal');
+            if (!modal) return;
+
+            window.pendingEditPhotoDataUrl = null;
+            document.getElementById('edit-item-type').value = type;
+            document.getElementById('edit-item-cat').value = catKey || '';
+            document.getElementById('edit-item-id').value = itemId;
+
+            const nameLabel = document.getElementById('edit-item-name-label');
+            const descLabel = document.getElementById('edit-item-desc-label');
+            const priceLabel = document.getElementById('edit-item-price-label');
+            const nameInp = document.getElementById('edit-item-name');
+            const descInp = document.getElementById('edit-item-desc');
+            const priceInp = document.getElementById('edit-item-price');
+            const roleWrap = document.getElementById('edit-item-role-wrap');
+            const roleSel = document.getElementById('edit-item-role');
+            const unitWrap = document.getElementById('edit-item-unit-wrap');
+            const unitSel = document.getElementById('edit-item-unit');
+            const srvUnitWrap = document.getElementById('edit-item-service-unit-wrap');
+            const srvUnitSel = document.getElementById('edit-item-service-unit');
+            const photoBox = document.getElementById('edit-item-photo-box');
+            const photoPreview = document.getElementById('edit-item-photo-preview');
+            const removePhotoBtn = document.getElementById('edit-item-remove-photo-btn');
+
+            priceInp.disabled = false;
+            roleWrap.classList.add('hidden');
+            unitWrap.classList.add('hidden');
+            srvUnitWrap.classList.add('hidden');
+            photoBox.classList.add('hidden');
+            removePhotoBtn.classList.add('hidden');
+            nameLabel.textContent = 'Название';
+            descLabel.textContent = 'Краткое описание';
+            priceLabel.textContent = 'Цена (₽)';
+
+            if (type === 'fabric') {
+                const item = window.FABRICS_LIST.find(f => f.id === itemId);
+                if (!item) return;
+                document.getElementById('edit-modal-title').textContent = 'Редактировать полотно';
+                nameInp.value = item.name || '';
+                descInp.value = item.desc || '';
+                priceInp.value = item.price || 0;
+                photoBox.classList.remove('hidden');
+                if (item.img) {
+                    photoPreview.innerHTML = `<img src="${item.img}" class="w-full h-full object-cover">`;
+                    removePhotoBtn.classList.remove('hidden');
+                } else {
+                    photoPreview.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+                }
+            } else if (type === 'lamp') {
+                const cat = window.LAMP_VARIANTS_CATALOG[catKey];
+                const item = cat && cat.items.find(v => v.id === itemId);
+                if (!item) return;
+                document.getElementById('edit-modal-title').textContent = 'Редактировать светильник';
+                nameInp.value = item.name || '';
+                descInp.value = item.desc || '';
+                priceInp.value = item.price || 0;
+                unitWrap.classList.remove('hidden');
+                unitSel.value = item.unit || 'шт';
+                photoBox.classList.remove('hidden');
+                if (item.img && item.img !== LAMP_FALLBACK_SVG) {
+                    photoPreview.innerHTML = `<img src="${item.img}" class="w-full h-full object-cover">`;
+                    removePhotoBtn.classList.remove('hidden');
+                } else {
+                    photoPreview.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+                }
+            } else if (type === 'led') {
+                const item = window.LED_LIST.find(l => l.id === itemId);
+                if (!item) return;
+                document.getElementById('edit-modal-title').textContent = 'Редактировать LED-ленту';
+                nameInp.value = item.name || '';
+                descInp.value = item.desc || '';
+                priceInp.value = item.price || 0;
+                priceLabel.textContent = 'Цена (₽ / пог. м)';
+            } else if (type === 'service') {
+                const item = window.EXTRA_SERVICES_LIST.find(s => s.id === itemId);
+                if (!item) return;
+                document.getElementById('edit-modal-title').textContent = 'Редактировать работу';
+                nameInp.value = item.name || '';
+                descInp.value = item.desc || '';
+                priceInp.value = item.price || 0;
+                srvUnitWrap.classList.remove('hidden');
+                srvUnitSel.value = item.unit || 'fixed';
+            } else if (type === 'key') {
+                const keys = getAllowedKeys();
+                const idx = parseInt(itemId, 10);
+                const item = keys[idx];
+                if (!item) return;
+                document.getElementById('edit-modal-title').textContent = 'Редактировать ключ доступа';
+                nameLabel.textContent = 'Код доступа';
+                descLabel.textContent = 'Заметка (кому выдан)';
+                nameInp.value = item.code || '';
+                descInp.value = item.label || '';
+                roleWrap.classList.remove('hidden');
+                roleSel.value = item.role || 'client';
+                priceInp.value = item.discount || 0;
+                handleEditKeyRoleChange(roleSel.value);
+            }
+
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            syncBodyScrollLock();
+        }
+
+        function handleEditModalFileUpload(input) {
+            const file = input && input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const compressed = await compressImageDataUrl(ev.target.result);
+                window.pendingEditPhotoDataUrl = compressed;
+                document.getElementById('edit-item-photo-preview').innerHTML = `<img src="${compressed}" class="w-full h-full object-cover">`;
+                document.getElementById('edit-item-remove-photo-btn').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearEditModalPhoto() {
+            window.pendingEditPhotoDataUrl = '';
+            document.getElementById('edit-item-photo-preview').innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
+            document.getElementById('edit-item-remove-photo-btn').classList.add('hidden');
+        }
+
+        function closeAdminEditModal() {
+            const modal = document.getElementById('admin-edit-item-modal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            syncBodyScrollLock();
+        }
+
+        function saveAdminEditedItem(e) {
+            if (e) e.preventDefault();
+            const type = document.getElementById('edit-item-type').value;
+            const catKey = document.getElementById('edit-item-cat').value;
+            const itemId = document.getElementById('edit-item-id').value;
+            const name = document.getElementById('edit-item-name').value.trim();
+            const desc = document.getElementById('edit-item-desc').value.trim();
+            const price = Math.max(0, parseInt(document.getElementById('edit-item-price').value, 10) || 0);
+
+            if (!name) return;
+
+            if (type === 'fabric') {
+                const item = window.FABRICS_LIST.find(f => f.id === itemId);
+                if (item) {
+                    item.name = name;
+                    item.shortName = name;
+                    item.desc = desc;
+                    item.price = price;
+                    if (window.pendingEditPhotoDataUrl !== null) item.img = window.pendingEditPhotoDataUrl;
+                    saveFabricsCatalogToCache();
+                    renderFabricsGrid();
+                }
+            } else if (type === 'lamp') {
+                const cat = window.LAMP_VARIANTS_CATALOG[catKey];
+                const item = cat && cat.items.find(v => v.id === itemId);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    item.unit = document.getElementById('edit-item-unit').value || 'шт';
+                    if (window.pendingEditPhotoDataUrl !== null) {
+                        item.img = window.pendingEditPhotoDataUrl || LAMP_FALLBACK_SVG;
+                    }
+                    syncVariantBasePricesWithAdmin();
+                    saveLampCatalogToCache();
+                    if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
+                }
+            } else if (type === 'led') {
+                const item = window.LED_LIST.find(l => l.id === itemId);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    syncLedPricesMap();
+                    saveLedCatalogToCache();
+                    renderLedSelectOptions();
+                }
+            } else if (type === 'service') {
+                const item = window.EXTRA_SERVICES_LIST.find(s => s.id === itemId);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    item.unit = document.getElementById('edit-item-service-unit').value || 'fixed';
+                    saveExtraServicesToCache();
+                    renderExtraServicesGrid();
+                }
+            } else if (type === 'key') {
+                const keys = getAllowedKeys();
+                const idx = parseInt(itemId, 10);
+                if (keys[idx]) {
+                    const role = document.getElementById('edit-item-role').value;
+                    keys[idx].code = name.toUpperCase();
+                    keys[idx].label = desc;
+                    keys[idx].role = role;
+                    keys[idx].discount = role === 'master' ? Math.min(90, Math.max(1, price)) : 0;
+                    saveAllowedKeys(keys);
+                }
+            }
+
+            syncPriceLabels();
+            renderAllAdminSections();
+            calculateTotal();
+            closeAdminEditModal();
+            queueCloudSync('all');
+            showToast('Изменения сохранены');
+        }
+
+        // ЛОГИКА ПОЛЗУНКОВ, СЧЁТЧИКОВ И РАСЧЁТА СМЕТЫ КАЛЬКУЛЯТОРА
         function updateRangeFill(slider) {
             if (!slider) return;
             const min = parseFloat(slider.min) || 0;
@@ -3054,128 +4173,72 @@
             slider.style.setProperty('--range-progress', `${pct}%`);
         }
 
-        function updateAllRangeFills() {
-            document.querySelectorAll('input[type="range"]').forEach(updateRangeFill);
-        }
-
         function syncAreaFromSlider(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.area = num;
+            const area = Math.max(0, parseFloat(val) || 0);
+            calcState.area = area;
             const inp = document.getElementById('input-area');
             const lbl = document.getElementById('area-val-label');
-            if (inp) inp.value = num;
-            if (lbl) lbl.textContent = num;
-            updateRangeFill(document.getElementById('slider-area'));
+            const slider = document.getElementById('slider-area');
+            if (inp) inp.value = area;
+            if (lbl) lbl.textContent = area;
+            updateRangeFill(slider);
+
             if (!isPerimeterManuallyEdited) {
-                const autoP = num > 0 ? Math.round(Math.sqrt(num) * 4) : 0;
-                calcState.perimeter = autoP;
+                const autoPerim = area > 0 ? Math.round(4 * Math.sqrt(area)) : 0;
+                calcState.perimeter = autoPerim;
                 const pInp = document.getElementById('input-perimeter');
                 const pSlider = document.getElementById('slider-perimeter');
                 const pLbl = document.getElementById('perimeter-val-label');
-                if (pInp) pInp.value = autoP;
-                if (pSlider) pSlider.value = Math.min(120, autoP);
-                if (pLbl) pLbl.textContent = autoP;
+                if (pInp) pInp.value = autoPerim;
+                if (pSlider) pSlider.value = Math.min(120, autoPerim);
+                if (pLbl) pLbl.textContent = autoPerim;
             }
             calculateTotal();
         }
 
         function syncAreaFromInput(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.area = num;
+            const area = Math.max(0, parseFloat(val) || 0);
+            calcState.area = area;
             const slider = document.getElementById('slider-area');
             const lbl = document.getElementById('area-val-label');
             if (slider) {
-                slider.value = Math.min(100, num);
+                slider.value = Math.min(100, area);
                 updateRangeFill(slider);
             }
-            if (lbl) lbl.textContent = num;
+            if (lbl) lbl.textContent = area;
+
             if (!isPerimeterManuallyEdited) {
-                const autoP = num > 0 ? Math.round(Math.sqrt(num) * 4) : 0;
-                calcState.perimeter = autoP;
+                const autoPerim = area > 0 ? Math.round(4 * Math.sqrt(area)) : 0;
+                calcState.perimeter = autoPerim;
                 const pInp = document.getElementById('input-perimeter');
                 const pSlider = document.getElementById('slider-perimeter');
                 const pLbl = document.getElementById('perimeter-val-label');
-                if (pInp) pInp.value = autoP;
-                if (pSlider) pSlider.value = Math.min(120, autoP);
-                if (pLbl) pLbl.textContent = autoP;
+                if (pInp) pInp.value = autoPerim;
+                if (pSlider) pSlider.value = Math.min(120, autoPerim);
+                if (pLbl) pLbl.textContent = autoPerim;
             }
             calculateTotal();
         }
 
         function syncPerimeterFromSlider(val) {
             isPerimeterManuallyEdited = true;
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.perimeter = num;
+            const p = Math.max(0, parseFloat(val) || 0);
+            calcState.perimeter = p;
             const inp = document.getElementById('input-perimeter');
             const lbl = document.getElementById('perimeter-val-label');
-            if (inp) inp.value = num;
-            if (lbl) lbl.textContent = num;
+            if (inp) inp.value = p;
+            if (lbl) lbl.textContent = p;
             calculateTotal();
         }
 
         function syncPerimeterFromInput(val) {
             isPerimeterManuallyEdited = true;
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.perimeter = num;
+            const p = Math.max(0, parseFloat(val) || 0);
+            calcState.perimeter = p;
             const slider = document.getElementById('slider-perimeter');
             const lbl = document.getElementById('perimeter-val-label');
-            if (slider) slider.value = Math.min(120, num);
-            if (lbl) lbl.textContent = num;
-            calculateTotal();
-        }
-
-        function syncRubberInsertFromSlider(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.rubberInsertLength = num;
-            const inp = document.getElementById('input-rubber-insert');
-            const lbl = document.getElementById('rubber-insert-val-label');
-            if (inp) inp.value = num;
-            if (lbl) lbl.textContent = num;
-            updateRangeFill(document.getElementById('slider-rubber-insert'));
-            calculateTotal();
-        }
-
-        function syncRubberInsertFromInput(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.rubberInsertLength = num;
-            const slider = document.getElementById('slider-rubber-insert');
-            const lbl = document.getElementById('rubber-insert-val-label');
-            if (slider) {
-                slider.value = Math.min(120, num);
-                updateRangeFill(slider);
-            }
-            if (lbl) lbl.textContent = num;
-            calculateTotal();
-        }
-
-        function syncPerimeterFromInput(val) {
-            isPerimeterManuallyEdited = true;
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.perimeter = num;
-            const slider = document.getElementById('slider-perimeter');
-            const lbl = document.getElementById('perimeter-val-label');
-            if (slider) slider.value = Math.min(120, num);
-            if (lbl) lbl.textContent = num;
-            calculateTotal();
-        }
-
-        function syncRubberInsertFromSlider(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.rubberInsertLength = num;
-            const inp = document.getElementById('input-rubber-insert');
-            const lbl = document.getElementById('rubber-insert-val-label');
-            if (inp) inp.value = num;
-            if (lbl) lbl.textContent = num;
-            calculateTotal();
-        }
-
-        function syncRubberInsertFromInput(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.rubberInsertLength = num;
-            const slider = document.getElementById('slider-rubber-insert');
-            const lbl = document.getElementById('rubber-insert-val-label');
-            if (slider) slider.value = Math.min(120, num);
-            if (lbl) lbl.textContent = num;
+            if (slider) slider.value = Math.min(120, p);
+            if (lbl) lbl.textContent = p;
             calculateTotal();
         }
 
@@ -3195,39 +4258,65 @@
             calculateTotal();
         }
 
+        function syncRubberInsertFromSlider(val) {
+            const len = Math.max(0, parseFloat(val) || 0);
+            calcState.rubberInsertLength = len;
+            const inp = document.getElementById('input-rubber-insert');
+            const lbl = document.getElementById('rubber-insert-val-label');
+            const slider = document.getElementById('slider-rubber-insert');
+            if (inp) inp.value = len;
+            if (lbl) lbl.textContent = len;
+            updateRangeFill(slider);
+            calculateTotal();
+        }
+
+        function syncRubberInsertFromInput(val) {
+            const len = Math.max(0, parseFloat(val) || 0);
+            calcState.rubberInsertLength = len;
+            const slider = document.getElementById('slider-rubber-insert');
+            const lbl = document.getElementById('rubber-insert-val-label');
+            if (slider) {
+                slider.value = Math.min(120, len);
+                updateRangeFill(slider);
+            }
+            if (lbl) lbl.textContent = len;
+            calculateTotal();
+        }
+
         function syncDismantleFromSlider(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.dismantleArea = num;
+            const area = Math.max(0, parseFloat(val) || 0);
+            calcState.dismantleArea = area;
             const inp = document.getElementById('input-dismantle');
             const lbl = document.getElementById('dismantle-val-label');
-            if (inp) inp.value = num;
-            if (lbl) lbl.textContent = num;
-            updateRangeFill(document.getElementById('slider-dismantle'));
+            const slider = document.getElementById('slider-dismantle');
+            if (inp) inp.value = area;
+            if (lbl) lbl.textContent = area;
+            updateRangeFill(slider);
             calculateTotal();
         }
 
         function syncDismantleFromInput(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.dismantleArea = num;
+            const area = Math.max(0, parseFloat(val) || 0);
+            calcState.dismantleArea = area;
             const slider = document.getElementById('slider-dismantle');
             const lbl = document.getElementById('dismantle-val-label');
             if (slider) {
-                slider.value = Math.min(100, num);
+                slider.value = Math.min(100, area);
                 updateRangeFill(slider);
             }
-            if (lbl) lbl.textContent = num;
+            if (lbl) lbl.textContent = area;
             calculateTotal();
         }
 
         function changeExtraCorners(delta) {
-            calcState.corners = Math.max(0, calcState.corners + delta);
+            calcState.corners = Math.max(0, (calcState.corners || 0) + delta);
             const el = document.getElementById('corners-count');
             if (el) el.textContent = calcState.corners;
             calculateTotal();
         }
 
         function changePipes(delta) {
-            calcState.pipes = Math.max(0, calcState.pipes + delta);
+            calcState.pipes = Math.max(0, (calcState.pipes || 0) + delta);
             const el = document.getElementById('pipes-count');
             if (el) el.textContent = calcState.pipes;
             calculateTotal();
@@ -3235,22 +4324,24 @@
 
         function changeLampCount(catKey, delta) {
             const cat = window.LAMP_VARIANTS_CATALOG[catKey];
-            if (!cat || !Array.isArray(cat.items) || cat.items.length === 0) return;
-            const defaultId = cat.defaultVariantId || cat.items[0].id;
+            if (!cat || !cat.items || cat.items.length === 0) return;
+
+            const defaultId = cat.defaultVariantId && cat.items.some(i => i.id === cat.defaultVariantId)
+                ? cat.defaultVariantId
+                : cat.items[0].id;
+
             if (delta > 0) {
-                calcState.lampVariants[defaultId] = (calcState.lampVariants[defaultId] || 0) + delta;
+                calcState.lampVariants[defaultId] = (calcState.lampVariants[defaultId] || 0) + 1;
                 openLampCategoryVariants(catKey);
             } else {
-                const activeItem = [...cat.items].reverse().find(i => (calcState.lampVariants[i.id] || 0) > 0);
-                if (activeItem) {
-                    calcState.lampVariants[activeItem.id] = Math.max(0, (calcState.lampVariants[activeItem.id] || 0) + delta);
+                const withQty = [...cat.items].reverse().find(i => (calcState.lampVariants[i.id] || 0) > 0);
+                if (withQty) {
+                    calcState.lampVariants[withQty.id] = Math.max(0, calcState.lampVariants[withQty.id] - 1);
                 }
             }
+
             syncCategoryCountersUI();
-
-            const items = window.LAMP_VARIANTS_CATALOG[catKey]?.items || [];
-            const totalCatQty = items.reduce((sum, item) => sum + (calcState.lampVariants[item.id] || 0), 0);
-
+            const totalCatQty = cat.items.reduce((sum, item) => sum + (calcState.lampVariants[item.id] || 0), 0);
             if (delta < 0 && totalCatQty === 0 && window.activeLampCategory === catKey) {
                 closeLampVariantsDrawer();
             } else if (window.activeLampCategory === catKey) {
@@ -3260,163 +4351,221 @@
         }
 
         function syncLedLength(val) {
-            const num = Math.max(0, parseFloat(val) || 0);
-            calcState.ledLength = num;
+            const len = Math.max(0, parseFloat(val) || 0);
+            calcState.ledLength = len;
             const lbl = document.getElementById('led-len-display');
-            if (lbl) lbl.textContent = num;
-            updateRangeFill(document.getElementById('slider-led-length'));
+            const slider = document.getElementById('slider-led-length');
+            if (lbl) lbl.textContent = len;
+            updateRangeFill(slider);
             calculateTotal();
         }
 
-        function renderExtraServicesGrid() {
-            const grid = document.getElementById('extra-services-grid');
-            if (!grid) return;
-            const step4Services = window.EXTRA_SERVICES_LIST.filter(s => s.inStep4);
-            grid.innerHTML = step4Services.map(srv => {
-                const checked = Boolean(calcState.selectedExtraServices[srv.id]);
-                const priceUnitText = srv.unit === 'per_m' ? `${Number(srv.price).toLocaleString('ru-RU')} ₽/м.п.` : `${Number(srv.price).toLocaleString('ru-RU')} ₽`;
-                return `
-                    <label class="w-full flex items-start gap-3 p-4 rounded-2xl border ${checked ? 'border-emerald-500 bg-emerald-50/50' : 'border-stone-200 bg-stone-50/50'} cursor-pointer transition">
-                        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleExtraService('${srv.id}', this.checked)" class="mt-1 w-4 h-4 rounded border-stone-300 shrink-0">
-                        <div class="min-w-0 flex-1 w-full text-justify space-y-1">
-                            <span class="text-sm font-bold text-stone-900 block leading-snug w-full">${srv.name}</span>
-                            ${srv.desc ? `<span class="text-xs text-stone-500 block leading-relaxed w-full">${srv.desc}</span>` : ''}
-                            <span class="text-xs font-extrabold text-emerald-700 pt-0.5 block text-left">+ ${priceUnitText}</span>
-                        </div>
-                    </label>
-                `;
-            }).join('');
-        }
+        function syncPriceLabels() {
+            const cornerSrv = getExtraServiceById('corner');
+            const pipeSrv = getExtraServiceById('pipe');
+            const maskSrv = getExtraServiceById('mask');
+            const dismantleSrv = getExtraServiceById('dismantle');
+            const chandelierSrv = getExtraServiceById('chandelier');
 
-        function toggleExtraService(serviceId, isChecked) {
-            calcState.selectedExtraServices[serviceId] = Boolean(isChecked);
-            renderExtraServicesGrid();
-            calculateTotal();
+            const cornerPrice = cornerSrv ? cornerSrv.price : window.PRICES.extras.corner;
+            const pipePrice = pipeSrv ? pipeSrv.price : window.PRICES.extras.pipe;
+            const maskPrice = maskSrv ? maskSrv.price : window.PRICES.extras.mask;
+            const dismantlePrice = dismantleSrv ? dismantleSrv.price : window.PRICES.extras.dismantle;
+            const chandelierPrice = chandelierSrv ? chandelierSrv.price : window.PRICES.extras.chandelier;
+
+            const elCorner = document.getElementById('lbl-extra-corner');
+            const elPipe = document.getElementById('lbl-extra-pipe');
+            const elMask = document.getElementById('lbl-rubber-insert-price');
+            const elDismantle = document.getElementById('lbl-dismantle-price');
+            const elChandelier = document.getElementById('price-display-chandelier');
+            const elShadow = document.getElementById('price-display-profile-shadow');
+            const elFloating = document.getElementById('price-display-profile-floating');
+
+            if (elCorner) elCorner.textContent = Number(cornerPrice).toLocaleString('ru-RU');
+            if (elPipe) elPipe.textContent = Number(pipePrice).toLocaleString('ru-RU');
+            if (elMask) elMask.textContent = Number(maskPrice).toLocaleString('ru-RU');
+            if (elDismantle) elDismantle.textContent = Number(dismantlePrice).toLocaleString('ru-RU');
+            if (elChandelier) {
+                elChandelier.textContent = `Усиленная закладная платформа + подключение (+${Number(chandelierPrice).toLocaleString('ru-RU')} ₽)`;
+            }
+            if (elShadow) {
+                elShadow.textContent = `+ ${Number(window.PRICES.profiles.shadow.price).toLocaleString('ru-RU')} ₽ / пог. метр`;
+            }
+            if (elFloating) {
+                elFloating.textContent = `+ ${Number(window.PRICES.profiles.floating.price).toLocaleString('ru-RU')} ₽ / пог. метр`;
+            }
+
+            ['gx53', 'tube', 'track'].forEach(catKey => {
+                const el = document.getElementById(`price-display-lamp-${catKey}`);
+                if (el) {
+                    el.textContent = `от ${Number(getCategoryMinPrice(catKey)).toLocaleString('ru-RU')} ₽/шт`;
+                }
+            });
         }
 
         function calculateTotal() {
             const breakdown = [];
-            let total = 0;
+            let subtotal = 0;
 
+            // 1. Полотно
             const fabric = getFabricById(calcState.fabricKey);
             if (calcState.area > 0 && fabric) {
-                const sum = Math.round(calcState.area * (Number(fabric.price) || 0));
-                total += sum;
-                breakdown.push({ label: `Полотно: ${fabric.name} (${calcState.area} м²)`, sum });
+                const cost = Math.round(calcState.area * Number(fabric.price || 0));
+                subtotal += cost;
+                breakdown.push({
+                    label: `${fabric.name} (${calcState.area} м²)`,
+                    cost
+                });
             }
 
-            const profileRadio = document.querySelector('input[name="profile_type"]:checked');
-            const profileKey = profileRadio ? profileRadio.value : 'classic';
-            calcState.profileKey = profileKey;
+            // 2. Профиль примыкания
+            const checkedProfile = document.querySelector('input[name="profile_type"]:checked');
+            calcState.profileKey = checkedProfile ? checkedProfile.value : 'classic';
             document.querySelectorAll('.profile-card').forEach(card => {
-                const inp = card.querySelector('input[type="radio"]');
-                if (inp && inp.checked) {
-                    card.classList.add('border-emerald-600', 'bg-emerald-50/50');
-                    card.classList.remove('border-stone-200');
-                } else {
-                    card.classList.remove('border-emerald-600', 'bg-emerald-50/50');
-                    card.classList.add('border-stone-200');
-                }
+                const radio = card.querySelector('input[type="radio"]');
+                const active = radio && radio.checked;
+                card.className = active
+                    ? 'profile-card border border-emerald-600 bg-emerald-50/50 p-3.5 rounded-xl cursor-pointer flex items-center gap-3'
+                    : 'profile-card border border-stone-200 p-3.5 rounded-xl cursor-pointer flex items-center gap-3';
             });
 
-            const profileObj = window.PRICES.profiles[profileKey];
-            const effectivePerimeter = calcState.perimeter > 0 ? calcState.perimeter : (calcState.area > 0 ? Math.round(Math.sqrt(calcState.area) * 4) : 0);
-            if (profileObj && Number(profileObj.price) > 0 && effectivePerimeter > 0) {
-                const sum = Math.round(effectivePerimeter * Number(profileObj.price));
-                total += sum;
-                breakdown.push({ label: `${profileObj.name} (${effectivePerimeter} м.п.)`, sum });
+            const profileObj = window.PRICES.profiles[calcState.profileKey];
+            const effectivePerim = calcState.perimeter > 0
+                ? calcState.perimeter
+                : (calcState.area > 0 ? Math.round(4 * Math.sqrt(calcState.area)) : 0);
+
+            if (profileObj && profileObj.price > 0 && effectivePerim > 0) {
+                const cost = Math.round(effectivePerim * profileObj.price);
+                subtotal += cost;
+                breakdown.push({
+                    label: `${profileObj.name} (~${effectivePerim} м.п.)`,
+                    cost
+                });
             }
 
+            // 3. Резиновая вставка
+            const maskSrv = getExtraServiceById('mask');
+            const maskUnitPrice = maskSrv ? Number(maskSrv.price) : window.PRICES.extras.mask;
             if (calcState.rubberInsertLength > 0) {
-                const maskSrv = getExtraServiceById('mask');
-                const unitPrice = maskSrv ? Number(maskSrv.price) : (window.PRICES.extras.mask || 90);
-                const sum = Math.round(calcState.rubberInsertLength * unitPrice);
-                const colorLabel = calcState.rubberInsertColor === 'black' ? 'чёрная' : 'белая';
-                total += sum;
-                breakdown.push({ label: `Резиновая вставка (${colorLabel}, ${calcState.rubberInsertLength} м.п.)`, sum });
+                const cost = Math.round(calcState.rubberInsertLength * maskUnitPrice);
+                const colorName = calcState.rubberInsertColor === 'black' ? 'чёрная' : 'белая';
+                subtotal += cost;
+                breakdown.push({
+                    label: `Резиновая вставка (${colorName}, ${calcState.rubberInsertLength} м.п.)`,
+                    cost
+                });
             }
 
+            // 4. Демонтаж
+            const dismantleSrv = getExtraServiceById('dismantle');
+            const dismantleUnitPrice = dismantleSrv ? Number(dismantleSrv.price) : window.PRICES.extras.dismantle;
             if (calcState.dismantleArea > 0) {
-                const dismantleSrv = getExtraServiceById('dismantle');
-                const unitPrice = dismantleSrv ? Number(dismantleSrv.price) : (window.PRICES.extras.dismantle || 150);
-                const sum = Math.round(calcState.dismantleArea * unitPrice);
-                total += sum;
-                breakdown.push({ label: `Демонтаж старого потолка (${calcState.dismantleArea} м²)`, sum });
+                const cost = Math.round(calcState.dismantleArea * dismantleUnitPrice);
+                subtotal += cost;
+                breakdown.push({
+                    label: `Демонтаж потолка (${calcState.dismantleArea} м²)`,
+                    cost
+                });
             }
 
+            // 5. Углы и трубы
+            const cornerSrv = getExtraServiceById('corner');
+            const cornerUnitPrice = cornerSrv ? Number(cornerSrv.price) : window.PRICES.extras.corner;
             if (calcState.corners > 0) {
-                const cornerSrv = getExtraServiceById('corner');
-                const unitPrice = cornerSrv ? Number(cornerSrv.price) : (window.PRICES.extras.corner || 150);
-                const sum = Math.round(calcState.corners * unitPrice);
-                total += sum;
-                breakdown.push({ label: `Дополнительные углы (${calcState.corners} шт)`, sum });
+                const cost = Math.round(calcState.corners * cornerUnitPrice);
+                subtotal += cost;
+                breakdown.push({
+                    label: `Доп. углы (${calcState.corners} шт)`,
+                    cost
+                });
             }
 
+            const pipeSrv = getExtraServiceById('pipe');
+            const pipeUnitPrice = pipeSrv ? Number(pipeSrv.price) : window.PRICES.extras.pipe;
             if (calcState.pipes > 0) {
-                const pipeSrv = getExtraServiceById('pipe');
-                const unitPrice = pipeSrv ? Number(pipeSrv.price) : (window.PRICES.extras.pipe || 350);
-                const sum = Math.round(calcState.pipes * unitPrice);
-                total += sum;
-                breakdown.push({ label: `Обвод труб отопления (${calcState.pipes} шт)`, sum });
+                const cost = Math.round(calcState.pipes * pipeUnitPrice);
+                subtotal += cost;
+                breakdown.push({
+                    label: `Обвод труб (${calcState.pipes} шт)`,
+                    cost
+                });
             }
 
+            // 6. Светильники
             ['gx53', 'tube', 'track'].forEach(catKey => {
                 const items = window.LAMP_VARIANTS_CATALOG[catKey]?.items || [];
-                items.forEach(item => {
-                    const qty = calcState.lampVariants[item.id] || 0;
+                items.forEach(variant => {
+                    const qty = calcState.lampVariants[variant.id] || 0;
                     if (qty > 0) {
-                        const sum = Math.round(qty * (Number(item.price) || 0));
-                        total += sum;
-                        breakdown.push({ label: `${item.name} (${qty} ${item.unit || 'шт'})`, sum });
+                        const cost = Math.round(qty * Number(variant.price || 0));
+                        subtotal += cost;
+                        breakdown.push({
+                            label: `${variant.name} (${qty} ${variant.unit || 'шт'})`,
+                            cost
+                        });
                     }
                 });
             });
 
-            const chandEl = document.getElementById('has-chandelier');
-            calcState.chandelier = Boolean(chandEl && chandEl.checked);
+            // 7. Люстра
+            const chandelierCheckbox = document.getElementById('has-chandelier');
+            calcState.chandelier = Boolean(chandelierCheckbox && chandelierCheckbox.checked);
             if (calcState.chandelier) {
-                const chandSrv = getExtraServiceById('chandelier');
-                const sum = chandSrv ? Number(chandSrv.price) : (window.PRICES.extras.chandelier || 650);
-                total += sum;
-                breakdown.push({ label: 'Монтаж центральной люстры', sum });
+                const chandelierSrv = getExtraServiceById('chandelier');
+                const cost = chandelierSrv ? Number(chandelierSrv.price) : window.PRICES.extras.chandelier;
+                subtotal += cost;
+                breakdown.push({
+                    label: 'Монтаж центральной люстры',
+                    cost
+                });
             }
 
+            // 8. LED-подсветка
             const ledSelect = document.getElementById('led-type');
-            if (ledSelect) calcState.ledType = ledSelect.value;
-            const ledTempRadio = document.querySelector('input[name="led_temp"]:checked');
-            calcState.ledTemp = ledTempRadio ? ledTempRadio.value : 'neutral';
+            if (ledSelect && ledSelect.value) {
+                calcState.ledType = ledSelect.value;
+            }
+            const checkedTemp = document.querySelector('input[name="led_temp"]:checked');
+            calcState.ledTemp = checkedTemp ? checkedTemp.value : 'neutral';
             document.querySelectorAll('.led-temp-card').forEach(card => {
-                const inp = card.querySelector('input[type="radio"]');
-                if (inp && inp.checked) {
-                    card.classList.add('border-emerald-400', 'bg-stone-800');
-                    card.classList.remove('border-stone-700');
-                } else {
-                    card.classList.remove('border-emerald-400', 'bg-stone-800');
-                    card.classList.add('border-stone-700');
-                }
+                const radio = card.querySelector('input[type="radio"]');
+                const active = radio && radio.checked;
+                card.className = active
+                    ? 'led-temp-card border border-emerald-400 bg-stone-800 rounded-xl p-2 cursor-pointer flex flex-col items-center text-center transition'
+                    : 'led-temp-card border border-stone-700 bg-stone-850 hover:border-emerald-400 rounded-xl p-2 cursor-pointer flex flex-col items-center text-center transition';
             });
 
             if (calcState.ledLength > 0) {
                 const ledObj = getLedById(calcState.ledType);
-                const unitPrice = ledObj ? Number(ledObj.price) : 950;
-                const sum = Math.round(calcState.ledLength * unitPrice);
                 const tempMap = { warm: '3000K', neutral: '4000K', cool: '6000K' };
-                total += sum;
-                breakdown.push({ label: `LED-лента: ${ledObj ? ledObj.name : ''} (${calcState.ledLength} м, ${tempMap[calcState.ledTemp] || '4000K'})`, sum });
+                const cost = Math.round(calcState.ledLength * Number(ledObj ? ledObj.price : 0));
+                subtotal += cost;
+                breakdown.push({
+                    label: `LED ${ledObj ? ledObj.name : ''} ${tempMap[calcState.ledTemp] || ''} (${calcState.ledLength} м)`,
+                    cost
+                });
             }
 
+            // 9. Дополнительные работы (шаг 4)
             window.EXTRA_SERVICES_LIST.filter(s => s.inStep4).forEach(srv => {
                 if (calcState.selectedExtraServices[srv.id]) {
-                    const mult = srv.unit === 'per_m' ? (effectivePerimeter || 1) : 1;
-                    const sum = Math.round((Number(srv.price) || 0) * mult);
-                    total += sum;
-                    const suffix = srv.unit === 'per_m' ? ` (${effectivePerimeter || 1} м.п.)` : '';
-                    breakdown.push({ label: `${srv.name}${suffix}`, sum });
+                    const mult = srv.unit === 'per_m' ? Math.max(1, effectivePerim) : 1;
+                    const cost = Math.round(Number(srv.price || 0) * mult);
+                    subtotal += cost;
+                    breakdown.push({
+                        label: srv.unit === 'per_m' ? `${srv.name} (~${mult} м.п.)` : srv.name,
+                        cost
+                    });
                 }
             });
 
-            calcState.baseTotalPrice = total;
-            calcState.discountAmount = 0;
+            // Скидка мастера (если вход выполнен по ключу мастера)
+            const masterDiscountPct = getActiveMasterDiscountPercent();
+            const discountAmount = masterDiscountPct > 0 ? Math.round(subtotal * (masterDiscountPct / 100)) : 0;
+            const total = Math.max(0, subtotal - discountAmount);
+
+            calcState.baseTotalPrice = subtotal;
+            calcState.discountAmount = discountAmount;
             calcState.totalPrice = total;
             calcState.breakdown = breakdown;
 
@@ -3432,29 +4581,42 @@
 
             if (listEl) {
                 if (breakdown.length === 0) {
-                    listEl.innerHTML = '<div class="text-stone-400 italic">Выберите параметры потолка и освещения для расчёта...</div>';
+                    listEl.innerHTML = `<div class="text-stone-400 italic py-2">Выберите параметры потолка и освещения для расчёта...</div>`;
                 } else {
-                    listEl.innerHTML = breakdown.map(row => `
-                        <div class="flex items-start justify-between gap-2 py-1 border-b border-stone-100 last:border-0">
-                            <span class="text-stone-700">${row.label}</span>
-                            <span class="font-bold text-stone-900 whitespace-nowrap">${Number(row.sum).toLocaleString('ru-RU')} ₽</span>
+                    let html = breakdown.map(item => `
+                        <div class="flex items-start justify-between gap-2 py-1 border-b border-emerald-100/70 last:border-0">
+                            <span class="text-stone-700 leading-snug">${item.label}</span>
+                            <span class="font-bold text-stone-900 whitespace-nowrap">${item.cost.toLocaleString('ru-RU')} ₽</span>
                         </div>
                     `).join('');
+                    if (discountAmount > 0) {
+                        html += `
+                            <div class="flex items-center justify-between gap-2 pt-1.5 text-emerald-700 font-bold">
+                                <span>Скидка мастера (-${masterDiscountPct}%)</span>
+                                <span>-${discountAmount.toLocaleString('ru-RU')} ₽</span>
+                            </div>
+                        `;
+                    }
+                    listEl.innerHTML = html;
                 }
             }
         }
 
         function buildEstimateText() {
-            const lines = ['Смета на натяжной потолок DECARAT:'];
-            if (calcState.breakdown.length === 0) {
-                lines.push('Параметры ещё не выбраны.');
-            } else {
-                calcState.breakdown.forEach((item, idx) => {
-                    lines.push(`${idx + 1}. ${item.label} — ${Number(item.sum).toLocaleString('ru-RU')} ₽`);
+            const lines = ['📐 Расчёт натяжного потолка DECARAT:'];
+            if (calcState.area > 0) lines.push(`• Площадь: ${calcState.area} м²`);
+            if (calcState.breakdown.length > 0) {
+                lines.push('');
+                lines.push('Детализация сметы:');
+                calcState.breakdown.forEach(item => {
+                    lines.push(`— ${item.label}: ${item.cost.toLocaleString('ru-RU')} ₽`);
                 });
             }
+            if (calcState.discountAmount > 0) {
+                lines.push(`— Скидка мастера: -${calcState.discountAmount.toLocaleString('ru-RU')} ₽`);
+            }
             lines.push('');
-            lines.push(`ИТОГО: ${Number(calcState.totalPrice || 0).toLocaleString('ru-RU')} ₽`);
+            lines.push(`💰 Итого: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽`);
             return lines.join('\n');
         }
 
@@ -3466,11 +4628,6 @@
         function requestMeasurementInWhatsApp() {
             const text = encodeURIComponent('Здравствуйте! Хочу записаться на бесплатный замер натяжного потолка Decarat.');
             window.open(`https://wa.me/${COMPANY_PHONE.digits}?text=${text}`, '_blank');
-        }
-
-        function requestMeasurementInWhatsApp() {
-            const text = encodeURIComponent('Здравствуйте! Хочу записаться на бесплатный замер натяжного потолка Decarat.');
-            window.open(`https://wa.me/79298966736?text=${text}`, '_blank');
         }
 
         function copyEstimateToClipboard() {
@@ -3495,891 +4652,66 @@
             if (!toast) {
                 toast = document.createElement('div');
                 toast.id = 'decarat-toast';
-                toast.className = 'fixed bottom-6 right-6 z-50 bg-stone-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl border border-emerald-500/30 transition duration-300';
+                toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:#1c1917;color:#ffffff;padding:12px 20px;border-radius:16px;font-size:12px;font-weight:700;box-shadow:0 12px 30px rgba(0,0,0,0.28);border:1px solid rgba(16,185,129,0.4);transition:opacity 0.2s ease;';
                 document.body.appendChild(toast);
             }
             toast.textContent = message;
             toast.style.opacity = '1';
-            toast.style.transform = 'translateY(0)';
             clearTimeout(window.__toastTimer);
             window.__toastTimer = setTimeout(() => {
                 toast.style.opacity = '0';
-                toast.style.transform = 'translateY(12px)';
             }, 2600);
         }
 
-        function getAllowedKeys() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY_ALLOWED_KEYS);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-                }
-            } catch (e) {}
-            return [{ code: 'DECARAT2026', label: 'Базовый доступ', role: 'client', active: true }];
-        }
-
-        function saveAllowedKeys(keys) {
-            try {
-                localStorage.setItem(STORAGE_KEY_ALLOWED_KEYS, JSON.stringify(keys));
-            } catch (e) {}
-        }
-
-        function initAccessControl() {
-            const overlay = document.getElementById('access-gate-overlay');
-            if (!overlay) return;
-            const savedCode = localStorage.getItem(STORAGE_KEY_AUTH_CODE) || '';
-            const keys = getAllowedKeys();
-            const matched = keys.find(k => k.active !== false && String(k.code).toUpperCase() === savedCode.toUpperCase());
-            if (window.isAccessRestricted && !matched) {
-                overlay.classList.remove('hidden');
-                overlay.style.display = 'flex';
-            } else {
-                overlay.classList.add('hidden');
-                overlay.style.display = 'none';
-            }
-            syncBodyScrollLock();
-        }
-
-        function verifyAccessCode(e) {
-            if (e) e.preventDefault();
-            const inp = document.getElementById('access-code-input');
-            const err = document.getElementById('access-code-error');
-            const code = (inp ? inp.value : '').trim().toUpperCase();
-            const keys = getAllowedKeys();
-            const matched = keys.find(k => k.active !== false && String(k.code).toUpperCase() === code);
-            if (matched || code === getStoredAdminPin().toUpperCase()) {
-                localStorage.setItem(STORAGE_KEY_AUTH_CODE, code);
-                if (err) err.classList.add('hidden');
-                const overlay = document.getElementById('access-gate-overlay');
-                if (overlay) {
-                    overlay.classList.add('hidden');
-                    overlay.style.display = 'none';
-                }
-                syncBodyScrollLock();
-                showToast('Доступ разрешён');
-            } else if (err) {
-                err.classList.remove('hidden');
-            }
-        }
-
-        function lockSiteSession() {
-            window.isAdminAuthenticated = false;
-            localStorage.removeItem(STORAGE_KEY_AUTH_CODE);
-            if (window.isAccessRestricted) {
-                initAccessControl();
-            } else {
-                showToast('Сессия сброшена');
-            }
-        }
-
-        function resetLocalAuthCache() {
-            localStorage.removeItem(STORAGE_KEY_AUTH_CODE);
-            showToast('Кэш доступа очищен');
-        }
-
-        window.isAdminAuthenticated = false;
-        window.activeAdminTab = 'fabrics';
-        window.pendingEditPhotoDataUrl = null;
-
-        function updateAdminSidebarCounts() {
-            const fabEl = document.getElementById('admin-nav-fabrics-count');
-            if (fabEl) fabEl.textContent = String(window.FABRICS_LIST.length);
-
-            const ledEl = document.getElementById('admin-nav-led-count');
-            if (ledEl) ledEl.textContent = String(window.LED_LIST.length);
-
-            const srvEl = document.getElementById('admin-nav-services-count');
-            if (srvEl) srvEl.textContent = String(window.EXTRA_SERVICES_LIST.length);
-
-            const keysEl = document.getElementById('admin-nav-keys-count');
-            if (keysEl) keysEl.textContent = String(getAllowedKeys().length);
-        }
-
-        function switchAdminTab(tabName) {
-            window.activeAdminTab = tabName;
-            ['fabrics', 'lamps', 'led', 'services', 'access'].forEach(key => {
-                const btn = document.getElementById(`admin-tab-btn-${key}`);
-                const sec = document.getElementById(`admin-section-${key}`);
-                if (btn) btn.classList.toggle('is-active', key === tabName);
-                if (sec) sec.classList.toggle('hidden', key !== tabName);
-            });
-        }
-
-        function setAdminModalLayout(isAuthenticated) {
-            const shell = document.getElementById('admin-modal-shell');
-            const badge = document.getElementById('admin-topbar-badge');
-            const subtitle = document.getElementById('admin-topbar-subtitle');
-            if (shell) {
-                shell.style.maxWidth = isAuthenticated ? '1040px' : '420px';
-            }
-            if (badge) {
-                badge.classList.toggle('hidden', !isAuthenticated);
-            }
-            if (subtitle) {
-                subtitle.textContent = isAuthenticated
-                    ? 'Настройка прайса, каталога светильников, LED-подсветки и ключей доступа'
-                    : 'Авторизация владельца';
-            }
-        }
-
-        function openAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            if (!modal) return;
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex';
-
-            const loginBox = document.getElementById('admin-login-box');
-            const contentBox = document.getElementById('admin-content-box');
-            const pinErr = document.getElementById('admin-pin-error');
-            const pinInp = document.getElementById('admin-pin-input');
-
-            if (pinErr) pinErr.classList.add('hidden');
-            if (pinInp) pinInp.value = '';
-
-            setAdminModalLayout(Boolean(window.isAdminAuthenticated));
-
-            if (window.isAdminAuthenticated) {
-                if (loginBox) loginBox.classList.add('hidden');
-                if (contentBox) contentBox.classList.remove('hidden');
-                renderAllAdminSections();
-            } else {
-                if (loginBox) loginBox.classList.remove('hidden');
-                if (contentBox) contentBox.classList.add('hidden');
-                if (pinInp) setTimeout(() => pinInp.focus(), 50);
-            }
-            syncBodyScrollLock();
-        }
-
-        function verifyAdminPin(e) {
-            if (e) e.preventDefault();
-            const pinInp = document.getElementById('admin-pin-input');
-            const pinErr = document.getElementById('admin-pin-error');
-            const val = (pinInp ? pinInp.value : '').trim();
-            if (val === getStoredAdminPin()) {
-                window.isAdminAuthenticated = true;
-                unlockSiteForAdmin();
-                setAdminModalLayout(true);
-                if (pinErr) pinErr.classList.add('hidden');
-                document.getElementById('admin-login-box')?.classList.add('hidden');
-                document.getElementById('admin-content-box')?.classList.remove('hidden');
-                renderAllAdminSections();
-                showToast('Вы вошли в панель управления');
-            } else if (pinErr) {
-                pinErr.classList.remove('hidden');
-            }
-        }
-
-        function closeAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            }
-            syncBodyScrollLock();
-        }
-
-        function renderAllAdminSections() {
-            const shadowInp = document.getElementById('adm-prof-shadow');
-            const floatInp = document.getElementById('adm-prof-floating');
-            if (shadowInp) shadowInp.value = window.PRICES.profiles.shadow.price;
-            if (floatInp) floatInp.value = window.PRICES.profiles.floating.price;
-
-            renderAdminFabricsList();
-            renderAdminLampVariantsList();
-            renderAdminLedList();
-            renderAdminExtraServicesList();
-            renderAdminAccessKeysList();
-
-            const lockToggle = document.getElementById('adm-access-lock-toggle');
-            if (lockToggle) lockToggle.checked = Boolean(window.isAccessRestricted);
-            updateAdminSidebarCounts();
-        }
-
-        function renderAdminFabricsList() {
-            const listEl = document.getElementById('admin-fabrics-list');
-            if (!listEl) return;
-            listEl.innerHTML = window.FABRICS_LIST.map(f => `
-                <div class="admin-item-card flex items-center justify-between gap-3">
-                    <div class="min-w-0 flex-1">
-                        <div class="text-xs sm:text-sm font-bold text-stone-900 truncate">${f.name}</div>
-                        <div class="text-[11px] text-stone-500 truncate mt-0.5">${f.desc || ''}</div>
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-xl whitespace-nowrap">${Number(f.price).toLocaleString('ru-RU')} ₽/м²</span>
-                        <button type="button" onclick="openAdminEditModal('fabric', '', '${f.id}')" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать">✎</button>
-                        ${window.FABRICS_LIST.length > 1 ? `<button type="button" onclick="deleteFabricFromAdmin('${f.id}')" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить">✕</button>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addNewFabricFromAdmin() {
-            const nameInp = document.getElementById('new-fabric-name');
-            const priceInp = document.getElementById('new-fabric-price');
-            const descInp = document.getElementById('new-fabric-desc');
-            const fileInp = document.getElementById('new-fabric-file');
-
-            const name = (nameInp ? nameInp.value : '').trim();
-            const price = parseInt(priceInp ? priceInp.value : '0', 10);
-            const desc = (descInp ? descInp.value : '').trim();
-
-            if (!name || isNaN(price) || price <= 0) {
-                showToast('Укажите название и корректную цену полотна');
-                return;
-            }
-
-            const finalizeAdd = (imgData) => {
-                const newId = 'fabric_' + Date.now();
-                window.FABRICS_LIST.push({
-                    id: newId,
-                    name,
-                    shortName: name,
-                    desc,
-                    price,
-                    badge: '',
-                    img: imgData || '',
-                    placeholderTitle: name,
-                    placeholderStyle: 'bg-emerald-50 text-emerald-800'
-                });
-                saveFabricsCatalogToCache();
-                renderFabricsGrid();
-                renderAdminFabricsList();
-                updateAdminSidebarCounts();
-                calculateTotal();
-                if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-
-                if (nameInp) nameInp.value = '';
-                if (priceInp) priceInp.value = '';
-                if (descInp) descInp.value = '';
-                clearAdminFileZone(null, 'new-fabric');
-                showToast(`Полотно «${name}» добавлено`);
-            };
-
-            const file = fileInp && fileInp.files && fileInp.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => finalizeAdd(ev.target.result);
-                reader.readAsDataURL(file);
-            } else {
-                finalizeAdd('');
-            }
-        }
-
-        function deleteFabricFromAdmin(fabricId) {
-            if (window.FABRICS_LIST.length <= 1) return;
-            window.FABRICS_LIST = window.FABRICS_LIST.filter(f => f.id !== fabricId);
-            if (calcState.fabricKey === fabricId && window.FABRICS_LIST[0]) {
-                calcState.fabricKey = window.FABRICS_LIST[0].id;
-            }
-            saveFabricsCatalogToCache();
-            renderFabricsGrid();
-            renderAdminFabricsList();
-            updateAdminSidebarCounts();
-            calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Полотно удалено');
-        }
-
-        function saveAdminPrices() {
-            const shadowInp = document.getElementById('adm-prof-shadow');
-            const floatInp = document.getElementById('adm-prof-floating');
-            if (shadowInp) {
-                const p = Math.max(0, parseInt(shadowInp.value, 10) || 0);
-                window.PRICES.profiles.shadow.price = p;
-                const lbl = document.getElementById('price-display-profile-shadow');
-                if (lbl) lbl.textContent = `+ ${p.toLocaleString('ru-RU')} ₽ / пог. метр`;
-            }
-            if (floatInp) {
-                const p = Math.max(0, parseInt(floatInp.value, 10) || 0);
-                window.PRICES.profiles.floating.price = p;
-                const lbl = document.getElementById('price-display-profile-floating');
-                if (lbl) lbl.textContent = `+ ${p.toLocaleString('ru-RU')} ₽ / пог. метр`;
-            }
-            calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Цены профилей обновлены');
-        }
-
-        function resetAllPrices() {
-            window.PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
-            window.FABRICS_LIST = JSON.parse(JSON.stringify(DEFAULT_FABRICS_LIST));
-            saveFabricsCatalogToCache();
-            renderFabricsGrid();
-            renderAllAdminSections();
-            syncPriceLabels();
-            calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Цены и полотна сброшены к заводским');
-        }
-
-        function renderAdminLampVariantsList() {
-            const container = document.getElementById('admin-lamp-variants-list');
-            if (!container) return;
-            container.innerHTML = ['gx53', 'tube', 'track'].map(catKey => {
-                const cat = window.LAMP_VARIANTS_CATALOG[catKey];
-                if (!cat) return '';
-                return `
-                    <div class="admin-card space-y-3">
-                        <div class="flex items-center justify-between pb-2 border-b border-stone-100">
-                            <h5 class="text-xs sm:text-sm font-extrabold text-stone-900">${cat.title}</h5>
-                            <span class="text-[11px] text-stone-400">${cat.items.length} поз.</span>
-                        </div>
-                        <div class="space-y-2">
-                            ${cat.items.map(v => `
-                                <div class="admin-price-row">
-                                    <img src="${v.img || LAMP_FALLBACK_SVG}" onerror="this.onerror=null;this.src=LAMP_FALLBACK_SVG" class="w-10 h-10 rounded-xl object-contain bg-white border border-stone-200 p-1 shrink-0">
-                                    <div class="min-w-0 flex-1 text-left">
-                                        <div class="text-xs font-bold text-stone-900 truncate">${v.name}</div>
-                                        <div class="text-[11px] text-stone-500 truncate">${v.desc || ''}</div>
-                                    </div>
-                                    <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl whitespace-nowrap">${Number(v.price).toLocaleString('ru-RU')} ₽/${v.unit}</span>
-                                    <button type="button" onclick="openAdminEditModal('lamp', '${catKey}', '${v.id}')" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition">✎</button>
-                                    ${cat.items.length > 1 ? `<button type="button" onclick="deleteLampVariantFromAdmin('${catKey}', '${v.id}')" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition">✕</button>` : ''}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function addNewLampVariantFromAdmin() {
-            const catKey = document.getElementById('new-lamp-category')?.value || 'gx53';
-            const nameInp = document.getElementById('new-lamp-name');
-            const priceInp = document.getElementById('new-lamp-price');
-            const unitVal = document.getElementById('new-lamp-unit')?.value || 'шт';
-            const descInp = document.getElementById('new-lamp-desc');
-            const fileInp = document.getElementById('new-lamp-file');
-
-            const name = (nameInp ? nameInp.value : '').trim();
-            const price = parseInt(priceInp ? priceInp.value : '0', 10);
-            const desc = (descInp ? descInp.value : '').trim();
-
-            if (!name || isNaN(price) || price <= 0) {
-                showToast('Укажите название и цену светильника');
-                return;
-            }
-
-            const finalizeAdd = (imgData) => {
-                const cat = window.LAMP_VARIANTS_CATALOG[catKey];
-                if (!cat) return;
-                cat.items.push({
-                    id: `${catKey}_${Date.now()}`,
-                    name,
-                    desc,
-                    unit: unitVal,
-                    price,
-                    img: imgData || LAMP_FALLBACK_SVG
-                });
-                syncVariantBasePricesWithAdmin();
-                saveLampCatalogToCache();
-                syncPriceLabels();
-                renderAdminLampVariantsList();
-                if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
-                if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-
-                if (nameInp) nameInp.value = '';
-                if (priceInp) priceInp.value = '';
-                if (descInp) descInp.value = '';
-                clearAdminFileZone(null, 'new-lamp');
-                showToast(`Светильник «${name}» добавлен`);
-            };
-
-            const file = fileInp && fileInp.files && fileInp.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => finalizeAdd(ev.target.result);
-                reader.readAsDataURL(file);
-            } else {
-                finalizeAdd('');
-            }
-        }
-
-        function deleteLampVariantFromAdmin(catKey, variantId) {
-            const cat = window.LAMP_VARIANTS_CATALOG[catKey];
-            if (!cat || cat.items.length <= 1) return;
-            cat.items = cat.items.filter(i => i.id !== variantId);
-            delete calcState.lampVariants[variantId];
-            syncCategoryCountersUI();
-            syncVariantBasePricesWithAdmin();
-            saveLampCatalogToCache();
-            syncPriceLabels();
-            renderAdminLampVariantsList();
-            if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
-            calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Модель светильника удалена');
-        }
-
-        function resetLampCatalogToDefault() {
-            window.LAMP_VARIANTS_CATALOG = JSON.parse(JSON.stringify(DEFAULT_LAMP_VARIANTS_CATALOG));
-            syncVariantBasePricesWithAdmin();
-            saveLampCatalogToCache();
-            syncPriceLabels();
-            renderAdminLampVariantsList();
-            if (window.activeLampCategory) renderLampVariantsGrid(window.activeLampCategory);
-            calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Каталог светильников восстановлен');
-        }
-
-        function renderAdminExtraServicesList() {
-            const listEl = document.getElementById('admin-extra-services-list');
-            if (!listEl) return;
-            listEl.innerHTML = window.EXTRA_SERVICES_LIST.map(s => `
-                <div class="admin-item-card flex items-center justify-between gap-3">
-                    <div class="min-w-0 flex-1">
-                        <div class="text-xs sm:text-sm font-bold text-stone-900 truncate">${s.name}</div>
-                        ${s.desc ? `<div class="text-[11px] text-stone-500 truncate mt-0.5">${s.desc}</div>` : ''}
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <span class="text-xs font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-xl whitespace-nowrap">${Number(s.price).toLocaleString('ru-RU')} ₽${s.unit === 'per_m' ? '/м.п.' : ''}</span>
-                        <button type="button" onclick="openAdminEditModal('service', '', '${s.id}')" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать">✎</button>
-                        <button type="button" onclick="deleteExtraServiceFromAdmin('${s.id}')" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить">✕</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addNewExtraServiceFromAdmin() {
-            const nameInp = document.getElementById('new-service-name');
-            const priceInp = document.getElementById('new-service-price');
-            const unitVal = document.getElementById('new-service-unit')?.value || 'fixed';
-            const descInp = document.getElementById('new-service-desc');
-
-            const name = (nameInp ? nameInp.value : '').trim();
-            const price = parseInt(priceInp ? priceInp.value : '0', 10);
-            const desc = (descInp ? descInp.value : '').trim();
-
-            if (!name || isNaN(price) || price <= 0) {
-                showToast('Укажите название и цену услуги');
-                return;
-            }
-
-            window.EXTRA_SERVICES_LIST.push({
-                id: 'srv_' + Date.now(),
-                name,
-                desc,
-                price,
-                unit: unitVal,
-                inStep4: true,
-                isBuiltin: false
-            });
-
-            saveExtraServicesToCache();
-            renderExtraServicesGrid();
-            renderAdminExtraServicesList();
-            updateAdminSidebarCounts();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-
-            if (nameInp) nameInp.value = '';
-            if (priceInp) priceInp.value = '';
-            if (descInp) descInp.value = '';
-            showToast(`Услуга «${name}» добавлена`);
-        }
-
-        function deleteExtraServiceFromAdmin(srvId) {
-            window.EXTRA_SERVICES_LIST = window.EXTRA_SERVICES_LIST.filter(s => s.id !== srvId);
-            delete calcState.selectedExtraServices[srvId];
-            saveExtraServicesToCache();
-            renderExtraServicesGrid();
-            renderAdminExtraServicesList();
-            updateAdminSidebarCounts();
-            calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Услуга удалена');
-        }
-
-        function resetExtraServicesToDefault() {
-            window.EXTRA_SERVICES_LIST = JSON.parse(JSON.stringify(DEFAULT_EXTRA_SERVICES_LIST));
-            saveExtraServicesToCache();
-            syncPriceLabels();
-            renderExtraServicesGrid();
-            renderAdminExtraServicesList();
-            updateAdminSidebarCounts();
-            calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Дополнительные работы восстановлены');
-        }
-
-        function toggleAccessRestriction(locked) {
-            window.isAccessRestricted = Boolean(locked);
-            try {
-                localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted));
-            } catch (e) {}
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(window.isAccessRestricted ? 'Закрытый доступ включён' : 'Свободный доступ включён');
-        }
-
-        function handleNewKeyRoleChange(role) {
-            const wrap = document.getElementById('new-access-discount-wrap');
-            if (wrap) wrap.classList.toggle('hidden', role !== 'master');
-        }
-
-        function renderAdminAccessKeysList() {
-            const listEl = document.getElementById('admin-access-keys-list');
-            const countEl = document.getElementById('active-keys-count');
-            const keys = getAllowedKeys();
-            if (countEl) countEl.textContent = String(keys.length);
-            if (!listEl) return;
-
-            listEl.innerHTML = keys.map((k, idx) => {
-                const isMaster = k.role === 'master';
-                const badge = isMaster
-                    ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">Мастер -${k.discount || 15}%</span>`
-                    : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">Клиент</span>`;
-                return `
-                    <div class="admin-item-card flex items-center justify-between gap-3">
-                        <div class="min-w-0 flex-1">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="text-xs sm:text-sm font-extrabold text-emerald-800 tracking-wider">${k.code}</span>
-                                ${badge}
-                            </div>
-                            ${k.label ? `<div class="text-[11px] text-stone-500 mt-0.5 truncate">${k.label}</div>` : ''}
-                        </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <button type="button" onclick="openAdminEditModal('key', '', '${idx}')" class="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition">✎</button>
-                            <button type="button" onclick="deleteAccessKeyFromAdmin(${idx})" class="w-8 h-8 rounded-xl bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center transition">✕</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function addAccessCodeFromAdmin() {
-            const codeInp = document.getElementById('new-access-code');
-            const labelInp = document.getElementById('new-access-label');
-            const roleSel = document.getElementById('new-access-role');
-            const discInp = document.getElementById('new-access-discount');
-
-            const code = (codeInp ? codeInp.value : '').trim().toUpperCase();
-            const label = (labelInp ? labelInp.value : '').trim();
-            const role = roleSel ? roleSel.value : 'client';
-            const discount = role === 'master' ? Math.min(90, Math.max(1, parseInt(discInp ? discInp.value : '15', 10) || 15)) : 0;
-
-            if (!code) {
-                showToast('Введите код доступа');
-                return;
-            }
-            const keys = getAllowedKeys();
-            keys.push({ code, label, role, discount, active: true });
-            saveAllowedKeys(keys);
-            if (codeInp) codeInp.value = '';
-            if (labelInp) labelInp.value = '';
-            renderAdminAccessKeysList();
-            updateAdminSidebarCounts();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(`Ключ ${code} выдан`);
-        }
-
-        function deleteAccessKeyFromAdmin(idx) {
-            const keys = getAllowedKeys();
-            keys.splice(idx, 1);
-            saveAllowedKeys(keys);
-            renderAdminAccessKeysList();
-            updateAdminSidebarCounts();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Ключ удалён');
-        }
-
-        function changeAdminPin() {
-            const inp = document.getElementById('new-admin-pin-input');
-            const newPin = (inp ? inp.value : '').trim();
-            if (newPin.length < 4) {
-                showToast('PIN-код должен содержать минимум 4 символа');
-                return;
-            }
-            saveStoredAdminPin(newPin);
-            window.isAdminAuthenticated = false;
-            if (inp) inp.value = '';
-            showToast('PIN-код администратора и базы клиентов обновлён');
-        }
-
-        function handleEditKeyRoleChange(role) {
-            const priceLabel = document.getElementById('edit-item-price-label');
-            if (priceLabel) {
-                priceLabel.textContent = role === 'master' ? 'Скидка мастера (%)' : 'Скидка (%)';
-            }
-        }
-
-        function openAdminEditModal(type, catKey, itemId) {
-            const modal = document.getElementById('admin-edit-item-modal');
-            if (!modal) return;
-
-            document.getElementById('edit-item-type').value = type;
-            document.getElementById('edit-item-cat').value = catKey || '';
-            document.getElementById('edit-item-id').value = itemId;
-            window.pendingEditPhotoDataUrl = null;
-
-            const unitWrap = document.getElementById('edit-item-unit-wrap');
-            const srvUnitWrap = document.getElementById('edit-item-service-unit-wrap');
-            const roleWrap = document.getElementById('edit-item-role-wrap');
-            const photoBox = document.getElementById('edit-item-photo-box');
-            const previewEl = document.getElementById('edit-item-photo-preview');
-            const removeBtn = document.getElementById('edit-item-remove-photo-btn');
-            const priceLabel = document.getElementById('edit-item-price-label');
-
-            unitWrap.classList.add('hidden');
-            srvUnitWrap.classList.add('hidden');
-            roleWrap.classList.add('hidden');
-            photoBox.classList.add('hidden');
-            if (priceLabel) priceLabel.textContent = 'Цена (₽)';
-
-            let item = null;
-            if (type === 'fabric') {
-                item = getFabricById(itemId);
-                photoBox.classList.remove('hidden');
-            } else if (type === 'lamp') {
-                item = (window.LAMP_VARIANTS_CATALOG[catKey]?.items || []).find(i => i.id === itemId);
-                unitWrap.classList.remove('hidden');
-                photoBox.classList.remove('hidden');
-                if (item) document.getElementById('edit-item-unit').value = item.unit || 'шт';
-            } else if (type === 'led') {
-                item = getLedById(itemId);
-            } else if (type === 'service') {
-                item = getExtraServiceById(itemId);
-                srvUnitWrap.classList.remove('hidden');
-                if (item) document.getElementById('edit-item-service-unit').value = item.unit || 'fixed';
-            } else if (type === 'key') {
-                const keys = getAllowedKeys();
-                const k = keys[Number(itemId)];
-                if (!k) return;
-                roleWrap.classList.remove('hidden');
-                document.getElementById('edit-item-name').value = k.code || '';
-                document.getElementById('edit-item-desc').value = k.label || '';
-                document.getElementById('edit-item-role').value = k.role || 'client';
-                document.getElementById('edit-item-price').value = k.discount || 0;
-                handleEditKeyRoleChange(k.role || 'client');
-                modal.classList.remove('hidden');
-                modal.style.display = 'flex';
-                syncBodyScrollLock();
-                return;
-            }
-
-            if (!item) return;
-            document.getElementById('edit-item-name').value = item.name || '';
-            document.getElementById('edit-item-desc').value = item.desc || '';
-            document.getElementById('edit-item-price').value = item.price || 0;
-
-            if (item.img) {
-                previewEl.innerHTML = `<img src="${item.img}" class="w-full h-full object-cover">`;
-                removeBtn.classList.remove('hidden');
-            } else {
-                previewEl.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
-                removeBtn.classList.add('hidden');
-            }
-
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex';
-            syncBodyScrollLock();
-        }
-
-        function handleAdminFileZoneChange(input, prefix) {
-            const zone = document.getElementById(`${prefix}-upload-zone`);
-            const thumb = document.getElementById(`${prefix}-thumb`);
-            const label = document.getElementById(`${prefix}-file-label`);
-            const clearBtn = document.getElementById(`${prefix}-clear-btn`);
-            const file = input && input.files && input.files[0];
-
-            if (!file) {
-                clearAdminFileZone(null, prefix);
-                return;
-            }
-
-            if (zone) zone.classList.add('has-file');
-            if (label) {
-                label.textContent = file.name;
-                label.classList.remove('text-stone-600');
-                label.classList.add('text-emerald-800');
-            }
-            if (clearBtn) clearBtn.classList.remove('hidden');
-
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                if (thumb) {
-                    thumb.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function clearAdminFileZone(e, prefix) {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            const fileInp = document.getElementById(`${prefix}-file`);
-            const zone = document.getElementById(`${prefix}-upload-zone`);
-            const thumb = document.getElementById(`${prefix}-thumb`);
-            const label = document.getElementById(`${prefix}-file-label`);
-            const clearBtn = document.getElementById(`${prefix}-clear-btn`);
-
-            if (fileInp) fileInp.value = '';
-            if (zone) zone.classList.remove('has-file');
-            if (thumb) {
-                thumb.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
-            }
-            if (label) {
-                label.textContent = 'Выбрать фото';
-                label.classList.remove('text-emerald-800');
-                label.classList.add('text-stone-600');
-            }
-            if (clearBtn) clearBtn.classList.add('hidden');
-        }
-
-        function handleEditModalFileUpload(input) {
-            const file = input && input.files && input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                window.pendingEditPhotoDataUrl = ev.target.result;
-                document.getElementById('edit-item-photo-preview').innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`;
-                document.getElementById('edit-item-remove-photo-btn').classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function clearEditModalPhoto() {
-            window.pendingEditPhotoDataUrl = '';
-            document.getElementById('edit-item-photo-preview').innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`;
-            document.getElementById('edit-item-remove-photo-btn').classList.add('hidden');
-        }
-
-        function saveAdminEditedItem(e) {
-            if (e) e.preventDefault();
-            const type = document.getElementById('edit-item-type').value;
-            const catKey = document.getElementById('edit-item-cat').value;
-            const itemId = document.getElementById('edit-item-id').value;
-            const name = document.getElementById('edit-item-name').value.trim();
-            const desc = document.getElementById('edit-item-desc').value.trim();
-            const price = Math.max(0, parseInt(document.getElementById('edit-item-price').value, 10) || 0);
-
-            if (type === 'fabric') {
-                const item = getFabricById(itemId);
-                if (item) {
-                    item.name = name;
-                    item.desc = desc;
-                    item.price = price;
-                    if (window.pendingEditPhotoDataUrl !== null) item.img = window.pendingEditPhotoDataUrl;
-                    saveFabricsCatalogToCache();
-                    renderFabricsGrid();
-                }
-            } else if (type === 'lamp') {
-                const item = (window.LAMP_VARIANTS_CATALOG[catKey]?.items || []).find(i => i.id === itemId);
-                if (item) {
-                    item.name = name;
-                    item.desc = desc;
-                    item.price = price;
-                    item.unit = document.getElementById('edit-item-unit').value;
-                    if (window.pendingEditPhotoDataUrl !== null) item.img = window.pendingEditPhotoDataUrl;
-                    syncVariantBasePricesWithAdmin();
-                    saveLampCatalogToCache();
-                    if (window.activeLampCategory === catKey) renderLampVariantsGrid(catKey);
-                }
-            } else if (type === 'led') {
-                const item = getLedById(itemId);
-                if (item) {
-                    item.name = name;
-                    item.desc = desc;
-                    item.price = price;
-                    syncLedPricesMap();
-                    saveLedCatalogToCache();
-                    renderLedSelectOptions();
-                }
-            } else if (type === 'service') {
-                const item = getExtraServiceById(itemId);
-                if (item) {
-                    item.name = name;
-                    item.desc = desc;
-                    item.price = price;
-                    item.unit = document.getElementById('edit-item-service-unit').value;
-                    saveExtraServicesToCache();
-                    renderExtraServicesGrid();
-                }
-            } else if (type === 'key') {
-                const keys = getAllowedKeys();
-                const k = keys[Number(itemId)];
-                if (k) {
-                    const role = document.getElementById('edit-item-role').value;
-                    k.code = name.toUpperCase();
-                    k.label = desc;
-                    k.role = role;
-                    k.discount = role === 'master' ? Math.min(90, Math.max(1, price)) : 0;
-                    saveAllowedKeys(keys);
-                }
-            }
-
-            syncPriceLabels();
-            renderAllAdminSections();
-            calculateTotal();
-            closeAdminEditModal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast('Изменения сохранены');
-        }
-
-        function closeAdminEditModal() {
-            const modal = document.getElementById('admin-edit-item-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.display = 'none';
-            }
-            syncBodyScrollLock();
-        }
-
-        function syncPriceLabels() {
-            const maskSrv = getExtraServiceById('mask');
-            const maskLbl = document.getElementById('lbl-rubber-insert-price');
-            if (maskLbl && maskSrv) maskLbl.textContent = maskSrv.price;
-
-            const dismantleSrv = getExtraServiceById('dismantle');
-            const dismantleLbl = document.getElementById('lbl-dismantle-price');
-            if (dismantleLbl && dismantleSrv) dismantleLbl.textContent = dismantleSrv.price;
-
-            const cornerSrv = getExtraServiceById('corner');
-            const cornerLbl = document.getElementById('lbl-extra-corner');
-            if (cornerLbl && cornerSrv) cornerLbl.textContent = cornerSrv.price;
-
-            const pipeSrv = getExtraServiceById('pipe');
-            const pipeLbl = document.getElementById('lbl-extra-pipe');
-            if (pipeLbl && pipeSrv) pipeLbl.textContent = pipeSrv.price;
-
-            const chandSrv = getExtraServiceById('chandelier');
-            const chandLbl = document.getElementById('price-display-chandelier');
-            if (chandLbl && chandSrv) {
-                chandLbl.textContent = `Усиленная закладная платформа + подключение (+${Number(chandSrv.price).toLocaleString('ru-RU')} ₽)`;
-            }
-
-            ['gx53', 'tube', 'track'].forEach(catKey => {
-                const minPrice = getCategoryMinPrice(catKey);
-                const el = document.getElementById(`price-display-lamp-${catKey}`);
-                if (el) el.textContent = `от ${Number(minPrice).toLocaleString('ru-RU')} ₽/шт`;
-            });
-        }
-
+        // ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
         document.addEventListener('DOMContentLoaded', () => {
-            const footerPhoneLink = document.getElementById('footer-phone-link');
-            if (footerPhoneLink) {
-                footerPhoneLink.href = `tel:+${COMPANY_PHONE.digits}`;
-                footerPhoneLink.textContent = COMPANY_PHONE.formatted;
+            const footerPhone = document.getElementById('footer-phone-link');
+            if (footerPhone) {
+                footerPhone.href = `tel:+${COMPANY_PHONE.digits}`;
+                footerPhone.textContent = COMPANY_PHONE.formatted;
             }
+
             syncVariantBasePricesWithAdmin();
             syncPriceLabels();
             renderFabricsGrid();
             renderLedSelectOptions();
             renderExtraServicesGrid();
-            renderClientsRecordsList();
-            updateAllRangeFills();
-            calculateTotal();
+
+            ['slider-area', 'slider-rubber-insert', 'slider-dismantle', 'slider-led-length'].forEach(id => {
+                updateRangeFill(document.getElementById(id));
+            });
+
             initAccessControl();
+            calculateTotal();
         });
+
+        window.getAllowedKeys = getAllowedKeys;
+        window.saveAllowedKeys = saveAllowedKeys;
+        window.getStoredAdminPin = getStoredAdminPin;
+        window.saveFabricsCatalogToCache = saveFabricsCatalogToCache;
+        window.saveLampCatalogToCache = saveLampCatalogToCache;
+        window.saveLedCatalogToCache = saveLedCatalogToCache;
+        window.saveExtraServicesToCache = saveExtraServicesToCache;
+        window.saveClientsListToCache = saveClientsListToCache;
+        window.syncLedPricesMap = syncLedPricesMap;
+        window.syncVariantBasePricesWithAdmin = syncVariantBasePricesWithAdmin;
+        window.syncPriceLabels = syncPriceLabels;
+        window.renderFabricsGrid = renderFabricsGrid;
+        window.renderLedSelectOptions = renderLedSelectOptions;
+        window.renderExtraServicesGrid = renderExtraServicesGrid;
+        window.renderClientsRecordsList = renderClientsRecordsList;
+        window.renderLampVariantsGrid = renderLampVariantsGrid;
+        window.renderAllAdminSections = renderAllAdminSections;
+        window.initAccessControl = initAccessControl;
+        window.calculateTotal = calculateTotal;
+        window.showToast = showToast;
     </script>
 
     <!-- МОДУЛЬ ОБЛАЧНОЙ СИНХРОНИЗАЦИИ FIREBASE FIRESTORE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         (async function initDecaratCloudSync() {
             const dotEl = document.getElementById('cloud-sync-dot');
@@ -4394,6 +4726,41 @@
                             : 'w-2 h-2 rounded-full bg-stone-400';
                 }
                 if (statusEl) statusEl.textContent = text;
+            };
+
+            const notifyUser = (msg) => {
+                if (typeof window.showToast === 'function') window.showToast(msg);
+            };
+
+            const readKeysSafe = () => {
+                if (typeof window.getAllowedKeys === 'function') return window.getAllowedKeys();
+                try {
+                    const raw = localStorage.getItem('decarat_cached_keys_v1');
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                    }
+                } catch (e) {}
+                return [{ code: 'DECARAT2026', label: 'Базовый доступ', role: 'client', active: true }];
+            };
+
+            const writeKeysSafe = (keys) => {
+                if (typeof window.saveAllowedKeys === 'function') {
+                    window.saveAllowedKeys(keys);
+                } else {
+                    try {
+                        localStorage.setItem('decarat_cached_keys_v1', JSON.stringify(keys));
+                    } catch (e) {}
+                }
+            };
+
+            const readPinSafe = () => {
+                if (typeof window.getStoredAdminPin === 'function') return window.getStoredAdminPin();
+                try {
+                    return localStorage.getItem('decarat_admin_pin_v1') || '1234';
+                } catch (e) {
+                    return '1234';
+                }
             };
 
             try {
@@ -4425,18 +4792,49 @@
                     return;
                 }
 
-                const stateDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'main_state');
+                const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'settings_state');
+                const fabricsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'fabrics_state');
+                const lampsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'lamps_state');
+                const catalogsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'catalogs_state');
+                const legacyDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'main_state');
                 const clientsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'decarat_clients');
+
                 let isApplyingRemote = false;
+                let hasHydratedClients = false;
+                const pendingClientOps = window.__pendingClientOps || new Map();
+
+                const refreshUI = () => {
+                    if (typeof window.syncVariantBasePricesWithAdmin === 'function') window.syncVariantBasePricesWithAdmin();
+                    if (typeof window.syncPriceLabels === 'function') window.syncPriceLabels();
+                    if (typeof window.renderFabricsGrid === 'function') window.renderFabricsGrid();
+                    if (typeof window.renderLedSelectOptions === 'function') window.renderLedSelectOptions();
+                    if (typeof window.renderExtraServicesGrid === 'function') window.renderExtraServicesGrid();
+                    if (typeof window.renderClientsRecordsList === 'function') window.renderClientsRecordsList();
+                    if (window.activeLampCategory && typeof window.renderLampVariantsGrid === 'function') {
+                        window.renderLampVariantsGrid(window.activeLampCategory);
+                    }
+                    if (window.isAdminAuthenticated && typeof window.renderAllAdminSections === 'function') {
+                        window.renderAllAdminSections();
+                    } else if (typeof window.initAccessControl === 'function') {
+                        window.initAccessControl();
+                    }
+                    if (typeof window.calculateTotal === 'function') window.calculateTotal();
+                };
 
                 window.cloudSync = {
                     enabled: true,
                     async saveClient(clientObj) {
-                        if (!auth.currentUser || !clientObj || !clientObj.id) return;
+                        if (!clientObj || !clientObj.id) return;
+                        const idStr = String(clientObj.id);
+                        if (!auth.currentUser) {
+                            pendingClientOps.set(idStr, { type: 'save', data: clientObj });
+                            return;
+                        }
                         try {
-                            const clientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_clients', String(clientObj.id));
+                            updateCloudBadge('sync', 'Сохранение клиента...');
+                            const clientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_clients', idStr);
                             await setDoc(clientDocRef, {
-                                id: String(clientObj.id),
+                                id: idStr,
                                 name: String(clientObj.name || ''),
                                 phone: String(clientObj.phone || ''),
                                 city: String(clientObj.city || ''),
@@ -4444,45 +4842,132 @@
                                 note: String(clientObj.note || ''),
                                 createdAt: String(clientObj.createdAt || ''),
                                 createdAtTs: Number(clientObj.createdAtTs) || Date.now()
-                            }, { merge: true });
+                            });
+                            updateCloudBadge('ok', 'Сохранено в Firebase');
                         } catch (err) {
                             console.error('Ошибка сохранения клиента в Firebase:', err);
+                            updateCloudBadge('off', 'Ошибка сохранения клиента');
+                            notifyUser('Ошибка записи клиента в БД');
                         }
                     },
                     async deleteClient(clientId) {
-                        if (!auth.currentUser || !clientId) return;
+                        if (!clientId) return;
+                        const idStr = String(clientId);
+                        if (!auth.currentUser) {
+                            pendingClientOps.set(idStr, { type: 'delete' });
+                            return;
+                        }
                         try {
-                            const clientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_clients', String(clientId));
+                            updateCloudBadge('sync', 'Удаление из БД...');
+                            const clientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_clients', idStr);
                             await deleteDoc(clientDocRef);
+                            updateCloudBadge('ok', 'Удалено из Firebase');
                         } catch (err) {
                             console.error('Ошибка удаления клиента из Firebase:', err);
+                            updateCloudBadge('off', 'Ошибка удаления');
+                            notifyUser('Ошибка удаления клиента из БД');
                         }
                     },
                     async saveAll() {
                         if (!auth.currentUser || isApplyingRemote) return;
                         try {
                             updateCloudBadge('sync', 'Сохранение в Firebase...');
-                            const payload = {
-                                pricesJson: JSON.stringify(window.PRICES || {}),
-                                fabricsJson: JSON.stringify(window.FABRICS_LIST || []),
-                                lampsJson: JSON.stringify(window.LAMP_VARIANTS_CATALOG || {}),
-                                ledJson: JSON.stringify(window.LED_LIST || []),
-                                servicesJson: JSON.stringify(window.EXTRA_SERVICES_LIST || []),
-                                keysJson: JSON.stringify(getAllowedKeys()),
-                                clientsJson: JSON.stringify(window.CLIENTS_RECORDS || []),
-                                isAccessRestricted: Boolean(window.isAccessRestricted),
-                                adminPin: getStoredAdminPin(),
-                                updatedAt: Date.now()
-                            };
-                            await setDoc(stateDocRef, payload, { merge: true });
+                            const now = Date.now();
+                            await Promise.all([
+                                setDoc(settingsDocRef, {
+                                    pricesJson: JSON.stringify(window.PRICES || {}),
+                                    keysJson: JSON.stringify(readKeysSafe()),
+                                    isAccessRestricted: Boolean(window.isAccessRestricted),
+                                    adminPin: readPinSafe(),
+                                    updatedAt: now
+                                }),
+                                setDoc(fabricsDocRef, {
+                                    fabricsJson: JSON.stringify(window.FABRICS_LIST || []),
+                                    updatedAt: now
+                                }),
+                                setDoc(lampsDocRef, {
+                                    lampsJson: JSON.stringify(window.LAMP_VARIANTS_CATALOG || {}),
+                                    updatedAt: now
+                                }),
+                                setDoc(catalogsDocRef, {
+                                    ledJson: JSON.stringify(window.LED_LIST || []),
+                                    servicesJson: JSON.stringify(window.EXTRA_SERVICES_LIST || []),
+                                    updatedAt: now
+                                })
+                            ]);
                             updateCloudBadge('ok', 'Сохранено в Firebase');
                         } catch (err) {
                             console.error('Ошибка сохранения в Firebase:', err);
                             updateCloudBadge('off', 'Ошибка сохранения');
+                            notifyUser('Ошибка сохранения в облако (проверьте размер фото)');
                         }
                     }
                 };
 
+                // Первичная проверка наличия данных в БД перед подпиской, чтобы не перезатирать облако пустым локальным кэшем
+                const [settingsSnap, fabricsSnap, lampsSnap, catalogsSnap, legacySnap] = await Promise.all([
+                    getDoc(settingsDocRef),
+                    getDoc(fabricsDocRef),
+                    getDoc(lampsDocRef),
+                    getDoc(catalogsDocRef),
+                    getDoc(legacyDocRef)
+                ]);
+
+                const hasAnyCloudConfig = settingsSnap.exists() || fabricsSnap.exists() || lampsSnap.exists() || catalogsSnap.exists();
+                if (!hasAnyCloudConfig) {
+                    if (legacySnap.exists()) {
+                        const legacy = legacySnap.data() || {};
+                        isApplyingRemote = true;
+                        try {
+                            if (legacy.pricesJson) window.PRICES = { ...window.DEFAULT_PRICES, ...JSON.parse(legacy.pricesJson) };
+                            if (legacy.fabricsJson) {
+                                const f = JSON.parse(legacy.fabricsJson);
+                                if (Array.isArray(f) && f.length > 0) {
+                                    window.FABRICS_LIST = f;
+                                    if (typeof window.saveFabricsCatalogToCache === 'function') window.saveFabricsCatalogToCache();
+                                }
+                            }
+                            if (legacy.lampsJson) {
+                                const l = JSON.parse(legacy.lampsJson);
+                                if (l && l.gx53 && l.tube && l.track) {
+                                    window.LAMP_VARIANTS_CATALOG = l;
+                                    if (typeof window.saveLampCatalogToCache === 'function') window.saveLampCatalogToCache();
+                                }
+                            }
+                            if (legacy.ledJson) {
+                                const led = JSON.parse(legacy.ledJson);
+                                if (Array.isArray(led) && led.length > 0) {
+                                    window.LED_LIST = led;
+                                    if (typeof window.syncLedPricesMap === 'function') window.syncLedPricesMap();
+                                    if (typeof window.saveLedCatalogToCache === 'function') window.saveLedCatalogToCache();
+                                }
+                            }
+                            if (legacy.servicesJson) {
+                                const srv = JSON.parse(legacy.servicesJson);
+                                if (Array.isArray(srv) && srv.length > 0) {
+                                    window.EXTRA_SERVICES_LIST = srv;
+                                    if (typeof window.saveExtraServicesToCache === 'function') window.saveExtraServicesToCache();
+                                }
+                            }
+                            if (legacy.keysJson) {
+                                const k = JSON.parse(legacy.keysJson);
+                                if (Array.isArray(k)) writeKeysSafe(k);
+                            }
+                            if (typeof legacy.isAccessRestricted === 'boolean') {
+                                window.isAccessRestricted = legacy.isAccessRestricted;
+                                try { localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted)); } catch (e) {}
+                            }
+                            if (typeof legacy.adminPin === 'string' && legacy.adminPin.length >= 4) {
+                                try { localStorage.setItem('decarat_admin_pin_v1', legacy.adminPin); } catch (e) {}
+                            }
+                        } finally {
+                            isApplyingRemote = false;
+                        }
+                    }
+                    await window.cloudSync.saveAll();
+                }
+
+                // Подписка в реальном времени на коллекцию клиентов
                 onSnapshot(clientsColRef, (snapshot) => {
                     const remoteClients = [];
                     snapshot.forEach((docSnap) => {
@@ -4501,72 +4986,33 @@
                         }
                     });
 
-                    if (remoteClients.length > 0) {
-                        remoteClients.sort((a, b) => (b.createdAtTs || 0) - (a.createdAtTs || 0));
-                        window.CLIENTS_RECORDS = remoteClients;
-                        saveClientsListToCache();
-                        renderClientsRecordsList();
-                    } else if (Array.isArray(window.CLIENTS_RECORDS) && window.CLIENTS_RECORDS.length > 0) {
+                    if (!hasHydratedClients && remoteClients.length === 0 && Array.isArray(window.CLIENTS_RECORDS) && window.CLIENTS_RECORDS.length > 0) {
+                        hasHydratedClients = true;
                         window.CLIENTS_RECORDS.forEach((c) => window.cloudSync.saveClient(c));
+                        return;
                     }
+
+                    hasHydratedClients = true;
+                    remoteClients.sort((a, b) => (b.createdAtTs || 0) - (a.createdAtTs || 0));
+                    window.CLIENTS_RECORDS = remoteClients;
+                    if (typeof window.saveClientsListToCache === 'function') window.saveClientsListToCache();
+                    if (typeof window.renderClientsRecordsList === 'function') window.renderClientsRecordsList();
                 }, (error) => {
                     console.error('Ошибка подписки на коллекцию клиентов:', error);
                 });
 
-                onSnapshot(stateDocRef, (snap) => {
-                    if (!snap.exists()) {
-                        window.cloudSync.saveAll();
-                        return;
-                    }
+                // Подписка на настройки и закрытый доступ
+                onSnapshot(settingsDocRef, (snap) => {
+                    if (!snap.exists()) return;
                     const data = snap.data() || {};
                     isApplyingRemote = true;
                     try {
                         if (data.pricesJson) {
-                            const parsedPrices = JSON.parse(data.pricesJson);
-                            window.PRICES = { ...window.DEFAULT_PRICES, ...parsedPrices };
-                        }
-                        if (data.fabricsJson) {
-                            const parsedFabrics = JSON.parse(data.fabricsJson);
-                            if (Array.isArray(parsedFabrics) && parsedFabrics.length > 0) {
-                                window.FABRICS_LIST = parsedFabrics;
-                                saveFabricsCatalogToCache();
-                            }
-                        }
-                        if (data.lampsJson) {
-                            const parsedLamps = JSON.parse(data.lampsJson);
-                            if (parsedLamps && parsedLamps.gx53 && parsedLamps.tube && parsedLamps.track) {
-                                window.LAMP_VARIANTS_CATALOG = parsedLamps;
-                                saveLampCatalogToCache();
-                            }
-                        }
-                        if (data.ledJson) {
-                            const parsedLed = JSON.parse(data.ledJson);
-                            if (Array.isArray(parsedLed) && parsedLed.length > 0) {
-                                window.LED_LIST = parsedLed;
-                                syncLedPricesMap();
-                                saveLedCatalogToCache();
-                            }
-                        }
-                        if (data.servicesJson) {
-                            const parsedServices = JSON.parse(data.servicesJson);
-                            if (Array.isArray(parsedServices) && parsedServices.length > 0) {
-                                window.EXTRA_SERVICES_LIST = parsedServices;
-                                saveExtraServicesToCache();
-                            }
+                            window.PRICES = { ...window.DEFAULT_PRICES, ...JSON.parse(data.pricesJson) };
                         }
                         if (data.keysJson) {
                             const parsedKeys = JSON.parse(data.keysJson);
-                            if (Array.isArray(parsedKeys)) {
-                                saveAllowedKeys(parsedKeys);
-                            }
-                        }
-                        if (data.clientsJson && (!Array.isArray(window.CLIENTS_RECORDS) || window.CLIENTS_RECORDS.length === 0)) {
-                            const parsedClients = JSON.parse(data.clientsJson);
-                            if (Array.isArray(parsedClients) && parsedClients.length > 0) {
-                                window.CLIENTS_RECORDS = parsedClients;
-                                saveClientsListToCache();
-                                parsedClients.forEach((c) => window.cloudSync.saveClient(c));
-                            }
+                            if (Array.isArray(parsedKeys)) writeKeysSafe(parsedKeys);
                         }
                         if (typeof data.isAccessRestricted === 'boolean') {
                             window.isAccessRestricted = data.isAccessRestricted;
@@ -4576,35 +5022,112 @@
                         }
                         if (typeof data.adminPin === 'string' && data.adminPin.length >= 4) {
                             try {
-                                localStorage.setItem(STORAGE_KEY_ADMIN_PIN, data.adminPin);
+                                localStorage.setItem('decarat_admin_pin_v1', data.adminPin);
                             } catch (e) {}
                         }
-
-                        syncVariantBasePricesWithAdmin();
-                        syncPriceLabels();
-                        renderFabricsGrid();
-                        renderLedSelectOptions();
-                        renderExtraServicesGrid();
-                        renderClientsRecordsList();
-                        if (window.activeLampCategory) {
-                            renderLampVariantsGrid(window.activeLampCategory);
-                        }
-                        if (window.isAdminAuthenticated) {
-                            renderAllAdminSections();
-                        } else {
-                            initAccessControl();
-                        }
-                        calculateTotal();
+                        refreshUI();
                         updateCloudBadge('ok', 'Синхронизировано с Firebase');
-                    } catch (parseErr) {
-                        console.error('Ошибка применения данных из Firebase:', parseErr);
+                    } catch (err) {
+                        console.error('Ошибка чтения settings_state:', err);
                     } finally {
                         isApplyingRemote = false;
                     }
                 }, (error) => {
-                    console.error('Ошибка подписки Firestore:', error);
-                    updateCloudBadge('off', 'Ошибка связи с облаком');
+                    console.error('Ошибка подписки settings_state:', error);
                 });
+
+                // Подписка на полотна
+                onSnapshot(fabricsDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data() || {};
+                    isApplyingRemote = true;
+                    try {
+                        if (data.fabricsJson) {
+                            const parsedFabrics = JSON.parse(data.fabricsJson);
+                            if (Array.isArray(parsedFabrics) && parsedFabrics.length > 0) {
+                                window.FABRICS_LIST = parsedFabrics;
+                                if (typeof window.saveFabricsCatalogToCache === 'function') window.saveFabricsCatalogToCache();
+                            }
+                        }
+                        refreshUI();
+                        updateCloudBadge('ok', 'Синхронизировано с Firebase');
+                    } catch (err) {
+                        console.error('Ошибка чтения fabrics_state:', err);
+                    } finally {
+                        isApplyingRemote = false;
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки fabrics_state:', error);
+                });
+
+                // Подписка на светильники
+                onSnapshot(lampsDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data() || {};
+                    isApplyingRemote = true;
+                    try {
+                        if (data.lampsJson) {
+                            const parsedLamps = JSON.parse(data.lampsJson);
+                            if (parsedLamps && parsedLamps.gx53 && parsedLamps.tube && parsedLamps.track) {
+                                window.LAMP_VARIANTS_CATALOG = parsedLamps;
+                                if (typeof window.saveLampCatalogToCache === 'function') window.saveLampCatalogToCache();
+                            }
+                        }
+                        refreshUI();
+                        updateCloudBadge('ok', 'Синхронизировано с Firebase');
+                    } catch (err) {
+                        console.error('Ошибка чтения lamps_state:', err);
+                    } finally {
+                        isApplyingRemote = false;
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки lamps_state:', error);
+                });
+
+                // Подписка на LED-ленты и доп. работы
+                onSnapshot(catalogsDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data() || {};
+                    isApplyingRemote = true;
+                    try {
+                        if (data.ledJson) {
+                            const parsedLed = JSON.parse(data.ledJson);
+                            if (Array.isArray(parsedLed) && parsedLed.length > 0) {
+                                window.LED_LIST = parsedLed;
+                                if (typeof window.syncLedPricesMap === 'function') window.syncLedPricesMap();
+                                if (typeof window.saveLedCatalogToCache === 'function') window.saveLedCatalogToCache();
+                            }
+                        }
+                        if (data.servicesJson) {
+                            const parsedServices = JSON.parse(data.servicesJson);
+                            if (Array.isArray(parsedServices) && parsedServices.length > 0) {
+                                window.EXTRA_SERVICES_LIST = parsedServices;
+                                if (typeof window.saveExtraServicesToCache === 'function') window.saveExtraServicesToCache();
+                            }
+                        }
+                        refreshUI();
+                        updateCloudBadge('ok', 'Синхронизировано с Firebase');
+                    } catch (err) {
+                        console.error('Ошибка чтения catalogs_state:', err);
+                    } finally {
+                        isApplyingRemote = false;
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки catalogs_state:', error);
+                });
+
+                // Отправка отложенных операций, выполненных до завершения авторизации
+                if (pendingClientOps.size > 0) {
+                    for (const [cid, op] of pendingClientOps.entries()) {
+                        if (op.type === 'save') await window.cloudSync.saveClient(op.data);
+                        if (op.type === 'delete') await window.cloudSync.deleteClient(cid);
+                    }
+                    pendingClientOps.clear();
+                }
+                if (window.__pendingCloudSyncScopes && window.__pendingCloudSyncScopes.size > 0) {
+                    window.__pendingCloudSyncScopes.clear();
+                    await window.cloudSync.saveAll();
+                }
             } catch (err) {
                 console.error('Ошибка инициализации Firebase:', err);
                 updateCloudBadge('off', 'Локальный режим');
