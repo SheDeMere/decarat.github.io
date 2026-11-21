@@ -2306,10 +2306,10 @@
 
         function escapeHtml(str) {
             return String(str || '')
-                .replace(/&/g, '&')
-                .replace(/</g, '<')
-                .replace(/>/g, '>')
-                .replace(/"/g, '"');
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
         }
 
         function showToast(message) {
@@ -3675,8 +3675,6 @@
                                 ${k.role === 'master' ? `Мастер (-${k.discount || 0}%)` : 'Клиент'}
                             </span>
                         </div>
-                        ${k.label ? `<span class="text-[11px] text-stone-500 block truncate mt-0.5">${escapeHtml(k.label)}</span>` : ''}
-                    </div>
                     <button type="button" onclick="deleteAccessCodeFromAdmin('${escapeHtml(k.id)}')" title="Удалить" aria-label="Удалить" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 hover:border-rose-300 text-rose-600 flex items-center justify-center transition shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
@@ -3728,3 +3726,648 @@
 
             window.__adminFileData['edit-item'] = item.image || '';
             updateEditModalPhotoPreview(item.image || '');
+
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            syncBodyScrollLock();
+        }
+
+        function updateEditModalPhotoPreview(imgSrc) {
+            const preview = document.getElementById('edit-item-photo-preview');
+            const rmBtn = document.getElementById('edit-item-remove-photo-btn');
+            if (!preview) return;
+            if (imgSrc) {
+                preview.innerHTML = `<img src="${imgSrc}" class="w-full h-full object-cover">`;
+                if (rmBtn) rmBtn.classList.remove('hidden');
+            } else {
+                preview.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                if (rmBtn) rmBtn.classList.add('hidden');
+            }
+        }
+
+        async function handleEditModalFileUpload(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const compressed = await compressImageFile(file);
+            window.__adminFileData['edit-item'] = compressed;
+            updateEditModalPhotoPreview(compressed);
+        }
+
+        function clearEditModalPhoto() {
+            window.__adminFileData['edit-item'] = '';
+            updateEditModalPhotoPreview('');
+        }
+
+        function closeAdminEditModal() {
+            const modal = document.getElementById('admin-edit-item-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+                syncBodyScrollLock();
+            }
+        }
+
+        function saveAdminEditedItem(e) {
+            if (e) e.preventDefault();
+            const type = document.getElementById('edit-item-type').value;
+            const cat = document.getElementById('edit-item-cat').value;
+            const id = document.getElementById('edit-item-id').value;
+            const name = document.getElementById('edit-item-name').value.trim();
+            const desc = document.getElementById('edit-item-desc').value.trim();
+            const price = Number(document.getElementById('edit-item-price').value || 0);
+
+            if (type === 'fabric') {
+                const item = window.FABRICS_LIST.find(f => f.id === id);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    item.image = window.__adminFileData['edit-item'] || '';
+                    saveFabricsCatalogToCache();
+                    renderFabricsGrid();
+                    queueCloudSync('fabrics');
+                }
+            } else if (type === 'lamp') {
+                const item = (window.LAMP_VARIANTS_CATALOG[cat] || []).find(i => i.id === id);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    item.unit = document.getElementById('edit-item-unit').value || 'шт';
+                    item.image = window.__adminFileData['edit-item'] || '';
+                    saveLampCatalogToCache();
+                    syncVariantBasePricesWithAdmin();
+                    syncPriceLabels();
+                    if (window.activeLampCategory === cat) renderLampVariantsGrid(cat);
+                    queueCloudSync('lamps');
+                }
+            } else if (type === 'led') {
+                const item = window.LED_LIST.find(l => l.id === id);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    saveLedCatalogToCache();
+                    renderLedSelectOptions();
+                    queueCloudSync('catalogs');
+                }
+            } else if (type === 'service') {
+                const item = window.EXTRA_SERVICES_LIST.find(s => s.id === id);
+                if (item) {
+                    item.name = name;
+                    item.desc = desc;
+                    item.price = price;
+                    item.unit = document.getElementById('edit-item-service-unit').value || 'fixed';
+                    saveExtraServicesToCache();
+                    renderExtraServicesGrid();
+                    queueCloudSync('catalogs');
+                }
+            }
+
+            renderAllAdminSections();
+            calculateTotal();
+            closeAdminEditModal();
+            showToast('Изменения сохранены');
+        }
+
+        function verifyAdminPin(e) {
+            if (e) e.preventDefault();
+            const pinInp = document.getElementById('admin-pin-input');
+            const pinErr = document.getElementById('admin-pin-error');
+            const val = (pinInp ? pinInp.value : '').trim();
+
+            if (val === getStoredAdminPin()) {
+                setAdminSessionCached(true);
+                unlockSiteForAdmin();
+                if (pinErr) pinErr.classList.add('hidden');
+                if (pinInp) pinInp.value = '';
+                openAdminContent();
+                showToast('Вы вошли в панель управления');
+            } else if (pinErr) {
+                pinErr.classList.remove('hidden');
+            }
+        }
+
+        function openAdminContent() {
+            const shell = document.getElementById('admin-modal-shell');
+            const loginBox = document.getElementById('admin-login-box');
+            const contentBox = document.getElementById('admin-content-box');
+            const badge = document.getElementById('admin-topbar-badge');
+            const subtitle = document.getElementById('admin-topbar-subtitle');
+
+            if (shell) shell.style.maxWidth = '1040px';
+            if (loginBox) loginBox.classList.add('hidden');
+            if (contentBox) contentBox.classList.remove('hidden');
+            if (badge) badge.classList.remove('hidden');
+            if (subtitle) subtitle.textContent = 'Цены, каталог полотен, светильники и доступ';
+
+            renderAllAdminSections();
+        }
+
+        function renderAllAdminSections() {
+            const shadowInp = document.getElementById('adm-prof-shadow');
+            const floatInp = document.getElementById('adm-prof-floating');
+            const lockToggle = document.getElementById('adm-access-lock-toggle');
+
+            if (shadowInp && window.PRICES) shadowInp.value = window.PRICES.profile_shadow || 450;
+            if (floatInp && window.PRICES) floatInp.value = window.PRICES.profile_floating || 550;
+            if (lockToggle) lockToggle.checked = Boolean(window.isAccessRestricted);
+
+            updateAdminSidebarCounts();
+            renderAdminFabricsList();
+            renderAdminLampVariantsList();
+            renderAdminLedList();
+            renderAdminExtraServicesList();
+            renderAdminAccessKeysList();
+        }
+
+        function changeAdminPin() {
+            const inp = document.getElementById('new-admin-pin-input');
+            const val = (inp ? inp.value : '').trim();
+            if (val.length < 4) {
+                showToast('PIN-код должен содержать минимум 4 символа');
+                return;
+            }
+            saveStoredAdminPin(val);
+            if (inp) inp.value = '';
+            queueCloudSync('settings');
+            showToast('PIN-код администратора обновлён');
+        }
+
+        window.showToast = showToast;
+        window.getAllowedKeys = getAllowedKeys;
+        window.saveAllowedKeys = saveAllowedKeys;
+        window.getStoredAdminPin = getStoredAdminPin;
+        window.saveStoredAdminPin = saveStoredAdminPin;
+        window.saveFabricsCatalogToCache = saveFabricsCatalogToCache;
+        window.saveLampCatalogToCache = saveLampCatalogToCache;
+        window.saveLedCatalogToCache = saveLedCatalogToCache;
+        window.saveExtraServicesToCache = saveExtraServicesToCache;
+        window.saveClientsListToCache = saveClientsListToCache;
+        window.syncVariantBasePricesWithAdmin = syncVariantBasePricesWithAdmin;
+        window.syncPriceLabels = syncPriceLabels;
+        window.renderFabricsGrid = renderFabricsGrid;
+        window.renderLedSelectOptions = renderLedSelectOptions;
+        window.renderExtraServicesGrid = renderExtraServicesGrid;
+        window.renderClientsRecordsList = renderClientsRecordsList;
+        window.renderLampVariantsGrid = renderLampVariantsGrid;
+        window.initAccessControl = initAccessControl;
+        window.renderAllAdminSections = renderAllAdminSections;
+        window.calculateTotal = calculateTotal;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            syncVariantBasePricesWithAdmin();
+            syncPriceLabels();
+            renderFabricsGrid();
+            renderLedSelectOptions();
+            renderExtraServicesGrid();
+            ['slider-area', 'slider-rubber-insert', 'slider-dismantle', 'slider-led-length'].forEach(id => {
+                updateRangeFill(document.getElementById(id));
+            });
+            calculateTotal();
+            initAccessControl();
+        });
+    </script>
+
+    <!-- ОБЛАЧНАЯ СИНХРОНИЗАЦИЯ FIREBASE FIRESTORE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        function updateCloudBadge(status, text) {
+            const dot = document.getElementById('cloud-sync-dot');
+            const label = document.getElementById('cloud-sync-status');
+            if (label) label.textContent = text;
+            if (dot) {
+                dot.className = 'w-2 h-2 rounded-full ' + (
+                    status === 'ok' ? 'bg-emerald-500' :
+                    status === 'sync' ? 'bg-amber-300 animate-pulse' : 'bg-stone-400'
+                );
+            }
+        }
+
+        function notifyUser(msg) {
+            if (typeof window.showToast === 'function') {
+                window.showToast(msg);
+            }
+        }
+
+        function readKeysSafe() {
+            if (typeof window.getAllowedKeys === 'function') {
+                return window.getAllowedKeys();
+            }
+            try {
+                const raw = localStorage.getItem('decarat_cached_keys_v1');
+                const parsed = raw ? JSON.parse(raw) : [];
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function writeKeysSafe(list) {
+            if (typeof window.saveAllowedKeys === 'function') {
+                window.saveAllowedKeys(list);
+                return;
+            }
+            try {
+                localStorage.setItem('decarat_cached_keys_v1', JSON.stringify(list || []));
+            } catch (e) {}
+        }
+
+        function readPinSafe() {
+            if (typeof window.getStoredAdminPin === 'function') {
+                return window.getStoredAdminPin();
+            }
+            try {
+                return localStorage.getItem('decarat_admin_pin_v1') || '1234';
+            } catch (e) {
+                return '1234';
+            }
+        }
+
+        (async function initFirebaseCloudSync() {
+            try {
+                const rawConfig = (typeof __firebase_config !== 'undefined' && __firebase_config)
+                    ? __firebase_config
+                    : (window.__firebase_config || null);
+
+                if (!rawConfig) {
+                    updateCloudBadge('off', 'Локальный режим');
+                    return;
+                }
+
+                const firebaseConfig = typeof rawConfig === 'string'
+                    ? JSON.parse(rawConfig)
+                    : rawConfig;
+
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'decarat-ceiling-app';
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+
+                updateCloudBadge('sync', 'Подключение к облаку...');
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                const user = auth.currentUser;
+                if (!user) {
+                    updateCloudBadge('off', 'Нет авторизации');
+                    return;
+                }
+
+                const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'settings_state');
+                const fabricsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'fabrics_state');
+                const lampsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'lamps_state');
+                const catalogsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'catalogs_state');
+                const legacyDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_site_config', 'main_state');
+                const clientsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'decarat_clients');
+
+                let isApplyingRemote = false;
+                let hasHydratedClients = false;
+                const pendingClientOps = window.__pendingClientOps || new Map();
+
+                const refreshUI = () => {
+                    if (typeof window.syncVariantBasePricesWithAdmin === 'function') window.syncVariantBasePricesWithAdmin();
+                    if (typeof window.syncPriceLabels === 'function') window.syncPriceLabels();
+                    if (typeof window.renderFabricsGrid === 'function') window.renderFabricsGrid();
+                    if (typeof window.renderLedSelectOptions === 'function') window.renderLedSelectOptions();
+                    if (typeof window.renderExtraServicesGrid === 'function') window.renderExtraServicesGrid();
+                    if (typeof window.renderClientsRecordsList === 'function') window.renderClientsRecordsList();
+                    if (window.activeLampCategory && typeof window.renderLampVariantsGrid === 'function') {
+                        window.renderLampVariantsGrid(window.activeLampCategory);
+                    }
+                    if (window.isAdminAuthenticated && typeof window.renderAllAdminSections === 'function') {
+                        window.renderAllAdminSections();
+                    }
+                    if (typeof window.initAccessControl === 'function') {
+                        window.initAccessControl();
+                    }
+                    if (typeof window.calculateTotal === 'function') window.calculateTotal();
+                };
+
+                window.cloudSync = {
+                    enabled: true,
+                    async saveClient(clientObj) {
+                        if (!clientObj || !clientObj.id) return;
+                        const idStr = String(clientObj.id);
+                        if (!auth.currentUser) {
+                            pendingClientOps.set(idStr, { type: 'save', data: clientObj });
+                            return;
+                        }
+                        try {
+                            updateCloudBadge('sync', 'Сохранение клиента...');
+                            const clientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_clients', idStr);
+                            await setDoc(clientDocRef, {
+                                id: idStr,
+                                name: String(clientObj.name || ''),
+                                phone: String(clientObj.phone || ''),
+                                city: String(clientObj.city || ''),
+                                price: Number(clientObj.price) || 0,
+                                note: String(clientObj.note || ''),
+                                createdAt: String(clientObj.createdAt || ''),
+                                createdAtTs: Number(clientObj.createdAtTs) || Date.now()
+                            });
+                            updateCloudBadge('ok', 'Сохранено в Firebase');
+                        } catch (err) {
+                            console.error('Ошибка сохранения клиента в Firebase:', err);
+                            updateCloudBadge('off', 'Ошибка сохранения клиента');
+                            notifyUser('Ошибка записи клиента в БД');
+                        }
+                    },
+                    async deleteClient(clientId) {
+                        if (!clientId) return;
+                        const idStr = String(clientId);
+                        if (!auth.currentUser) {
+                            pendingClientOps.set(idStr, { type: 'delete' });
+                            return;
+                        }
+                        try {
+                            updateCloudBadge('sync', 'Удаление из БД...');
+                            const clientDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'decarat_clients', idStr);
+                            await deleteDoc(clientDocRef);
+                            updateCloudBadge('ok', 'Удалено из Firebase');
+                        } catch (err) {
+                            console.error('Ошибка удаления клиента из Firebase:', err);
+                            updateCloudBadge('off', 'Ошибка удаления');
+                            notifyUser('Ошибка удаления клиента из БД');
+                        }
+                    },
+                    async saveAll() {
+                        if (!auth.currentUser) return;
+                        try {
+                            updateCloudBadge('sync', 'Сохранение в Firebase...');
+                            const now = Date.now();
+                            await Promise.all([
+                                setDoc(settingsDocRef, {
+                                    pricesJson: JSON.stringify(window.PRICES || {}),
+                                    keysJson: JSON.stringify(readKeysSafe()),
+                                    isAccessRestricted: Boolean(window.isAccessRestricted),
+                                    adminPin: readPinSafe(),
+                                    updatedAt: now
+                                }),
+                                setDoc(fabricsDocRef, {
+                                    fabricsJson: JSON.stringify(window.FABRICS_LIST || []),
+                                    updatedAt: now
+                                }),
+                                setDoc(lampsDocRef, {
+                                    lampsJson: JSON.stringify(window.LAMP_VARIANTS_CATALOG || {}),
+                                    updatedAt: now
+                                }),
+                                setDoc(catalogsDocRef, {
+                                    ledJson: JSON.stringify(window.LED_LIST || []),
+                                    servicesJson: JSON.stringify(window.EXTRA_SERVICES_LIST || []),
+                                    updatedAt: now
+                                })
+                            ]);
+                            updateCloudBadge('ok', 'Сохранено в Firebase');
+                        } catch (err) {
+                            console.error('Ошибка сохранения в Firebase:', err);
+                            updateCloudBadge('off', 'Ошибка сохранения');
+                            notifyUser('Ошибка сохранения в облако (проверьте размер фото)');
+                        }
+                    }
+                };
+
+                // Первичная загрузка данных из БД и сохранение отложенных локальных изменений
+                const [settingsSnap, fabricsSnap, lampsSnap, catalogsSnap, legacySnap] = await Promise.all([
+                    getDoc(settingsDocRef),
+                    getDoc(fabricsDocRef),
+                    getDoc(lampsDocRef),
+                    getDoc(catalogsDocRef),
+                    getDoc(legacyDocRef)
+                ]);
+
+                const hasPendingChanges = window.__pendingCloudSyncScopes && window.__pendingCloudSyncScopes.size > 0;
+                const hasAnyCloudConfig = settingsSnap.exists() || fabricsSnap.exists() || lampsSnap.exists() || catalogsSnap.exists();
+
+                if (!hasAnyCloudConfig && !hasPendingChanges) {
+                    if (legacySnap.exists()) {
+                        const legacy = legacySnap.data() || {};
+                        isApplyingRemote = true;
+                        try {
+                            if (legacy.pricesJson) window.PRICES = { ...window.DEFAULT_PRICES, ...JSON.parse(legacy.pricesJson) };
+                            if (legacy.fabricsJson) {
+                                const f = JSON.parse(legacy.fabricsJson);
+                                if (Array.isArray(f) && f.length > 0) {
+                                    window.FABRICS_LIST = f;
+                                    if (typeof window.saveFabricsCatalogToCache === 'function') window.saveFabricsCatalogToCache();
+                                }
+                            }
+                            if (legacy.lampsJson) {
+                                const l = JSON.parse(legacy.lampsJson);
+                                if (l && l.gx53 && l.tube && l.track) {
+                                    window.LAMP_VARIANTS_CATALOG = l;
+                                    if (typeof window.saveLampCatalogToCache === 'function') window.saveLampCatalogToCache();
+                                }
+                            }
+                            if (legacy.ledJson) {
+                                const led = JSON.parse(legacy.ledJson);
+                                if (Array.isArray(led) && led.length > 0) {
+                                    window.LED_LIST = led;
+                                    if (typeof window.syncLedPricesMap === 'function') window.syncLedPricesMap();
+                                    if (typeof window.saveLedCatalogToCache === 'function') window.saveLedCatalogToCache();
+                                }
+                            }
+                            if (legacy.servicesJson) {
+                                const srv = JSON.parse(legacy.servicesJson);
+                                if (Array.isArray(srv) && srv.length > 0) {
+                                    window.EXTRA_SERVICES_LIST = srv;
+                                    if (typeof window.saveExtraServicesToCache === 'function') window.saveExtraServicesToCache();
+                                }
+                            }
+                            if (legacy.keysJson) {
+                                const k = JSON.parse(legacy.keysJson);
+                                if (Array.isArray(k)) writeKeysSafe(k);
+                            }
+                            if (typeof legacy.isAccessRestricted === 'boolean') {
+                                window.isAccessRestricted = legacy.isAccessRestricted;
+                                try { localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted)); } catch (e) {}
+                            }
+                            if (typeof legacy.adminPin === 'string' && legacy.adminPin.length >= 4) {
+                                try { localStorage.setItem('decarat_admin_pin_v1', legacy.adminPin); } catch (e) {}
+                            }
+                        } finally {
+                            isApplyingRemote = false;
+                        }
+                    }
+                    await window.cloudSync.saveAll();
+                } else if (hasPendingChanges) {
+                    window.__pendingCloudSyncScopes.clear();
+                    await window.cloudSync.saveAll();
+                }
+
+                // Подписка в реальном времени на коллекцию клиентов
+                onSnapshot(clientsColRef, (snapshot) => {
+                    const remoteClients = [];
+                    snapshot.forEach((docSnap) => {
+                        const d = docSnap.data();
+                        if (d && (d.name || d.phone)) {
+                            remoteClients.push({
+                                id: d.id || docSnap.id,
+                                name: d.name || '',
+                                phone: d.phone || '',
+                                city: d.city || '',
+                                price: Number(d.price) || 0,
+                                note: d.note || '',
+                                createdAt: d.createdAt || '',
+                                createdAtTs: Number(d.createdAtTs) || 0
+                            });
+                        }
+                    });
+
+                    if (!hasHydratedClients && remoteClients.length === 0 && Array.isArray(window.CLIENTS_RECORDS) && window.CLIENTS_RECORDS.length > 0) {
+                        hasHydratedClients = true;
+                        window.CLIENTS_RECORDS.forEach((c) => window.cloudSync.saveClient(c));
+                        return;
+                    }
+
+                    hasHydratedClients = true;
+                    remoteClients.sort((a, b) => (b.createdAtTs || 0) - (a.createdAtTs || 0));
+                    window.CLIENTS_RECORDS = remoteClients;
+                    if (typeof window.saveClientsListToCache === 'function') window.saveClientsListToCache();
+                    if (typeof window.renderClientsRecordsList === 'function') window.renderClientsRecordsList();
+                }, (error) => {
+                    console.error('Ошибка подписки на коллекцию клиентов:', error);
+                });
+
+                // Подписка на настройки и закрытый доступ
+                onSnapshot(settingsDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data() || {};
+                    isApplyingRemote = true;
+                    try {
+                        if (data.pricesJson) {
+                            window.PRICES = { ...window.DEFAULT_PRICES, ...JSON.parse(data.pricesJson) };
+                        }
+                        if (data.keysJson) {
+                            const parsedKeys = JSON.parse(data.keysJson);
+                            if (Array.isArray(parsedKeys)) writeKeysSafe(parsedKeys);
+                        }
+                        if (typeof data.isAccessRestricted === 'boolean') {
+                            window.isAccessRestricted = data.isAccessRestricted;
+                            try {
+                                localStorage.setItem('decarat_access_locked_v1', String(window.isAccessRestricted));
+                            } catch (e) {}
+                        }
+                        if (typeof data.adminPin === 'string' && data.adminPin.length >= 4) {
+                            try {
+                                localStorage.setItem('decarat_admin_pin_v1', data.adminPin);
+                            } catch (e) {}
+                        }
+                        refreshUI();
+                        updateCloudBadge('ok', 'Синхронизировано с Firebase');
+                    } catch (err) {
+                        console.error('Ошибка чтения settings_state:', err);
+                    } finally {
+                        isApplyingRemote = false;
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки settings_state:', error);
+                });
+
+                // Подписка на полотна
+                onSnapshot(fabricsDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data() || {};
+                    isApplyingRemote = true;
+                    try {
+                        if (data.fabricsJson) {
+                            const parsedFabrics = JSON.parse(data.fabricsJson);
+                            if (Array.isArray(parsedFabrics) && parsedFabrics.length > 0) {
+                                window.FABRICS_LIST = parsedFabrics;
+                                if (typeof window.saveFabricsCatalogToCache === 'function') window.saveFabricsCatalogToCache();
+                            }
+                        }
+                        refreshUI();
+                        updateCloudBadge('ok', 'Синхронизировано с Firebase');
+                    } catch (err) {
+                        console.error('Ошибка чтения fabrics_state:', err);
+                    } finally {
+                        isApplyingRemote = false;
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки fabrics_state:', error);
+                });
+
+                // Подписка на светильники
+                onSnapshot(lampsDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data() || {};
+                    isApplyingRemote = true;
+                    try {
+                        if (data.lampsJson) {
+                            const parsedLamps = JSON.parse(data.lampsJson);
+                            if (parsedLamps && parsedLamps.gx53 && parsedLamps.tube && parsedLamps.track) {
+                                window.LAMP_VARIANTS_CATALOG = parsedLamps;
+                                if (typeof window.saveLampCatalogToCache === 'function') window.saveLampCatalogToCache();
+                            }
+                        }
+                        refreshUI();
+                        updateCloudBadge('ok', 'Синхронизировано с Firebase');
+                    } catch (err) {
+                        console.error('Ошибка чтения lamps_state:', err);
+                    } finally {
+                        isApplyingRemote = false;
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки lamps_state:', error);
+                });
+
+                // Подписка на LED-ленты и доп. работы
+                onSnapshot(catalogsDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data() || {};
+                    isApplyingRemote = true;
+                    try {
+                        if (data.ledJson) {
+                            const parsedLed = JSON.parse(data.ledJson);
+                            if (Array.isArray(parsedLed) && parsedLed.length > 0) {
+                                window.LED_LIST = parsedLed;
+                                if (typeof window.syncLedPricesMap === 'function') window.syncLedPricesMap();
+                                if (typeof window.saveLedCatalogToCache === 'function') window.saveLedCatalogToCache();
+                            }
+                        }
+                        if (data.servicesJson) {
+                            const parsedServices = JSON.parse(data.servicesJson);
+                            if (Array.isArray(parsedServices) && parsedServices.length > 0) {
+                                window.EXTRA_SERVICES_LIST = parsedServices;
+                                if (typeof window.saveExtraServicesToCache === 'function') window.saveExtraServicesToCache();
+                            }
+                        }
+                        refreshUI();
+                        updateCloudBadge('ok', 'Синхронизировано с Firebase');
+                    } catch (err) {
+                        console.error('Ошибка чтения catalogs_state:', err);
+                    } finally {
+                        isApplyingRemote = false;
+                    }
+                }, (error) => {
+                    console.error('Ошибка подписки catalogs_state:', error);
+                });
+
+                // Отправка отложенных операций, выполненных до завершения авторизации
+                if (pendingClientOps.size > 0) {
+                    for (const [cid, op] of pendingClientOps.entries()) {
+                        if (op.type === 'save') await window.cloudSync.saveClient(op.data);
+                        if (op.type === 'delete') await window.cloudSync.deleteClient(cid);
+                    }
+                    pendingClientOps.clear();
+                }
+                if (window.__pendingCloudSyncScopes && window.__pendingCloudSyncScopes.size > 0) {
+                    window.__pendingCloudSyncScopes.clear();
+                    await window.cloudSync.saveAll();
+                }
+            } catch (err) {
+                console.error('Ошибка инициализации Firebase:', err);
+                updateCloudBadge('off', 'Локальный режим');
+            }
+        })();
+    </script>
+</body>
+</html>
