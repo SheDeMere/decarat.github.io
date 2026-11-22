@@ -786,29 +786,29 @@
 </head>
 <body class="bg-stone-50 text-stone-900">
 
-    <!-- ЭКРАН ЗАКРЫТОГО ДОСТУПА (PAYWALL / INVITE-ONLY GATE) -->
-    <div id="access-gate-overlay" style="display: none;" class="fixed inset-0 z-40 bg-stone-950/95 backdrop-blur-xl hidden items-center justify-center p-4">
+    <!-- ЭКРАН ЗАКРЫТОГО ДОСТУПА (ВХОД ПО PIN-КОДУ ДЛЯ МАСТЕРА И АДМИНА) -->
+    <div id="access-gate-overlay" style="display: flex;" class="fixed inset-0 z-40 bg-stone-950/95 backdrop-blur-xl flex items-center justify-center p-4">
         <div class="bg-stone-900 border border-emerald-800/60 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
             <div class="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none"></div>
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 mx-auto flex items-center justify-center text-white shadow-lg">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
             </div>
             <div>
-                <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-950 px-3 py-1 rounded-full border border-emerald-800/60">Закрытый доступ</span>
+                <span class="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-950 px-3 py-1 rounded-full border border-emerald-800/60">Рабочий кабинет</span>
                 <h2 class="text-2xl font-black text-white mt-3">DECARAT PRO</h2>
                 <p class="text-xs text-stone-400 mt-1.5 leading-relaxed">
-                    Доступ к калькулятору и расчёту сметы предоставляется только по персональному ключу или ссылке-приглашению.
+                    Вход только для мастеров и администратора. Введите ваш персональный PIN-код доступа.
                 </p>
             </div>
 
             <form id="access-gate-form" onsubmit="verifyAccessCode(event)" class="space-y-3 text-left">
                 <div>
-                    <label class="text-[11px] font-semibold text-stone-300 block mb-1">Введите ваш ключ доступа:</label>
-                    <input type="text" id="access-code-input" placeholder="Например: DECARAT2026" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-stone-700 text-white text-center font-bold tracking-widest uppercase">
+                    <label class="text-[11px] font-semibold text-stone-300 block mb-1">Введите ваш PIN-код или ключ доступа:</label>
+                    <input type="text" id="access-code-input" placeholder="Например: MASTER15" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-stone-700 text-white text-center font-bold tracking-widest uppercase">
                 </div>
-                <p id="access-code-error" class="text-xs text-rose-400 text-center hidden">Неверный или заблокированный ключ доступа</p>
+                <p id="access-code-error" class="text-xs text-rose-400 text-center hidden">Неверный или заблокированный PIN-код доступа</p>
                 <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm shadow-lg transition">
-                    Войти на сайт
+                    Войти в систему
                 </button>
             </form>
 
@@ -830,7 +830,7 @@
                 </div>
                 <div>
                     <span class="text-xl font-black tracking-tight text-stone-900 block leading-tight">DECARAT</span>
-                    <span class="text-[10px] text-stone-500 font-semibold uppercase tracking-widest block">Натяжные потолки & Свет</span>
+                    <span id="header-role-subtitle" class="text-[10px] text-stone-500 font-semibold uppercase tracking-widest block">Натяжные потолки & Свет</span>
                 </div>
             </div>
 
@@ -838,7 +838,7 @@
             <div class="flex items-center gap-2 sm:gap-3">
                 <button type="button" onclick="openAdminModal()" class="px-3.5 py-2.5 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition flex items-center gap-1.5 border border-stone-200">
                     <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span class="hidden sm:inline">Админ-панель</span>
+                    <span id="header-admin-btn-label" class="hidden sm:inline">Настройка цен</span>
                 </button>
                 <button type="button" id="header-logout-btn" onclick="lockSiteSession()" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs sm:text-sm font-bold shadow-md transition flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -1468,7 +1468,7 @@
         <span id="toast-text">Расчет успешно скопирован!</span>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО АДМИН-ПАНЕЛИ -->
+    <!-- МОДАЛЬНОЕ ОКНО ПАНЕЛИ УПРАВЛЕНИЯ (АДМИН И МАСТЕР) -->
     <div id="admin-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
         <!-- Шаг 1: Авторизация по пин-коду -->
         <div id="admin-auth-view" class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-stone-200">
@@ -1476,11 +1476,11 @@
                 <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 mx-auto flex items-center justify-center mb-3">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-                <h3 class="text-lg font-bold text-stone-900">Вход в панель управления</h3>
-                <p class="text-xs text-stone-500 mt-1">Введите пин-код администратора компании Decarat</p>
+                <h3 class="text-lg font-bold text-stone-900">Вход в редактор цен</h3>
+                <p class="text-xs text-stone-500 mt-1">Введите PIN-код администратора или персональный PIN-код мастера</p>
             </div>
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <input type="password" id="admin-pin-input" placeholder="Введите пин-код" class="w-full text-center tracking-widest text-lg font-bold py-2.5 px-4 rounded-xl border border-stone-300">
+                <input type="password" id="admin-pin-input" placeholder="Введите пин-код" class="w-full text-center tracking-widest text-lg font-bold py-2.5 px-4 rounded-xl border border-stone-300 uppercase">
                 <p id="admin-pin-error" class="text-xs text-red-500 text-center hidden">Неверный пин-код</p>
                 <div class="flex gap-2">
                     <button type="button" onclick="closeAdminModal()" class="w-1/2 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-bold text-stone-600 transition">Отмена</button>
@@ -1489,7 +1489,7 @@
             </form>
         </div>
 
-        <!-- Шаг 2: Современная двухколоночная админ-панель -->
+        <!-- Шаг 2: Современная двухколоночная панель управления -->
         <div id="admin-dashboard-view" class="admin-shell hidden">
             <!-- Верхняя шапка -->
             <div class="admin-topbar">
@@ -1499,10 +1499,10 @@
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <h3 class="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight truncate">Панель управления Decarat</h3>
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">PRO</span>
+                            <h3 id="dashboard-header-title" class="text-base sm:text-lg font-extrabold text-stone-900 tracking-tight truncate">Панель управления Decarat</h3>
+                            <span id="dashboard-role-badge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">АДМИН</span>
                         </div>
-                        <p class="text-xs text-stone-500 truncate">Каталог полотен, светильники, прайс-лист и ключи доступа</p>
+                        <p id="dashboard-header-subtitle" class="text-xs text-stone-500 truncate">Каталог полотен, светильники, прайс-лист и ключи доступа</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeAdminModal()" aria-label="Закрыть" class="w-9 h-9 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 flex items-center justify-center transition shrink-0">
@@ -1544,7 +1544,7 @@
                         </div>
                     </button>
 
-                    <button type="button" id="tab-btn-access" onclick="switchAdminTab('access')" class="admin-nav-btn">
+                    <button type="button" id="tab-btn-access" onclick="switchAdminTab('access')" class="admin-nav-btn admin-only-el">
                         <span class="admin-nav-icon">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
                         </span>
@@ -1554,7 +1554,7 @@
                         </div>
                     </button>
 
-                    <button type="button" id="tab-btn-security" onclick="switchAdminTab('security')" class="admin-nav-btn">
+                    <button type="button" id="tab-btn-security" onclick="switchAdminTab('security')" class="admin-nav-btn admin-only-el">
                         <span class="admin-nav-icon">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                         </span>
@@ -1568,9 +1568,20 @@
                 <!-- Рабочая область вкладок -->
                 <div class="admin-content custom-scrollbar">
 
+                    <!-- Уведомление для мастера о персональных ценах -->
+                    <div id="master-personal-prices-banner" class="hidden mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🛠️</span>
+                            <div>
+                                <span id="master-banner-title" class="text-xs font-extrabold text-emerald-950 block">Режим персонального прайса мастера</span>
+                                <span class="text-[11px] text-emerald-800 block mt-0.5">Все изменения цен сохраняются в облачную БД исключительно для вашего аккаунта и не влияют на цены других мастеров.</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- ВКЛАДКА 1: ПОЛОТНА ДЛЯ ПОТОЛКОВ -->
                     <div id="admin-tab-fabrics" class="space-y-6">
-                        <div class="admin-card space-y-5">
+                        <div class="admin-card space-y-5 admin-only-el">
                             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-stone-100">
                                 <div>
                                     <h4 class="text-sm font-extrabold text-stone-900">Добавить новое полотно</h4>
@@ -1617,7 +1628,7 @@
 
                     <!-- ВКЛАДКА 2: УПРАВЛЕНИЕ СВЕТИЛЬНИКАМИ -->
                     <div id="admin-tab-lamps" class="hidden space-y-6">
-                        <div class="admin-card space-y-5">
+                        <div class="admin-card space-y-5 admin-only-el">
                             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-stone-100">
                                 <div>
                                     <h4 class="text-sm font-extrabold text-stone-900">Добавить новый светильник</h4>
@@ -1696,7 +1707,7 @@
 
                     <!-- ВКЛАДКА 3: ПРОФИЛИ, LED И УСЛУГИ -->
                     <div id="admin-tab-prices" class="hidden space-y-6">
-                        <div class="admin-card space-y-5">
+                        <div class="admin-card space-y-5 admin-only-el">
                             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-stone-100">
                                 <div>
                                     <h4 class="text-sm font-extrabold text-stone-900">Добавить новую услугу</h4>
@@ -1811,12 +1822,12 @@
                         </div>
                     </div>
 
-                    <!-- ВКЛАДКА 4: ДОСТУП И КЛЮЧИ -->
-                    <div id="admin-tab-access" class="hidden space-y-6">
+                    <!-- ВКЛАДКА 4: ДОСТУП И КЛЮЧИ (ТОЛЬКО АДМИН) -->
+                    <div id="admin-tab-access" class="hidden space-y-6 admin-only-el">
                         <div class="admin-card flex flex-wrap items-center justify-between gap-4">
                             <div>
-                                <h4 class="text-sm font-extrabold text-stone-900">Закрытый доступ по ключу</h4>
-                                <p class="text-xs text-stone-500 mt-0.5">Если включено, сайт запрашивает персональный ключ при входе</p>
+                                <h4 class="text-sm font-extrabold text-stone-900">Закрытый доступ по PIN-коду</h4>
+                                <p class="text-xs text-stone-500 mt-0.5">Если включено, сайт запрашивает персональный PIN-код мастера или админа при входе</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="toggle-access-lock" onchange="toggleAccessRestriction(this.checked)" class="sr-only peer">
@@ -1827,47 +1838,47 @@
                         <div class="admin-card space-y-5">
                             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-stone-100">
                                 <div>
-                                    <h4 class="text-sm font-extrabold text-stone-900">Создать новый ключ доступа</h4>
-                                    <p class="text-xs text-stone-500 mt-0.5">Для клиента (базовые цены) или мастера (с персональной скидкой)</p>
+                                    <h4 class="text-sm font-extrabold text-stone-900">Создать PIN-код доступа для мастера</h4>
+                                    <p class="text-xs text-stone-500 mt-0.5">Каждый мастер сможет настраивать свои цены под себя, не меняя цены других</p>
                                 </div>
-                                <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">Приглашения</span>
+                                <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">Мастера</span>
                             </div>
 
                             <div class="admin-grid-row admin-grid-2">
                                 <div>
-                                    <label class="admin-label">Имя человека</label>
+                                    <label class="admin-label">Имя мастера</label>
                                     <input type="text" id="new-key-owner" placeholder="Алексей (Мастер)" class="admin-input">
                                 </div>
                                 <div>
-                                    <label class="admin-label">Код ключа</label>
+                                    <label class="admin-label">PIN-код / Ключ входа</label>
                                     <input type="text" id="new-key-code" placeholder="MASTER2026" class="admin-input uppercase font-mono">
                                 </div>
                             </div>
 
                             <div class="admin-grid-row admin-grid-2 pt-1">
                                 <div>
-                                    <label class="admin-label">Тип пользователя</label>
+                                    <label class="admin-label">Роль</label>
                                     <select id="new-key-role" onchange="handleNewKeyRoleChange(this.value)" class="admin-input font-semibold">
-                                        <option value="client">Клиент</option>
-                                        <option value="master">Мастер</option>
+                                        <option value="master" selected>Мастер (личные цены + скидка)</option>
+                                        <option value="client">Обычный пользователь (базовые цены)</option>
                                     </select>
                                 </div>
-                                <div id="new-key-discount-wrapper" class="hidden">
-                                    <label class="admin-label text-emerald-800">Скидка для мастера (%)</label>
-                                    <input type="number" id="new-key-discount" value="15" min="0" max="90" class="admin-input font-bold text-emerald-800">
+                                <div id="new-key-discount-wrapper">
+                                    <label class="admin-label text-emerald-800">Доп. скидка мастера (%)</label>
+                                    <input type="number" id="new-key-discount" value="0" min="0" max="90" class="admin-input font-bold text-emerald-800">
                                 </div>
                             </div>
 
                             <div class="pt-3 flex justify-center">
                                 <button type="button" onclick="createNewAccessKey()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl whitespace-nowrap transition shadow-sm">
-                                    Создать ключ доступа
+                                    Создать доступ для мастера
                                 </button>
                             </div>
                         </div>
 
                         <div class="space-y-4">
                             <div class="px-1">
-                                <span class="text-xs font-extrabold text-stone-700 uppercase tracking-wider">Активные ключи доступа</span>
+                                <span class="text-xs font-extrabold text-stone-700 uppercase tracking-wider">Активные PIN-коды мастеров</span>
                             </div>
                             <div id="admin-keys-list" class="space-y-4">
                                 <!-- Рендерится через JS -->
@@ -1875,13 +1886,13 @@
                         </div>
                     </div>
 
-                    <!-- ВКЛАДКА 5: БЕЗОПАСНОСТЬ И СМЕНА ПИН-КОДА -->
-                    <div id="admin-tab-security" class="hidden space-y-6">
+                    <!-- ВКЛАДКА 5: БЕЗОПАСНОСТЬ И СМЕНА ПИН-КОДА (ТОЛЬКО АДМИН) -->
+                    <div id="admin-tab-security" class="hidden space-y-6 admin-only-el">
                         <div class="admin-card space-y-4">
                             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-stone-100">
                                 <div>
                                     <h4 class="text-sm font-extrabold text-stone-900">Смена PIN-кода администратора</h4>
-                                    <p class="text-xs text-stone-500 mt-0.5">Изменение пароля для входа в панель управления</p>
+                                    <p class="text-xs text-stone-500 mt-0.5">Изменение главного пароля владельца сайта</p>
                                 </div>
                                 <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">Безопасность</span>
                             </div>
@@ -1939,8 +1950,8 @@
                 <div id="edit-item-role-wrap" class="hidden">
                     <label class="admin-label">Тип доступа</label>
                     <select id="edit-item-role" onchange="handleEditKeyRoleChange(this.value)" class="admin-input-sm w-full font-semibold">
-                        <option value="client">Клиент (без скидки)</option>
-                        <option value="master">Мастер (со скидкой)</option>
+                        <option value="master">Мастер (личные цены + скидка)</option>
+                        <option value="client">Обычный доступ (базовые цены)</option>
                     </select>
                 </div>
 
@@ -2053,7 +2064,7 @@
         window.DEFAULT_PRICES = DEFAULT_PRICES;
         window.PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
 
-        // Базовые (общие) эталонные цены для админа/гостей, поверх которых накладываются персональные цены мастера
+        // Базовые (общие) эталонные цены админа, поверх которых накладываются персональные цены мастера
         let BASE_SHARED_PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
 
         const DEFAULT_FABRICS_LIST = [
@@ -2292,7 +2303,7 @@
             return EXTRA_SERVICES_LIST.find(s => s.id === serviceId);
         }
 
-        // ================= ИНДИВИДУАЛЬНЫЕ ЦЕНЫ МАСТЕРОВ (ПО КОДУ/ID МАСТЕРА) =================
+        // ================= ИНДИВИДУАЛЬНЫЕ ЦЕНЫ МАСТЕРОВ (ПО ПИН-КОДУ МАСТЕРА) =================
         function loadMasterPricesMapFromCache() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY_MASTER_PRICES_MAP);
@@ -2313,6 +2324,10 @@
         }
 
         function getCurrentMasterKeyId() {
+            // Если вошел администратор и не выбрал профиль мастера — работаем с общими базовыми ценами
+            if (window.isAdminLoggedIn && !window.isMasterEditorMode) {
+                return null;
+            }
             if (window.activeMasterSession && window.activeMasterSession.role === 'master' && window.activeMasterSession.code) {
                 return String(window.activeMasterSession.code).trim().toUpperCase();
             }
@@ -2453,6 +2468,8 @@
         let isPerimeterManuallyEdited = false;
         window.activeLampCategory = null;
 
+        // По умолчанию сайт закрыт и требует PIN-код мастера или админа (без гостевого режима)
+        window.isAccessRestricted = true;
         try {
             const rawLocked = localStorage.getItem('decarat_access_locked_v1');
             if (rawLocked !== null) {
@@ -2597,7 +2614,7 @@
 
             grid.innerHTML = cat.items.map(variant => {
                 const qty = calcState.lampVariants[variant.id] || 0;
-                const escAttr = (str) => String(str || '').replace(/&/g, '&').replace(/"/g, '"').replace(/'/g, ''').replace(/</g, '<').replace(/>/g, '>');
+                const escAttr = (str) => String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 return `
                     <div class="bg-white rounded-2xl p-4 border ${qty > 0 ? 'border-emerald-500 ring-2' : 'border-stone-200'} flex flex-col justify-between transition shadow-sm">
                         <div>
@@ -2667,15 +2684,15 @@
             modal.style.display = 'none';
         }
 
-        // ================= УПРАВЛЕНИЕ ДОСТУПОМ И КЛЮЧАМИ =================
-        window.isAccessRestricted = false;
-        window.isSessionUnlocked = true;
+        // ================= УПРАВЛЕНИЕ ДОСТУПОМ И РОЛЯМИ (МАСТЕР / АДМИН) =================
+        window.isSessionUnlocked = false;
         window.isAdminLoggedIn = false;
+        window.isMasterEditorMode = false;
         window.activeMasterSession = null;
 
         const DEFAULT_ACCESS_KEYS = [
-            { code: 'DECARAT2026', owner: 'Базовый клиентский доступ', role: 'client', discount: 0 },
-            { code: 'MASTER15', owner: 'Партнёр-монтажник', role: 'master', discount: 15 }
+            { code: 'MASTER15', owner: 'Партнёр-монтажник', role: 'master', discount: 15 },
+            { code: 'DECARAT2026', owner: 'Мастер базовый', role: 'master', discount: 0 }
         ];
 
         function loadKeysListFromCache() {
@@ -2742,6 +2759,21 @@
             }
         }
 
+        function updateHeaderRoleUI() {
+            const subtitleEl = document.getElementById('header-role-subtitle');
+            const btnLabelEl = document.getElementById('header-admin-btn-label');
+            if (window.isAdminLoggedIn && !window.isMasterEditorMode) {
+                if (subtitleEl) subtitleEl.textContent = 'Режим Администратора (Общий прайс)';
+                if (btnLabelEl) btnLabelEl.textContent = 'Админ-панель';
+            } else if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
+                if (subtitleEl) subtitleEl.textContent = `Мастер: ${window.activeMasterSession.owner}`;
+                if (btnLabelEl) btnLabelEl.textContent = 'Мои цены';
+            } else {
+                if (subtitleEl) subtitleEl.textContent = 'Натяжные потолки & Свет';
+                if (btnLabelEl) btnLabelEl.textContent = 'Настройка цен';
+            }
+        }
+
         function updateMasterPaymentButtonUI() {
             const cashBtn = document.getElementById('pay-cash-btn');
             const masterBtn = document.getElementById('pay-master-btn');
@@ -2753,11 +2785,12 @@
                 masterBtn.classList.remove('hidden');
                 document.getElementById('master-btn-badge').textContent = `−${pct}%`;
                 document.getElementById('master-btn-title').textContent = window.activeMasterSession.owner || 'Скидка мастера';
-                document.getElementById('master-btn-subtitle').textContent = `Скидка ${pct}%`;
+                document.getElementById('master-btn-subtitle').textContent = pct > 0 ? `Скидка ${pct}%` : 'Личный прайс';
             } else {
                 masterBtn.classList.add('hidden');
                 cashBtn.classList.remove('hidden');
             }
+            updateHeaderRoleUI();
         }
 
         function refreshPricesForSessionAndUi() {
@@ -2766,35 +2799,24 @@
             updateActiveCardStyles();
             calculateTotal();
             updateHeroQuickPrice();
-            if (window.isAdminLoggedIn) {
+            if (window.isAdminLoggedIn || window.isMasterEditorMode) {
                 refreshAdminDashboardData();
             }
         }
 
         function applyUserAccessProfile(keyObj, autoSelectMasterPayment = true) {
             if (!keyObj) return;
-            const isMaster = (keyObj.role === 'master') || (!keyObj.role && (keyObj.discount || 0) > 0);
-            if (isMaster) {
-                window.activeMasterSession = { ...keyObj, role: 'master' };
-                updateMasterPaymentButtonUI();
-                refreshPricesForSessionAndUi();
-                if (window.cloudSync && window.cloudSync.enabled && window.cloudSync.loadMasterPrices) {
-                    window.cloudSync.loadMasterPrices(keyObj.code);
-                }
-                if (autoSelectMasterPayment) {
-                    setPaymentMethod('master');
-                } else {
-                    calculateTotal();
-                }
+            window.isMasterEditorMode = true;
+            window.activeMasterSession = { ...keyObj, role: 'master' };
+            updateMasterPaymentButtonUI();
+            refreshPricesForSessionAndUi();
+            if (window.cloudSync && window.cloudSync.enabled && window.cloudSync.loadMasterPrices) {
+                window.cloudSync.loadMasterPrices(keyObj.code);
+            }
+            if (autoSelectMasterPayment) {
+                setPaymentMethod('master');
             } else {
-                window.activeMasterSession = { ...keyObj, role: 'client', discount: 0 };
-                updateMasterPaymentButtonUI();
-                refreshPricesForSessionAndUi();
-                if (calcState.paymentMethod === 'master') {
-                    setPaymentMethod('cash');
-                } else {
-                    calculateTotal();
-                }
+                calculateTotal();
             }
         }
 
@@ -2805,6 +2827,18 @@
             const candidateCode = urlKey || savedCode;
 
             if (candidateCode) {
+                // Проверяем, не PIN ли это администратора
+                if (candidateCode === getStoredAdminPin().toUpperCase()) {
+                    window.isAdminLoggedIn = true;
+                    window.isMasterEditorMode = false;
+                    window.isSessionUnlocked = true;
+                    unlockSiteUI();
+                    updateHeaderRoleUI();
+                    updateLogoutButtonVisibility();
+                    return;
+                }
+
+                // Ищем мастера по PIN-коду
                 const found = window.ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === candidateCode);
                 if (found) {
                     saveAuthCodeToCache(found.code);
@@ -2829,14 +2863,33 @@
             const errorEl = document.getElementById('access-code-error');
             const code = (input ? input.value : '').trim().toUpperCase();
 
+            // 1. Вход по PIN-коду администратора
+            if (code === getStoredAdminPin().toUpperCase()) {
+                if (errorEl) errorEl.classList.add('hidden');
+                saveAuthCodeToCache(code);
+                window.isAdminLoggedIn = true;
+                window.isMasterEditorMode = false;
+                window.isSessionUnlocked = true;
+                window.activeMasterSession = null;
+                unlockSiteUI();
+                updateMasterPaymentButtonUI();
+                updateLogoutButtonVisibility();
+                refreshPricesForSessionAndUi();
+                showToast('Вы вошли как Администратор');
+                return;
+            }
+
+            // 2. Вход по PIN-коду мастера
             const found = window.ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === code);
             if (found) {
                 if (errorEl) errorEl.classList.add('hidden');
                 saveAuthCodeToCache(found.code);
                 window.isSessionUnlocked = true;
+                window.isAdminLoggedIn = false;
                 unlockSiteUI();
                 applyUserAccessProfile(found, true);
-                showToast(`Добро пожаловать, ${found.owner}!`);
+                updateLogoutButtonVisibility();
+                showToast(`Добро пожаловать, ${found.owner}! Загружены ваши личные цены.`);
             } else {
                 if (errorEl) errorEl.classList.remove('hidden');
             }
@@ -2847,20 +2900,17 @@
             window.activeMasterSession = null;
             window.isSessionUnlocked = false;
             window.isAdminLoggedIn = false;
+            window.isMasterEditorMode = false;
             updateMasterPaymentButtonUI();
             updateLogoutButtonVisibility();
             refreshPricesForSessionAndUi();
-            if (window.isAccessRestricted) {
-                lockSiteUI();
-            } else {
-                window.location.reload();
-            }
+            lockSiteUI();
         }
 
         function updateLogoutButtonVisibility() {
             const logoutBtn = document.getElementById('header-logout-btn');
             if (!logoutBtn) return;
-            if (window.isAccessRestricted && window.isSessionUnlocked) {
+            if (window.isSessionUnlocked || window.isAdminLoggedIn) {
                 logoutBtn.classList.remove('hidden');
             } else {
                 logoutBtn.classList.add('hidden');
@@ -2877,7 +2927,7 @@
                 unlockSiteUI();
             }
             if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(window.isAccessRestricted ? 'Закрытый доступ по ключу включён' : 'Свободный доступ к сайту открыт');
+            showToast(window.isAccessRestricted ? 'Закрытый доступ по PIN-коду включён' : 'Свободный доступ к сайту открыт');
         }
 
         function handleNewKeyRoleChange(role) {
@@ -2886,7 +2936,6 @@
             if (!discountWrapper || !discountInp) return;
             if (role === 'master') {
                 discountWrapper.classList.remove('hidden');
-                if (!parseInt(discountInp.value, 10)) discountInp.value = 15;
             } else {
                 discountWrapper.classList.add('hidden');
                 discountInp.value = 0;
@@ -2899,18 +2948,18 @@
             const roleSel = document.getElementById('new-key-role');
             const discountInp = document.getElementById('new-key-discount');
 
-            const owner = (ownerInp ? ownerInp.value : '').trim() || 'Новый пользователь';
+            const owner = (ownerInp ? ownerInp.value : '').trim() || 'Новый мастер';
             const rawCode = (codeInp ? codeInp.value : '').trim().toUpperCase().replace(/\s+/g, '-');
-            const code = rawCode || `KEY-${Math.floor(1000 + Math.random() * 9000)}`;
-            const role = roleSel ? roleSel.value : 'client';
-            const discount = role === 'master' ? Math.max(0, Math.min(90, parseInt(discountInp ? discountInp.value : '15', 10) || 0)) : 0;
+            const code = rawCode || `M${Math.floor(1000 + Math.random() * 9000)}`;
+            const role = roleSel ? roleSel.value : 'master';
+            const discount = role === 'master' ? Math.max(0, Math.min(90, parseInt(discountInp ? discountInp.value : '0', 10) || 0)) : 0;
 
-            if (window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === code)) {
-                showToast('Ключ с таким кодом уже существует');
+            if (code === getStoredAdminPin().toUpperCase() || window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === code)) {
+                showToast('Этот PIN-код уже занят');
                 return;
             }
 
-            window.ALLOWED_ACCESS_KEYS.push({ code, owner, role, discount });
+            window.ALLOWED_ACCESS_KEYS.push({ code, owner, role: 'master', discount });
             saveKeysListToCache();
             renderAccessKeysList();
             updateAdminSidebarCounts();
@@ -2918,12 +2967,12 @@
 
             if (ownerInp) ownerInp.value = '';
             if (codeInp) codeInp.value = '';
-            showToast(`Ключ «${code}» создан`);
+            showToast(`PIN-код «${code}» для мастера ${owner} создан`);
         }
 
         function deleteAccessKey(code) {
             if (window.ALLOWED_ACCESS_KEYS.length <= 1) {
-                showToast('Должен оставаться хотя бы один ключ доступа');
+                showToast('Должен оставаться хотя бы один PIN-код доступа');
                 return;
             }
             window.ALLOWED_ACCESS_KEYS = window.ALLOWED_ACCESS_KEYS.filter(k => k.code !== code);
@@ -2931,7 +2980,7 @@
             renderAccessKeysList();
             updateAdminSidebarCounts();
             if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(`Ключ «${code}» удалён`);
+            showToast(`PIN-код «${code}» удалён`);
         }
 
         function copyInviteLink(code) {
@@ -2943,7 +2992,7 @@
             temp.select();
             document.execCommand('copy');
             document.body.removeChild(temp);
-            showToast(`Ссылка-приглашение для ${code} скопирована!`);
+            showToast(`Ссылка входа для ${code} скопирована!`);
         }
 
         function renderAccessKeysList() {
@@ -2951,10 +3000,10 @@
             if (!container) return;
 
             container.innerHTML = window.ALLOWED_ACCESS_KEYS.map(item => {
-                const isMaster = (item.role === 'master') || (!item.role && (item.discount || 0) > 0);
-                const roleBadge = isMaster
-                    ? `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Мастер −${item.discount || 0}%</span>`
-                    : `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">Клиент</span>`;
+                const pct = item.discount || 0;
+                const roleBadge = pct > 0
+                    ? `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Мастер • Личные цены + скидка ${pct}%</span>`
+                    : `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Мастер • Личные цены</span>`;
 
                 return `
                     <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
@@ -2963,16 +3012,16 @@
                                 <span class="text-xs sm:text-sm font-bold text-stone-900 truncate">${item.owner}</span>
                                 ${roleBadge}
                             </div>
-                            <span class="text-xs font-mono font-bold text-emerald-800 block">${item.code}</span>
+                            <span class="text-xs font-mono font-bold text-emerald-800 block">PIN: ${item.code}</span>
                         </div>
                         <div class="flex items-center gap-3 shrink-0">
                             <button type="button" onclick="copyInviteLink('${item.code}')" class="px-3 h-9 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-bold text-stone-700 transition whitespace-nowrap">
                                 Ссылка
                             </button>
-                            <button type="button" onclick="openAdminEditModal('key', '', '${item.code}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать ключ">
+                            <button type="button" onclick="openAdminEditModal('key', '', '${item.code}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать доступ">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                             </button>
-                            <button type="button" onclick="deleteAccessKey('${item.code}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить ключ">
+                            <button type="button" onclick="deleteAccessKey('${item.code}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить доступ">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
                         </div>
@@ -2981,7 +3030,38 @@
             }).join('');
         }
 
-        // ================= МОДАЛЬНОЕ ОКНО И ВКЛАДКИ АДМИН-ПАНЕЛИ =================
+        // ================= МОДАЛЬНОЕ ОКНО И ВКЛАДКИ РЕДАКТОРА ЦЕН (АДМИН + МАСТЕР) =================
+        function configureDashboardRoleVisibility() {
+            const isMasterOnly = !window.isAdminLoggedIn && window.isMasterEditorMode && window.activeMasterSession;
+            
+            document.querySelectorAll('.admin-only-el').forEach(el => {
+                if (isMasterOnly) {
+                    el.classList.add('hidden');
+                } else {
+                    el.classList.remove('hidden');
+                }
+            });
+
+            const banner = document.getElementById('master-personal-prices-banner');
+            const titleEl = document.getElementById('dashboard-header-title');
+            const badgeEl = document.getElementById('dashboard-role-badge');
+            const subEl = document.getElementById('dashboard-header-subtitle');
+
+            if (isMasterOnly) {
+                if (banner) banner.classList.remove('hidden');
+                const bannerTitle = document.getElementById('master-banner-title');
+                if (bannerTitle) bannerTitle.textContent = `Персональный прайс-лист: ${window.activeMasterSession.owner} (PIN: ${window.activeMasterSession.code})`;
+                if (titleEl) titleEl.textContent = `Настройка цен — ${window.activeMasterSession.owner}`;
+                if (badgeEl) badgeEl.textContent = 'МАСТЕР';
+                if (subEl) subEl.textContent = 'Ваши индивидуальные цены на полотна, светильники, профили и услуги';
+            } else {
+                if (banner) banner.classList.add('hidden');
+                if (titleEl) titleEl.textContent = 'Панель управления Decarat';
+                if (badgeEl) badgeEl.textContent = 'АДМИН';
+                if (subEl) subEl.textContent = 'Общий базовый каталог полотен, светильники, прайс-лист и PIN-коды мастеров';
+            }
+        }
+
         function openAdminModal() {
             const modal = document.getElementById('admin-modal');
             const authView = document.getElementById('admin-auth-view');
@@ -2991,9 +3071,12 @@
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
 
-            if (window.isAdminLoggedIn) {
+            // Если уже авторизован Админ или Мастер — открываем сразу их панель
+            if (window.isAdminLoggedIn || (window.isMasterEditorMode && window.activeMasterSession)) {
                 if (authView) authView.classList.add('hidden');
                 if (dashView) dashView.classList.remove('hidden');
+                configureDashboardRoleVisibility();
+                switchAdminTab('fabrics');
                 refreshAdminDashboardData();
             } else {
                 if (authView) authView.classList.remove('hidden');
@@ -3017,21 +3100,52 @@
             if (e) e.preventDefault();
             const pinInp = document.getElementById('admin-pin-input');
             const errEl = document.getElementById('admin-pin-error');
-            const entered = (pinInp ? pinInp.value : '').trim();
+            const entered = (pinInp ? pinInp.value : '').trim().toUpperCase();
 
-            if (entered === getStoredAdminPin()) {
+            // 1. Проверка PIN-кода администратора
+            if (entered === getStoredAdminPin().toUpperCase()) {
                 window.isAdminLoggedIn = true;
+                window.isMasterEditorMode = false;
                 window.isSessionUnlocked = true;
+                window.activeMasterSession = null;
+                saveAuthCodeToCache(entered);
                 if (errEl) errEl.classList.add('hidden');
                 unlockSiteUI();
+                updateMasterPaymentButtonUI();
                 updateLogoutButtonVisibility();
+                refreshPricesForSessionAndUi();
+
                 document.getElementById('admin-auth-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                configureDashboardRoleVisibility();
+                switchAdminTab('fabrics');
                 refreshAdminDashboardData();
-                showToast('Добро пожаловать в панель управления!');
-            } else {
-                if (errEl) errEl.classList.remove('hidden');
+                showToast('Вы вошли в панель управления администратора!');
+                return;
             }
+
+            // 2. Проверка PIN-кода мастера
+            const foundMaster = window.ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === entered);
+            if (foundMaster) {
+                window.isAdminLoggedIn = false;
+                window.isMasterEditorMode = true;
+                window.isSessionUnlocked = true;
+                saveAuthCodeToCache(foundMaster.code);
+                if (errEl) errEl.classList.add('hidden');
+                unlockSiteUI();
+                applyUserAccessProfile(foundMaster, true);
+                updateLogoutButtonVisibility();
+
+                document.getElementById('admin-auth-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                configureDashboardRoleVisibility();
+                switchAdminTab('fabrics');
+                refreshAdminDashboardData();
+                showToast(`Открыт персональный редактор цен для мастера: ${foundMaster.owner}`);
+                return;
+            }
+
+            if (errEl) errEl.classList.remove('hidden');
         }
 
         function updateAdminPinCode() {
@@ -3204,45 +3318,6 @@
             showToast(`Полотно «${name}» добавлено в каталог`);
         }
 
-        function updateFabricPriceFromAdmin(fabricId, newPriceVal) {
-            const item = FABRICS_LIST.find(f => f.id === fabricId);
-            if (!item) return;
-
-            const parsed = Math.max(0, parseInt(newPriceVal, 10) || 0);
-
-            persistCurrentPriceChangeToDb((bucket, isMaster) => {
-                if (isMaster) {
-                    bucket.fabrics[fabricId] = parsed;
-                } else {
-                    item.price = parsed;
-                    if (window.PRICES.fabrics[fabricId]) {
-                        window.PRICES.fabrics[fabricId].price = parsed;
-                    } else {
-                        window.PRICES.fabrics[fabricId] = { name: item.shortName || item.name, price: parsed };
-                    }
-                }
-            });
-
-            renderFabricsGrid();
-            calculateTotal();
-            updateHeroQuickPrice();
-            showToast(`Цена для «${item.name}» обновлена`);
-        }
-
-        function updateFabricPhotoFromAdmin(fabricId, newImgUrl) {
-            const item = FABRICS_LIST.find(f => f.id === fabricId);
-            if (!item) return;
-
-            item.img = (newImgUrl || '').trim();
-            const baseItem = BASE_SHARED_FABRICS.find(f => f.id === fabricId);
-            if (baseItem) baseItem.img = item.img;
-            saveFabricsCatalogToCache();
-            renderFabricsGrid();
-            renderAdminFabricsList();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(`Фото для «${item.name}» обновлено`);
-        }
-
         function deleteFabricFromAdmin(fabricId) {
             if (FABRICS_LIST.length <= 1) {
                 showToast('В каталоге должно оставаться хотя бы одно полотно');
@@ -3271,6 +3346,24 @@
         }
 
         function resetFabricsCatalogToDefault() {
+            const masterId = getCurrentMasterKeyId();
+            if (masterId) {
+                if (window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[masterId]) {
+                    window.MASTER_PRICES_MAP[masterId].fabrics = {};
+                    saveMasterPricesMapToCache();
+                    if (window.cloudSync && window.cloudSync.enabled) {
+                        window.cloudSync.saveMasterPrices(masterId, window.MASTER_PRICES_MAP[masterId]);
+                    }
+                }
+                applyEffectivePricesForCurrentSession();
+                renderFabricsGrid();
+                renderAdminFabricsList();
+                calculateTotal();
+                updateHeroQuickPrice();
+                showToast('Ваши цены на полотна сброшены к базовым');
+                return;
+            }
+
             FABRICS_LIST = JSON.parse(JSON.stringify(DEFAULT_FABRICS_LIST));
             window.FABRICS_LIST = FABRICS_LIST;
             BASE_SHARED_FABRICS = JSON.parse(JSON.stringify(DEFAULT_FABRICS_LIST));
@@ -3278,14 +3371,6 @@
                 window.PRICES.fabrics[f.id] = { name: f.shortName || f.name, price: f.price };
                 BASE_SHARED_PRICES.fabrics[f.id] = { name: f.shortName || f.name, price: f.price };
             });
-            const masterId = getCurrentMasterKeyId();
-            if (masterId && window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[masterId]) {
-                window.MASTER_PRICES_MAP[masterId].fabrics = {};
-                saveMasterPricesMapToCache();
-                if (window.cloudSync && window.cloudSync.enabled) {
-                    window.cloudSync.saveMasterPrices(masterId, window.MASTER_PRICES_MAP[masterId]);
-                }
-            }
             if (!FABRICS_LIST.some(f => f.id === calcState.fabricKey) && FABRICS_LIST[0]) {
                 calcState.fabricKey = FABRICS_LIST[0].id;
             }
@@ -3303,11 +3388,18 @@
         function renderAdminFabricsList() {
             const container = document.getElementById('admin-fabrics-list');
             if (!container) return;
+            const isMasterMode = Boolean(getCurrentMasterKeyId());
 
             container.innerHTML = FABRICS_LIST.map(item => {
                 const thumbHtml = item.img
                     ? `<img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src=LAMP_FALLBACK_SVG" class="w-12 h-12 rounded-xl object-cover bg-stone-100 border border-stone-200 shrink-0">`
                     : `<div class="w-12 h-12 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-[10px] font-bold text-stone-400 text-center px-1 shrink-0">Нет фото</div>`;
+
+                const deleteBtn = !isMasterMode ? `
+                    <button type="button" onclick="deleteFabricFromAdmin('${item.id}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить полотно">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                ` : '';
 
                 return `
                     <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
@@ -3323,21 +3415,21 @@
                                 <span class="text-xs font-extrabold text-stone-900 whitespace-nowrap">${Number(item.price).toLocaleString('ru-RU')} ₽/м²</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <button type="button" onclick="openAdminEditModal('fabric', '', '${item.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать полотно" aria-label="Редактировать полотно">
+                                <button type="button" onclick="openAdminEditModal('fabric', '', '${item.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Изменить цену" aria-label="Изменить цену">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
-                                <button type="button" onclick="deleteFabricFromAdmin('${item.id}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить полотно">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
+                                ${deleteBtn}
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
+
         function renderAdminLampsList() {
             const container = document.getElementById('admin-lamps-list');
             if (!container) return;
+            const isMasterMode = Boolean(getCurrentMasterKeyId());
 
             const categories = [
                 { key: 'gx53', title: 'Встраиваемые споты GX53' },
@@ -3347,30 +3439,36 @@
 
             container.innerHTML = categories.map(catMeta => {
                 const items = LAMP_VARIANTS_CATALOG[catMeta.key]?.items || [];
-                const rowsHtml = items.map(item => `
-                    <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
-                        <div class="flex items-center gap-4 min-w-0 flex-1 pr-2">
-                            <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src=LAMP_FALLBACK_SVG" class="w-12 h-12 rounded-xl object-cover bg-stone-100 border border-stone-200 shrink-0">
-                            <div class="min-w-0 space-y-1.5 py-0.5">
-                                <span class="text-xs sm:text-sm font-bold text-stone-900 block truncate leading-snug">${item.name}</span>
-                                <span class="text-[11px] text-stone-500 block truncate leading-relaxed">${item.desc}</span>
+                const rowsHtml = items.map(item => {
+                    const deleteBtn = !isMasterMode ? `
+                        <button type="button" onclick="deleteLampVariantFromAdmin('${catMeta.key}', '${item.id}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить светильник">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    ` : '';
+
+                    return `
+                        <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center gap-4 min-w-0 flex-1 pr-2">
+                                <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src=LAMP_FALLBACK_SVG" class="w-12 h-12 rounded-xl object-cover bg-stone-100 border border-stone-200 shrink-0">
+                                <div class="min-w-0 space-y-1.5 py-0.5">
+                                    <span class="text-xs sm:text-sm font-bold text-stone-900 block truncate leading-snug">${item.name}</span>
+                                    <span class="text-[11px] text-stone-500 block truncate leading-relaxed">${item.desc}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-4 shrink-0">
+                                <div class="flex items-center justify-center bg-stone-50 border border-stone-200 rounded-xl px-3.5 h-9">
+                                    <span class="text-xs font-extrabold text-stone-900 whitespace-nowrap">${Number(item.price).toLocaleString('ru-RU')} ₽/${item.unit}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" onclick="openAdminEditModal('lamp', '${catMeta.key}', '${item.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Изменить цену" aria-label="Изменить цену">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </button>
+                                    ${deleteBtn}
+                                </div>
                             </div>
                         </div>
-                        <div class="flex flex-wrap items-center gap-4 shrink-0">
-                            <div class="flex items-center justify-center bg-stone-50 border border-stone-200 rounded-xl px-3.5 h-9">
-                                <span class="text-xs font-extrabold text-stone-900 whitespace-nowrap">${Number(item.price).toLocaleString('ru-RU')} ₽/${item.unit}</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <button type="button" onclick="openAdminEditModal('lamp', '${catMeta.key}', '${item.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center transition" title="Редактировать светильник" aria-label="Редактировать светильник">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </button>
-                                <button type="button" onclick="deleteLampVariantFromAdmin('${catMeta.key}', '${item.id}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center transition" title="Удалить светильник">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 return `
                     <div class="space-y-3">
@@ -3384,13 +3482,6 @@
             }).join('');
         }
 
-        function focusPriceInput(inputId) {
-            const el = document.getElementById(inputId);
-            if (!el) return;
-            el.focus();
-            el.select();
-        }
-
         function handleEditKeyRoleChange(role) {
             const priceInput = document.getElementById('edit-item-price');
             if (!priceInput) return;
@@ -3399,7 +3490,6 @@
                 priceInput.disabled = true;
             } else {
                 priceInput.disabled = false;
-                if (!parseInt(priceInput.value, 10)) priceInput.value = 15;
             }
         }
 
@@ -3435,11 +3525,14 @@
             const modal = document.getElementById('admin-edit-item-modal');
             if (!modal) return;
 
+            const isMasterMode = Boolean(getCurrentMasterKeyId());
+
             document.getElementById('edit-item-type').value = itemType;
             document.getElementById('edit-item-cat').value = catKey || '';
             document.getElementById('edit-item-id').value = itemId;
 
             const nameLabel = document.getElementById('edit-item-name-label');
+            const nameInput = document.getElementById('edit-item-name');
             const descLabel = document.getElementById('edit-item-desc-label');
             const descWrap = descLabel ? descLabel.parentElement : null;
             const unitWrap = document.getElementById('edit-item-unit-wrap');
@@ -3453,6 +3546,8 @@
             priceInput.disabled = false;
             priceInput.step = '10';
             priceInput.max = '';
+            nameInput.disabled = isMasterMode && itemType !== 'key';
+            codeInput.disabled = isMasterMode && itemType !== 'key';
             codeInput.classList.remove('uppercase', 'font-mono');
             if (descWrap) descWrap.classList.remove('hidden');
             if (serviceUnitWrap) serviceUnitWrap.classList.add('hidden');
@@ -3461,17 +3556,20 @@
                 const item = FABRICS_LIST.find(f => f.id === itemId);
                 if (!item) return;
 
-                document.getElementById('edit-modal-subtitle').textContent = 'Каталог полотен';
-                document.getElementById('edit-modal-title').textContent = 'Редактировать полотно';
+                document.getElementById('edit-modal-subtitle').textContent = isMasterMode ? 'Моя цена на полотно' : 'Каталог полотен';
+                document.getElementById('edit-modal-title').textContent = isMasterMode ? 'Указать свою цену' : 'Редактировать полотно';
                 if (nameLabel) nameLabel.textContent = 'Название полотна';
                 if (descLabel) descLabel.textContent = 'Краткое описание';
-                document.getElementById('edit-item-name').value = item.name || '';
+                nameInput.value = item.name || '';
                 codeInput.value = item.desc || '';
                 priceInput.value = item.price || 0;
-                if (priceLabel) priceLabel.textContent = 'Цена (₽ / м²)';
+                if (priceLabel) priceLabel.textContent = isMasterMode ? 'Ваша цена (₽ / м²)' : 'Цена (₽ / м²)';
                 if (unitWrap) unitWrap.classList.add('hidden');
                 if (roleWrap) roleWrap.classList.add('hidden');
-                if (photoBox) photoBox.classList.remove('hidden');
+                if (photoBox) {
+                    if (isMasterMode) photoBox.classList.add('hidden');
+                    else photoBox.classList.remove('hidden');
+                }
 
                 currentEditModalImg = item.img || '';
                 renderEditModalPhotoPreview();
@@ -3480,18 +3578,24 @@
                 const item = cat && cat.items.find(v => v.id === itemId);
                 if (!item) return;
 
-                document.getElementById('edit-modal-subtitle').textContent = 'Каталог светильников';
-                document.getElementById('edit-modal-title').textContent = 'Редактировать светильник';
+                document.getElementById('edit-modal-subtitle').textContent = isMasterMode ? 'Моя цена на светильник' : 'Каталог светильников';
+                document.getElementById('edit-modal-title').textContent = isMasterMode ? 'Указать свою цену' : 'Редактировать светильник';
                 if (nameLabel) nameLabel.textContent = 'Название модели';
                 if (descLabel) descLabel.textContent = 'Краткое описание';
-                document.getElementById('edit-item-name').value = item.name || '';
+                nameInput.value = item.name || '';
                 codeInput.value = item.desc || '';
                 priceInput.value = item.price || 0;
                 document.getElementById('edit-item-unit').value = item.unit || 'шт';
-                if (priceLabel) priceLabel.textContent = 'Цена (₽)';
-                if (unitWrap) unitWrap.classList.remove('hidden');
+                if (priceLabel) priceLabel.textContent = isMasterMode ? `Ваша цена (₽ / ${item.unit || 'шт'})` : 'Цена (₽)';
+                if (unitWrap) {
+                    if (isMasterMode) unitWrap.classList.add('hidden');
+                    else unitWrap.classList.remove('hidden');
+                }
                 if (roleWrap) roleWrap.classList.add('hidden');
-                if (photoBox) photoBox.classList.remove('hidden');
+                if (photoBox) {
+                    if (isMasterMode) photoBox.classList.add('hidden');
+                    else photoBox.classList.remove('hidden');
+                }
 
                 currentEditModalImg = (item.img && item.img !== LAMP_FALLBACK_SVG) ? item.img : '';
                 renderEditModalPhotoPreview();
@@ -3501,13 +3605,13 @@
 
                 const currentPrice = profObj.price || 0;
 
-                document.getElementById('edit-modal-subtitle').textContent = 'Профильные системы';
-                document.getElementById('edit-modal-title').textContent = 'Редактировать профиль';
+                document.getElementById('edit-modal-subtitle').textContent = isMasterMode ? 'Моя цена на профиль' : 'Профильные системы';
+                document.getElementById('edit-modal-title').textContent = isMasterMode ? 'Указать свою цену' : 'Редактировать профиль';
                 if (nameLabel) nameLabel.textContent = 'Название профиля';
                 if (descWrap) descWrap.classList.add('hidden');
-                document.getElementById('edit-item-name').value = profObj.name || '';
+                nameInput.value = profObj.name || '';
                 priceInput.value = currentPrice;
-                if (priceLabel) priceLabel.textContent = 'Цена (₽ / пог. м)';
+                if (priceLabel) priceLabel.textContent = isMasterMode ? 'Ваша цена (₽ / пог. м)' : 'Цена (₽ / пог. м)';
                 if (unitWrap) unitWrap.classList.add('hidden');
                 if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) photoBox.classList.add('hidden');
@@ -3517,13 +3621,13 @@
 
                 const currentPrice = ledObj.price || 0;
 
-                document.getElementById('edit-modal-subtitle').textContent = 'Светодиодная подсветка';
-                document.getElementById('edit-modal-title').textContent = 'Редактировать LED-ленту';
+                document.getElementById('edit-modal-subtitle').textContent = isMasterMode ? 'Моя цена на LED-ленту' : 'Светодиодная подсветка';
+                document.getElementById('edit-modal-title').textContent = isMasterMode ? 'Указать свою цену' : 'Редактировать LED-ленту';
                 if (nameLabel) nameLabel.textContent = 'Название LED-ленты';
                 if (descWrap) descWrap.classList.add('hidden');
-                document.getElementById('edit-item-name').value = ledObj.name || '';
+                nameInput.value = ledObj.name || '';
                 priceInput.value = currentPrice;
-                if (priceLabel) priceLabel.textContent = 'Цена (₽ / пог. м)';
+                if (priceLabel) priceLabel.textContent = isMasterMode ? 'Ваша цена (₽ / пог. м)' : 'Цена (₽ / пог. м)';
                 if (unitWrap) unitWrap.classList.add('hidden');
                 if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) photoBox.classList.add('hidden');
@@ -3531,19 +3635,19 @@
                 const svc = getExtraServiceById(itemId);
                 if (!svc) return;
 
-                document.getElementById('edit-modal-subtitle').textContent = 'Дополнительные услуги';
-                document.getElementById('edit-modal-title').textContent = 'Редактировать услугу';
+                document.getElementById('edit-modal-subtitle').textContent = isMasterMode ? 'Моя цена на услугу' : 'Дополнительные услуги';
+                document.getElementById('edit-modal-title').textContent = isMasterMode ? 'Указать свою цену' : 'Редактировать услугу';
                 if (nameLabel) nameLabel.textContent = 'Название услуги';
                 if (descLabel) descLabel.textContent = 'Краткое описание';
-                document.getElementById('edit-item-name').value = svc.name || '';
+                nameInput.value = svc.name || '';
                 codeInput.value = svc.desc || '';
                 priceInput.value = svc.price || 0;
-                if (priceLabel) priceLabel.textContent = 'Цена (₽)';
+                if (priceLabel) priceLabel.textContent = isMasterMode ? 'Ваша цена (₽)' : 'Цена (₽)';
                 if (unitWrap) unitWrap.classList.add('hidden');
                 if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) photoBox.classList.add('hidden');
                 if (serviceUnitWrap) {
-                    if (svc.inStep4) {
+                    if (svc.inStep4 && !isMasterMode) {
                         serviceUnitWrap.classList.remove('hidden');
                         document.getElementById('edit-item-service-unit').value = svc.unit || 'fixed';
                     } else {
@@ -3554,27 +3658,30 @@
                 const keyItem = window.ALLOWED_ACCESS_KEYS.find(k => k.code === itemId);
                 if (!keyItem) return;
 
-                const isMaster = (keyItem.role === 'master') || (!keyItem.role && keyItem.discount > 0);
-                document.getElementById('edit-modal-subtitle').textContent = 'Доступ и ключи';
-                document.getElementById('edit-modal-title').textContent = 'Редактировать ключ';
-                if (nameLabel) nameLabel.textContent = 'Имя человека';
-                if (descLabel) descLabel.textContent = 'Пароль / Ключ';
-                document.getElementById('edit-item-name').value = keyItem.owner || '';
+                nameInput.disabled = false;
+                codeInput.disabled = false;
+                document.getElementById('edit-modal-subtitle').textContent = 'Доступ мастеров';
+                document.getElementById('edit-modal-title').textContent = 'Редактировать доступ мастера';
+                if (nameLabel) nameLabel.textContent = 'Имя мастера';
+                if (descLabel) descLabel.textContent = 'PIN-код / Ключ входа';
+                nameInput.value = keyItem.owner || '';
                 codeInput.value = keyItem.code || '';
                 codeInput.classList.add('uppercase', 'font-mono');
                 priceInput.step = '1';
                 priceInput.max = '90';
-                priceInput.value = isMaster ? (keyItem.discount || 0) : 0;
-                if (priceLabel) priceLabel.textContent = 'Скидка (%)';
+                priceInput.value = keyItem.discount || 0;
+                if (priceLabel) priceLabel.textContent = 'Доп. скидка (%)';
                 if (unitWrap) unitWrap.classList.add('hidden');
-                if (roleWrap) roleWrap.classList.remove('hidden');
-                document.getElementById('edit-item-role').value = isMaster ? 'master' : 'client';
-                handleEditKeyRoleChange(isMaster ? 'master' : 'client');
+                if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) photoBox.classList.add('hidden');
             }
 
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
+            setTimeout(() => {
+                priceInput.focus();
+                priceInput.select();
+            }, 50);
         }
 
         function closeAdminEditModal() {
@@ -3607,14 +3714,6 @@
                 persistCurrentPriceChangeToDb((bucket, isMaster) => {
                     if (isMaster) {
                         bucket.fabrics[itemId] = price;
-                        const baseItem = BASE_SHARED_FABRICS.find(f => f.id === itemId);
-                        if (baseItem) {
-                            baseItem.name = name;
-                            baseItem.shortName = name;
-                            baseItem.placeholderTitle = name;
-                            baseItem.desc = desc;
-                            baseItem.img = currentEditModalImg;
-                        }
                     } else {
                         item.name = name;
                         item.shortName = name;
@@ -3637,7 +3736,7 @@
                 renderAdminFabricsList();
                 calculateTotal();
                 updateHeroQuickPrice();
-                showToast(`Товар «${name}» обновлён`);
+                showToast(getCurrentMasterKeyId() ? `Ваша цена на «${name}» сохранена в БД` : `Товар «${name}» обновлён`);
             } else if (itemType === 'lamp') {
                 const cat = LAMP_VARIANTS_CATALOG[catKey];
                 const item = cat && cat.items.find(v => v.id === itemId);
@@ -3648,14 +3747,6 @@
                 persistCurrentPriceChangeToDb((bucket, isMaster) => {
                     if (isMaster) {
                         bucket.lamps[itemId] = price;
-                        const baseCat = BASE_SHARED_LAMPS[catKey];
-                        const baseItem = baseCat && baseCat.items.find(v => v.id === itemId);
-                        if (baseItem) {
-                            baseItem.name = name;
-                            baseItem.desc = desc;
-                            baseItem.unit = unit;
-                            baseItem.img = currentEditModalImg || LAMP_FALLBACK_SVG;
-                        }
                     } else {
                         item.name = name;
                         item.desc = desc;
@@ -3676,7 +3767,7 @@
                 }
                 calculateTotal();
                 updateHeroQuickPrice();
-                showToast(`Товар «${name}» обновлён`);
+                showToast(getCurrentMasterKeyId() ? `Ваша цена на «${name}» сохранена в БД` : `Товар «${name}» обновлён`);
             } else if (itemType === 'profile') {
                 const profObj = window.PRICES.profiles[itemId];
                 if (!profObj) return;
@@ -3684,9 +3775,6 @@
                 persistCurrentPriceChangeToDb((bucket, isMaster) => {
                     if (isMaster) {
                         bucket.profiles[itemId] = price;
-                        if (BASE_SHARED_PRICES.profiles[itemId]) {
-                            BASE_SHARED_PRICES.profiles[itemId].name = name;
-                        }
                     } else {
                         profObj.name = name;
                         profObj.price = price;
@@ -3696,7 +3784,7 @@
                 populateAdminForm();
                 updateUiPriceLabels();
                 calculateTotal();
-                showToast(`Профиль «${name}» обновлён`);
+                showToast(getCurrentMasterKeyId() ? `Ваша цена на профиль сохранена в БД` : `Профиль «${name}» обновлён`);
             } else if (itemType === 'led') {
                 const ledObj = window.PRICES.led[itemId];
                 if (!ledObj) return;
@@ -3704,9 +3792,6 @@
                 persistCurrentPriceChangeToDb((bucket, isMaster) => {
                     if (isMaster) {
                         bucket.led[itemId] = price;
-                        if (BASE_SHARED_PRICES.led[itemId]) {
-                            BASE_SHARED_PRICES.led[itemId].name = name;
-                        }
                     } else {
                         ledObj.name = name;
                         ledObj.price = price;
@@ -3716,7 +3801,7 @@
                 populateAdminForm();
                 updateUiPriceLabels();
                 calculateTotal();
-                showToast(`LED-лента «${name}» обновлена`);
+                showToast(getCurrentMasterKeyId() ? `Ваша цена на LED-ленту сохранена в БД` : `LED-лента «${name}» обновлена`);
             } else if (itemType === 'service') {
                 const svc = getExtraServiceById(itemId);
                 if (!svc) return;
@@ -3728,12 +3813,6 @@
                 persistCurrentPriceChangeToDb((bucket, isMaster) => {
                     if (isMaster) {
                         bucket.extras[itemId] = price;
-                        const baseSvc = BASE_SHARED_EXTRAS.find(s => s.id === itemId);
-                        if (baseSvc) {
-                            baseSvc.name = name;
-                            baseSvc.desc = desc;
-                            baseSvc.unit = nextUnit;
-                        }
                     } else {
                         svc.name = name;
                         svc.desc = desc;
@@ -3748,19 +3827,18 @@
                 renderAdminExtraServicesList();
                 updateUiPriceLabels();
                 calculateTotal();
-                showToast(`Услуга «${name}» обновлена`);
+                showToast(getCurrentMasterKeyId() ? `Ваша цена на услугу сохранена в БД` : `Услуга «${name}» обновлена`);
             } else if (itemType === 'key') {
                 const keyItem = window.ALLOWED_ACCESS_KEYS.find(k => k.code === itemId);
                 if (!keyItem) return;
 
                 const newCode = desc.toUpperCase().replace(/\s+/g, '-') || keyItem.code;
-                if (newCode !== keyItem.code && window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === newCode)) {
-                    showToast('Такой ключ уже существует');
+                if (newCode !== keyItem.code && (newCode === getStoredAdminPin().toUpperCase() || window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === newCode))) {
+                    showToast('Такой PIN-код уже существует');
                     return;
                 }
 
-                const role = document.getElementById('edit-item-role').value || 'client';
-                const discount = role === 'master' ? Math.max(0, Math.min(90, price)) : 0;
+                const discount = Math.max(0, Math.min(90, price));
 
                 if (newCode !== keyItem.code && window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[keyItem.code.toUpperCase()]) {
                     window.MASTER_PRICES_MAP[newCode] = JSON.parse(JSON.stringify(window.MASTER_PRICES_MAP[keyItem.code.toUpperCase()]));
@@ -3770,7 +3848,7 @@
 
                 keyItem.owner = name;
                 keyItem.code = newCode;
-                keyItem.role = role;
+                keyItem.role = 'master';
                 keyItem.discount = discount;
 
                 saveKeysListToCache();
@@ -3779,7 +3857,7 @@
                     applyUserAccessProfile(keyItem, false);
                 }
                 if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-                showToast(`Ключ «${newCode}» обновлён`);
+                showToast(`Доступ мастера «${name}» обновлён`);
             }
 
             closeAdminEditModal();
@@ -3875,49 +3953,6 @@
             showToast(`Светильник «${name}» добавлен`);
         }
 
-        function updateLampVariantPriceFromAdmin(catKey, variantId, newPriceVal) {
-            const cat = LAMP_VARIANTS_CATALOG[catKey];
-            if (!cat) return;
-            const item = cat.items.find(v => v.id === variantId);
-            if (!item) return;
-
-            const parsed = Math.max(0, parseInt(newPriceVal, 10) || 0);
-
-            persistCurrentPriceChangeToDb((bucket, isMaster) => {
-                if (isMaster) {
-                    bucket.lamps[variantId] = parsed;
-                } else {
-                    item.price = parsed;
-                    if (item.isBasePriceLinked && window.PRICES.lamps[catKey]) {
-                        window.PRICES.lamps[catKey].price = parsed;
-                    }
-                }
-            });
-
-            updateUiPriceLabels();
-            calculateTotal();
-            updateHeroQuickPrice();
-            showToast(`Цена для «${item.name}» обновлена`);
-        }
-
-        function updateLampPhotoFromAdmin(catKey, variantId, newImgUrl) {
-            const cat = LAMP_VARIANTS_CATALOG[catKey];
-            if (!cat) return;
-            const item = cat.items.find(v => v.id === variantId);
-            if (!item) return;
-
-            item.img = (newImgUrl || '').trim() || LAMP_FALLBACK_SVG;
-            const baseItem = BASE_SHARED_LAMPS[catKey]?.items?.find(v => v.id === variantId);
-            if (baseItem) baseItem.img = item.img;
-            saveLampCatalogToCache();
-            renderAdminLampsList();
-            if (window.activeLampCategory === catKey) {
-                renderLampVariantsGrid(catKey);
-            }
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            showToast(`Фото для «${item.name}» обновлено`);
-        }
-
         function deleteLampVariantFromAdmin(catKey, variantId) {
             const cat = LAMP_VARIANTS_CATALOG[catKey];
             if (!cat) return;
@@ -3947,17 +3982,27 @@
         }
 
         function resetLampCatalogToDefault() {
+            const masterId = getCurrentMasterKeyId();
+            if (masterId) {
+                if (window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[masterId]) {
+                    window.MASTER_PRICES_MAP[masterId].lamps = {};
+                    saveMasterPricesMapToCache();
+                    if (window.cloudSync && window.cloudSync.enabled) {
+                        window.cloudSync.saveMasterPrices(masterId, window.MASTER_PRICES_MAP[masterId]);
+                    }
+                }
+                applyEffectivePricesForCurrentSession();
+                syncCategoryCountersUI();
+                updateUiPriceLabels();
+                renderAdminLampsList();
+                calculateTotal();
+                showToast('Ваши цены на светильники сброшены к базовым');
+                return;
+            }
+
             LAMP_VARIANTS_CATALOG = JSON.parse(JSON.stringify(DEFAULT_LAMP_VARIANTS_CATALOG));
             window.LAMP_VARIANTS_CATALOG = LAMP_VARIANTS_CATALOG;
             BASE_SHARED_LAMPS = JSON.parse(JSON.stringify(DEFAULT_LAMP_VARIANTS_CATALOG));
-            const masterId = getCurrentMasterKeyId();
-            if (masterId && window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[masterId]) {
-                window.MASTER_PRICES_MAP[masterId].lamps = {};
-                saveMasterPricesMapToCache();
-                if (window.cloudSync && window.cloudSync.enabled) {
-                    window.cloudSync.saveMasterPrices(masterId, window.MASTER_PRICES_MAP[masterId]);
-                }
-            }
             saveLampCatalogToCache();
             syncCategoryCountersUI();
             updateUiPriceLabels();
@@ -4102,10 +4147,11 @@
         function renderAdminExtraServicesList() {
             const container = document.getElementById('admin-extra-services-list');
             if (!container) return;
+            const isMasterMode = Boolean(getCurrentMasterKeyId());
 
             container.innerHTML = EXTRA_SERVICES_LIST.map(svc => {
                 const unitLabel = svc.unit === 'per_m' ? '₽/м' : '₽';
-                const deleteBtnHtml = !svc.isBuiltin
+                const deleteBtnHtml = (!svc.isBuiltin && !isMasterMode)
                     ? `<button type="button" onclick="deleteExtraServiceFromAdmin('${svc.id}')" class="w-9 h-9 rounded-xl bg-white border border-stone-200 hover:border-rose-300 hover:bg-rose-50 text-stone-400 hover:text-rose-600 flex items-center justify-center shrink-0 transition" title="Удалить услугу">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                        </button>`
@@ -4122,7 +4168,7 @@
                                 <span class="text-xs font-extrabold text-stone-900 whitespace-nowrap">${Number(svc.price).toLocaleString('ru-RU')} ${unitLabel}</span>
                             </div>
                             <div class="flex items-center gap-3.5">
-                                <button type="button" onclick="openAdminEditModal('service', '', '${svc.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 transition" title="Редактировать услугу">
+                                <button type="button" onclick="openAdminEditModal('service', '', '${svc.id}')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 transition" title="Изменить цену">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
                                 ${deleteBtnHtml}
@@ -4188,28 +4234,6 @@
             showToast(`Услуга «${name}» добавлена`);
         }
 
-        function updateExtraServicePriceFromAdmin(serviceId, newPriceVal) {
-            const svc = getExtraServiceById(serviceId);
-            if (!svc) return;
-
-            const parsed = Math.max(0, parseInt(newPriceVal, 10) || 0);
-
-            persistCurrentPriceChangeToDb((bucket, isMaster) => {
-                if (isMaster) {
-                    bucket.extras[serviceId] = parsed;
-                } else {
-                    svc.price = parsed;
-                    if (window.PRICES.extras && Object.prototype.hasOwnProperty.call(window.PRICES.extras, serviceId)) {
-                        window.PRICES.extras[serviceId] = parsed;
-                    }
-                }
-            });
-
-            updateUiPriceLabels();
-            calculateTotal();
-            showToast(`Цена для «${svc.name}» обновлена`);
-        }
-
         function deleteExtraServiceFromAdmin(serviceId) {
             const target = getExtraServiceById(serviceId);
             if (!target || target.isBuiltin) return;
@@ -4253,25 +4277,6 @@
             if (valLedCct) valLedCct.textContent = `${Number(window.PRICES.led.cct.price).toLocaleString('ru-RU')} ₽/м`;
 
             renderAdminExtraServicesList();
-        }
-
-        function saveAdminPrices(e) {
-            e.preventDefault();
-
-            window.PRICES.profiles.shadow.price = parseInt(document.getElementById('inp-price-profile-shadow').value) || 0;
-            window.PRICES.profiles.floating.price = parseInt(document.getElementById('inp-price-profile-floating').value) || 0;
-
-            window.PRICES.led.single.price = parseInt(document.getElementById('inp-price-led-single').value) || 0;
-            window.PRICES.led.rgb.price = parseInt(document.getElementById('inp-price-led-rgb').value) || 0;
-            window.PRICES.led.cct.price = parseInt(document.getElementById('inp-price-led-cct').value) || 0;
-
-            saveExtraServicesToCache();
-            updateUiPriceLabels();
-            calculateTotal();
-            updateHeroQuickPrice();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
-            closeAdminModal();
-            showToast('Изменения успешно сохранены');
         }
 
         function resetPricesToDefault() {
@@ -4368,6 +4373,14 @@
             document.getElementById('slider-perimeter').value = Math.min(perim, 120);
             document.getElementById('perimeter-val-label').textContent = perim;
             calcState.perimeter = perim;
+            calculateTotal();
+        }
+
+        function syncLedLength(val) {
+            const len = Math.max(0, parseInt(val, 10) || 0);
+            calcState.ledLength = len;
+            const disp = document.getElementById('led-len-display');
+            if (disp) disp.textContent = len;
             calculateTotal();
         }
 
@@ -4574,10 +4587,9 @@
                     });
                 }
                 if (badgeInfo) {
-                    badgeInfo.innerHTML = `
-                        <span>Скидка для мастера (${window.activeMasterSession.owner}, ${pct}%):</span>
-                        <span class="font-extrabold text-emerald-700">−${discount.toLocaleString('ru-RU')} ₽</span>
-                    `;
+                    badgeInfo.innerHTML = pct > 0
+                        ? `<span>Скидка для мастера (${window.activeMasterSession.owner}, ${pct}%):</span><span class="font-extrabold text-emerald-700">−${discount.toLocaleString('ru-RU')} ₽</span>`
+                        : `<span>Расчёт по личному прайсу мастера:</span><span class="font-extrabold text-emerald-700">${window.activeMasterSession.owner}</span>`;
                 }
             } else if (calcState.paymentMethod === 'cash') {
                 discount = Math.round(total * 0.10);
@@ -4718,7 +4730,7 @@
             if (calcState.optMask) msg += ` Маскировочная лента: да\n`;
 
             if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                msg += `\n🛠 Условия: Скидка для мастера ${window.activeMasterSession.owner} (${window.activeMasterSession.discount}%)\n`;
+                msg += `\n🛠 Условия: Личный прайс мастера ${window.activeMasterSession.owner} (скидка ${window.activeMasterSession.discount}%)\n`;
                 if (calcState.discountAmount > 0) {
                     msg += ` Скидка мастера: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
                 }
@@ -4747,14 +4759,14 @@
 
             let paymentLabel = 'Рассрочка 0%';
             if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                paymentLabel = `Скидка для мастера: ${window.activeMasterSession.owner} (${window.activeMasterSession.discount}%)`;
+                paymentLabel = `Личный прайс мастера: ${window.activeMasterSession.owner} (${window.activeMasterSession.discount}%)`;
             } else if (calcState.paymentMethod === 'cash') {
                 paymentLabel = 'Оплата наличными (Скидка 10%)';
             }
 
             let text = `Смета натяжного потолка от компании Decarat:\n`;
             if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                text += `Мастер: ${window.activeMasterSession.owner} (ключ ${window.activeMasterSession.code})\n`;
+                text += `Мастер: ${window.activeMasterSession.owner} (PIN ${window.activeMasterSession.code})\n`;
             }
             text += `Площадь: ${calcState.area} м² | Периметр: ${calcState.perimeter} м.п.\n`;
             text += `Полотно: ${getFabricById(calcState.fabricKey)?.shortName || getFabricById(calcState.fabricKey)?.name}\n`;
@@ -4963,7 +4975,7 @@
                         updateUiPriceLabels();
                         calculateTotal();
                         updateHeroQuickPrice();
-                        if (window.isAdminLoggedIn) {
+                        if (window.isAdminLoggedIn || window.isMasterEditorMode) {
                             refreshAdminDashboardData();
                         }
 
@@ -4977,7 +4989,7 @@
                             updateLogoutButtonVisibility();
                             
                             const savedCode = getSavedCachedAccessCode();
-                            const hasValidSession = savedCode && window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === savedCode);
+                            const hasValidSession = savedCode && (savedCode === getStoredAdminPin().toUpperCase() || window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === savedCode));
 
                             if (window.isAccessRestricted && !hasValidSession && !window.isAdminLoggedIn) {
                                 lockSiteUI();
@@ -4998,11 +5010,12 @@
                                     clearSavedAuthCache();
                                     window.activeMasterSession = null;
                                     window.isSessionUnlocked = false;
+                                    window.isMasterEditorMode = false;
                                     updateMasterPaymentButtonUI();
                                     refreshPricesForSessionAndUi();
                                     if (window.isAccessRestricted && !window.isAdminLoggedIn) lockSiteUI();
                                 }
-                            } else if (savedCode) {
+                            } else if (savedCode && savedCode !== getStoredAdminPin().toUpperCase()) {
                                 const cachedUser = window.ALLOWED_ACCESS_KEYS.find(k => k.code.toUpperCase() === savedCode);
                                 if (cachedUser) {
                                     window.isSessionUnlocked = true;
