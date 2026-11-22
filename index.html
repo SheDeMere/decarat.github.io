@@ -1237,7 +1237,7 @@
                                             <span class="text-[11px] font-bold text-white">4000K</span>
                                             <span class="text-[10px] text-stone-400">Нейтральный</span>
                                         </label>
-                                        <label class="led-temp-card border border-stone-700 rounded-xl p-2 cursor-pointer flex flex-col items-center text-center bg-stone-850 hover:border-emerald-400 transition">
+                                        <label class="led-temp-card border border-stone-700 bg-stone-850 rounded-xl p-2 cursor-pointer flex flex-col items-center text-center bg-stone-850 hover:border-emerald-400 transition">
                                             <input type="radio" name="led_temp" value="cool" class="hidden" onchange="calculateTotal()">
                                             <span class="w-3 h-3 rounded-full bg-teal-200 mb-1"></span>
                                             <span class="text-[11px] font-bold text-white">6000K</span>
@@ -2013,6 +2013,7 @@
         const STORAGE_KEY_FABRICS_CATALOG = 'decarat_fabrics_catalog_v1';
         const STORAGE_KEY_LAMP_CATALOG = 'decarat_lamp_catalog_v1';
         const STORAGE_KEY_EXTRA_SERVICES = 'decarat_extra_services_v1';
+        const STORAGE_KEY_MASTER_PRICES_MAP = 'decarat_master_prices_map_v1';
 
         const LAMP_FALLBACK_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' rx='24' fill='%23f5f5f4'/%3E%3Ccircle cx='80' cy='80' r='36' fill='%23d1fae5' stroke='%23059669' stroke-width='4'/%3E%3Ccircle cx='80' cy='80' r='14' fill='%23059669'/%3E%3C/svg%3E";
 
@@ -2049,7 +2050,11 @@
             }
         };
 
+        window.DEFAULT_PRICES = DEFAULT_PRICES;
         window.PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
+
+        // Базовые (общие) эталонные цены для админа/гостей, поверх которых накладываются персональные цены мастера
+        let BASE_SHARED_PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
 
         const DEFAULT_FABRICS_LIST = [
             {
@@ -2098,6 +2103,8 @@
             }
         ];
 
+        window.DEFAULT_FABRICS_LIST = DEFAULT_FABRICS_LIST;
+
         function loadFabricsCatalogFromCache() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY_FABRICS_CATALOG);
@@ -2113,6 +2120,7 @@
 
         let FABRICS_LIST = loadFabricsCatalogFromCache();
         window.FABRICS_LIST = FABRICS_LIST;
+        let BASE_SHARED_FABRICS = JSON.parse(JSON.stringify(FABRICS_LIST));
 
         function saveFabricsCatalogToCache() {
             try {
@@ -2220,6 +2228,8 @@
             }
         };
 
+        window.DEFAULT_LAMP_VARIANTS_CATALOG = DEFAULT_LAMP_VARIANTS_CATALOG;
+
         function loadLampCatalogFromCache() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY_LAMP_CATALOG);
@@ -2235,6 +2245,7 @@
 
         let LAMP_VARIANTS_CATALOG = loadLampCatalogFromCache();
         window.LAMP_VARIANTS_CATALOG = LAMP_VARIANTS_CATALOG;
+        let BASE_SHARED_LAMPS = JSON.parse(JSON.stringify(LAMP_VARIANTS_CATALOG));
 
         function saveLampCatalogToCache() {
             try {
@@ -2252,6 +2263,8 @@
             { id: 'fire', name: 'Платформа под датчик пожарной сигнализации', desc: 'Аккуратный вывод датчика', price: 350, unit: 'fixed', inStep4: true, isBuiltin: true }
         ];
 
+        window.DEFAULT_EXTRA_SERVICES_LIST = DEFAULT_EXTRA_SERVICES_LIST;
+
         function loadExtraServicesFromCache() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY_EXTRA_SERVICES);
@@ -2267,6 +2280,7 @@
 
         let EXTRA_SERVICES_LIST = loadExtraServicesFromCache();
         window.EXTRA_SERVICES_LIST = EXTRA_SERVICES_LIST;
+        let BASE_SHARED_EXTRAS = JSON.parse(JSON.stringify(EXTRA_SERVICES_LIST));
 
         function saveExtraServicesToCache() {
             try {
@@ -2276,6 +2290,139 @@
 
         function getExtraServiceById(serviceId) {
             return EXTRA_SERVICES_LIST.find(s => s.id === serviceId);
+        }
+
+        // ================= ИНДИВИДУАЛЬНЫЕ ЦЕНЫ МАСТЕРОВ (ПО КОДУ/ID МАСТЕРА) =================
+        function loadMasterPricesMapFromCache() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_MASTER_PRICES_MAP);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') return parsed;
+                }
+            } catch (e) {}
+            return {};
+        }
+
+        window.MASTER_PRICES_MAP = loadMasterPricesMapFromCache();
+
+        function saveMasterPricesMapToCache() {
+            try {
+                localStorage.setItem(STORAGE_KEY_MASTER_PRICES_MAP, JSON.stringify(window.MASTER_PRICES_MAP || {}));
+            } catch (e) {}
+        }
+
+        function getCurrentMasterKeyId() {
+            if (window.activeMasterSession && window.activeMasterSession.role === 'master' && window.activeMasterSession.code) {
+                return String(window.activeMasterSession.code).trim().toUpperCase();
+            }
+            return null;
+        }
+
+        function captureCurrentPricesAsSharedBase() {
+            BASE_SHARED_PRICES = JSON.parse(JSON.stringify(window.PRICES));
+            BASE_SHARED_FABRICS = JSON.parse(JSON.stringify(FABRICS_LIST));
+            BASE_SHARED_LAMPS = JSON.parse(JSON.stringify(LAMP_VARIANTS_CATALOG));
+            BASE_SHARED_EXTRAS = JSON.parse(JSON.stringify(EXTRA_SERVICES_LIST));
+        }
+
+        function applyEffectivePricesForCurrentSession() {
+            window.PRICES = JSON.parse(JSON.stringify(BASE_SHARED_PRICES));
+            FABRICS_LIST = JSON.parse(JSON.stringify(BASE_SHARED_FABRICS));
+            window.FABRICS_LIST = FABRICS_LIST;
+            LAMP_VARIANTS_CATALOG = JSON.parse(JSON.stringify(BASE_SHARED_LAMPS));
+            window.LAMP_VARIANTS_CATALOG = LAMP_VARIANTS_CATALOG;
+            EXTRA_SERVICES_LIST = JSON.parse(JSON.stringify(BASE_SHARED_EXTRAS));
+            window.EXTRA_SERVICES_LIST = EXTRA_SERVICES_LIST;
+
+            const masterId = getCurrentMasterKeyId();
+            const custom = masterId && window.MASTER_PRICES_MAP ? window.MASTER_PRICES_MAP[masterId] : null;
+
+            if (custom) {
+                if (custom.fabrics && typeof custom.fabrics === 'object') {
+                    FABRICS_LIST.forEach(f => {
+                        if (Object.prototype.hasOwnProperty.call(custom.fabrics, f.id) && typeof custom.fabrics[f.id] === 'number') {
+                            f.price = custom.fabrics[f.id];
+                        }
+                        if (window.PRICES.fabrics[f.id]) {
+                            window.PRICES.fabrics[f.id].price = f.price;
+                        }
+                    });
+                }
+
+                if (custom.profiles && typeof custom.profiles === 'object') {
+                    ['classic', 'shadow', 'floating'].forEach(pKey => {
+                        if (window.PRICES.profiles[pKey] && typeof custom.profiles[pKey] === 'number') {
+                            window.PRICES.profiles[pKey].price = custom.profiles[pKey];
+                        }
+                    });
+                }
+
+                if (custom.led && typeof custom.led === 'object') {
+                    ['single', 'rgb', 'cct'].forEach(lKey => {
+                        if (window.PRICES.led[lKey] && typeof custom.led[lKey] === 'number') {
+                            window.PRICES.led[lKey].price = custom.led[lKey];
+                        }
+                    });
+                }
+
+                if (custom.lamps && typeof custom.lamps === 'object') {
+                    ['gx53', 'tube', 'track'].forEach(catKey => {
+                        const items = LAMP_VARIANTS_CATALOG[catKey]?.items || [];
+                        items.forEach(item => {
+                            if (Object.prototype.hasOwnProperty.call(custom.lamps, item.id) && typeof custom.lamps[item.id] === 'number') {
+                                item.price = custom.lamps[item.id];
+                            }
+                        });
+                    });
+                }
+
+                if (custom.extras && typeof custom.extras === 'object') {
+                    EXTRA_SERVICES_LIST.forEach(svc => {
+                        if (Object.prototype.hasOwnProperty.call(custom.extras, svc.id) && typeof custom.extras[svc.id] === 'number') {
+                            svc.price = custom.extras[svc.id];
+                        }
+                        if (window.PRICES.extras && Object.prototype.hasOwnProperty.call(window.PRICES.extras, svc.id)) {
+                            window.PRICES.extras[svc.id] = svc.price;
+                        }
+                    });
+                }
+            }
+
+            saveFabricsCatalogToCache();
+            saveLampCatalogToCache();
+            saveExtraServicesToCache();
+        }
+
+        function persistCurrentPriceChangeToDb(changeFn) {
+            const masterId = getCurrentMasterKeyId();
+            if (masterId) {
+                if (!window.MASTER_PRICES_MAP[masterId]) {
+                    window.MASTER_PRICES_MAP[masterId] = {
+                        fabrics: {},
+                        profiles: {},
+                        led: {},
+                        lamps: {},
+                        extras: {}
+                    };
+                }
+                const targetBucket = window.MASTER_PRICES_MAP[masterId];
+                changeFn(targetBucket, true);
+                saveMasterPricesMapToCache();
+                applyEffectivePricesForCurrentSession();
+                if (window.cloudSync && window.cloudSync.enabled) {
+                    window.cloudSync.saveMasterPrices(masterId, targetBucket);
+                }
+            } else {
+                changeFn(null, false);
+                captureCurrentPricesAsSharedBase();
+                saveFabricsCatalogToCache();
+                saveLampCatalogToCache();
+                saveExtraServicesToCache();
+                if (window.cloudSync && window.cloudSync.enabled) {
+                    window.cloudSync.saveAll();
+                }
+            }
         }
 
         const calcState = {
@@ -2306,7 +2453,6 @@
         let isPerimeterManuallyEdited = false;
         window.activeLampCategory = null;
 
-        // Ensure access restriction is checked immediately on load before rendering UI
         try {
             const rawLocked = localStorage.getItem('decarat_access_locked_v1');
             if (rawLocked !== null) {
@@ -2451,7 +2597,7 @@
 
             grid.innerHTML = cat.items.map(variant => {
                 const qty = calcState.lampVariants[variant.id] || 0;
-                const escAttr = (str) => String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const escAttr = (str) => String(str || '').replace(/&/g, '&').replace(/"/g, '"').replace(/'/g, ''').replace(/</g, '<').replace(/>/g, '>');
                 return `
                     <div class="bg-white rounded-2xl p-4 border ${qty > 0 ? 'border-emerald-500 ring-2' : 'border-stone-200'} flex flex-col justify-between transition shadow-sm">
                         <div>
@@ -2614,12 +2760,27 @@
             }
         }
 
+        function refreshPricesForSessionAndUi() {
+            applyEffectivePricesForCurrentSession();
+            updateUiPriceLabels();
+            updateActiveCardStyles();
+            calculateTotal();
+            updateHeroQuickPrice();
+            if (window.isAdminLoggedIn) {
+                refreshAdminDashboardData();
+            }
+        }
+
         function applyUserAccessProfile(keyObj, autoSelectMasterPayment = true) {
             if (!keyObj) return;
             const isMaster = (keyObj.role === 'master') || (!keyObj.role && (keyObj.discount || 0) > 0);
             if (isMaster) {
                 window.activeMasterSession = { ...keyObj, role: 'master' };
                 updateMasterPaymentButtonUI();
+                refreshPricesForSessionAndUi();
+                if (window.cloudSync && window.cloudSync.enabled && window.cloudSync.loadMasterPrices) {
+                    window.cloudSync.loadMasterPrices(keyObj.code);
+                }
                 if (autoSelectMasterPayment) {
                     setPaymentMethod('master');
                 } else {
@@ -2628,6 +2789,7 @@
             } else {
                 window.activeMasterSession = { ...keyObj, role: 'client', discount: 0 };
                 updateMasterPaymentButtonUI();
+                refreshPricesForSessionAndUi();
                 if (calcState.paymentMethod === 'master') {
                     setPaymentMethod('cash');
                 } else {
@@ -2687,6 +2849,7 @@
             window.isAdminLoggedIn = false;
             updateMasterPaymentButtonUI();
             updateLogoutButtonVisibility();
+            refreshPricesForSessionAndUi();
             if (window.isAccessRestricted) {
                 lockSiteUI();
             } else {
@@ -3000,7 +3163,7 @@
             }
 
             const newId = `fabric_custom_${Date.now()}`;
-            FABRICS_LIST.push({
+            const newItem = {
                 id: newId,
                 name,
                 shortName: name,
@@ -3010,17 +3173,28 @@
                 img,
                 placeholderTitle: name,
                 placeholderStyle: 'bg-stone-100 text-stone-600'
+            };
+
+            persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                if (isMaster) {
+                    if (!BASE_SHARED_FABRICS.some(f => f.id === newId)) {
+                        BASE_SHARED_FABRICS.push({ ...newItem });
+                    }
+                    if (!BASE_SHARED_PRICES.fabrics[newId]) {
+                        BASE_SHARED_PRICES.fabrics[newId] = { name, price };
+                    }
+                    bucket.fabrics[newId] = price;
+                } else {
+                    FABRICS_LIST.push(newItem);
+                    window.PRICES.fabrics[newId] = { name, price };
+                }
             });
 
-            window.PRICES.fabrics[newId] = { name, price };
-
-            saveFabricsCatalogToCache();
             renderFabricsGrid();
             renderAdminFabricsList();
             updateAdminSidebarCounts();
             calculateTotal();
             updateHeroQuickPrice();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
 
             if (nameInput) nameInput.value = '';
             if (priceInput) priceInput.value = '';
@@ -3035,18 +3209,23 @@
             if (!item) return;
 
             const parsed = Math.max(0, parseInt(newPriceVal, 10) || 0);
-            item.price = parsed;
-            if (window.PRICES.fabrics[fabricId]) {
-                window.PRICES.fabrics[fabricId].price = parsed;
-            } else {
-                window.PRICES.fabrics[fabricId] = { name: item.shortName || item.name, price: parsed };
-            }
 
-            saveFabricsCatalogToCache();
+            persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                if (isMaster) {
+                    bucket.fabrics[fabricId] = parsed;
+                } else {
+                    item.price = parsed;
+                    if (window.PRICES.fabrics[fabricId]) {
+                        window.PRICES.fabrics[fabricId].price = parsed;
+                    } else {
+                        window.PRICES.fabrics[fabricId] = { name: item.shortName || item.name, price: parsed };
+                    }
+                }
+            });
+
             renderFabricsGrid();
             calculateTotal();
             updateHeroQuickPrice();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
             showToast(`Цена для «${item.name}» обновлена`);
         }
 
@@ -3055,6 +3234,8 @@
             if (!item) return;
 
             item.img = (newImgUrl || '').trim();
+            const baseItem = BASE_SHARED_FABRICS.find(f => f.id === fabricId);
+            if (baseItem) baseItem.img = item.img;
             saveFabricsCatalogToCache();
             renderFabricsGrid();
             renderAdminFabricsList();
@@ -3071,7 +3252,9 @@
             const target = FABRICS_LIST.find(f => f.id === fabricId);
             FABRICS_LIST = FABRICS_LIST.filter(f => f.id !== fabricId);
             window.FABRICS_LIST = FABRICS_LIST;
+            BASE_SHARED_FABRICS = BASE_SHARED_FABRICS.filter(f => f.id !== fabricId);
             delete window.PRICES.fabrics[fabricId];
+            if (BASE_SHARED_PRICES.fabrics) delete BASE_SHARED_PRICES.fabrics[fabricId];
 
             if (calcState.fabricKey === fabricId && FABRICS_LIST[0]) {
                 calcState.fabricKey = FABRICS_LIST[0].id;
@@ -3090,9 +3273,19 @@
         function resetFabricsCatalogToDefault() {
             FABRICS_LIST = JSON.parse(JSON.stringify(DEFAULT_FABRICS_LIST));
             window.FABRICS_LIST = FABRICS_LIST;
+            BASE_SHARED_FABRICS = JSON.parse(JSON.stringify(DEFAULT_FABRICS_LIST));
             FABRICS_LIST.forEach(f => {
                 window.PRICES.fabrics[f.id] = { name: f.shortName || f.name, price: f.price };
+                BASE_SHARED_PRICES.fabrics[f.id] = { name: f.shortName || f.name, price: f.price };
             });
+            const masterId = getCurrentMasterKeyId();
+            if (masterId && window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[masterId]) {
+                window.MASTER_PRICES_MAP[masterId].fabrics = {};
+                saveMasterPricesMapToCache();
+                if (window.cloudSync && window.cloudSync.enabled) {
+                    window.cloudSync.saveMasterPrices(masterId, window.MASTER_PRICES_MAP[masterId]);
+                }
+            }
             if (!FABRICS_LIST.some(f => f.id === calcState.fabricKey) && FABRICS_LIST[0]) {
                 calcState.fabricKey = FABRICS_LIST[0].id;
             }
@@ -3411,22 +3604,35 @@
                 const item = FABRICS_LIST.find(f => f.id === itemId);
                 if (!item) return;
 
-                item.name = name;
-                item.shortName = name;
-                item.placeholderTitle = name;
-                item.desc = desc;
-                item.price = price;
-                item.badge = '';
-                item.img = currentEditModalImg;
+                persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                    if (isMaster) {
+                        bucket.fabrics[itemId] = price;
+                        const baseItem = BASE_SHARED_FABRICS.find(f => f.id === itemId);
+                        if (baseItem) {
+                            baseItem.name = name;
+                            baseItem.shortName = name;
+                            baseItem.placeholderTitle = name;
+                            baseItem.desc = desc;
+                            baseItem.img = currentEditModalImg;
+                        }
+                    } else {
+                        item.name = name;
+                        item.shortName = name;
+                        item.placeholderTitle = name;
+                        item.desc = desc;
+                        item.price = price;
+                        item.badge = '';
+                        item.img = currentEditModalImg;
 
-                if (window.PRICES.fabrics[itemId]) {
-                    window.PRICES.fabrics[itemId].name = name;
-                    window.PRICES.fabrics[itemId].price = price;
-                } else {
-                    window.PRICES.fabrics[itemId] = { name, price };
-                }
+                        if (window.PRICES.fabrics[itemId]) {
+                            window.PRICES.fabrics[itemId].name = name;
+                            window.PRICES.fabrics[itemId].price = price;
+                        } else {
+                            window.PRICES.fabrics[itemId] = { name, price };
+                        }
+                    }
+                });
 
-                saveFabricsCatalogToCache();
                 renderFabricsGrid();
                 renderAdminFabricsList();
                 calculateTotal();
@@ -3438,17 +3644,31 @@
                 if (!item) return;
 
                 const unit = document.getElementById('edit-item-unit').value || 'шт';
-                item.name = name;
-                item.desc = desc;
-                item.price = price;
-                item.unit = unit;
-                item.img = currentEditModalImg || LAMP_FALLBACK_SVG;
 
-                if (item.isBasePriceLinked && window.PRICES.lamps[catKey]) {
-                    window.PRICES.lamps[catKey].price = price;
-                }
+                persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                    if (isMaster) {
+                        bucket.lamps[itemId] = price;
+                        const baseCat = BASE_SHARED_LAMPS[catKey];
+                        const baseItem = baseCat && baseCat.items.find(v => v.id === itemId);
+                        if (baseItem) {
+                            baseItem.name = name;
+                            baseItem.desc = desc;
+                            baseItem.unit = unit;
+                            baseItem.img = currentEditModalImg || LAMP_FALLBACK_SVG;
+                        }
+                    } else {
+                        item.name = name;
+                        item.desc = desc;
+                        item.price = price;
+                        item.unit = unit;
+                        item.img = currentEditModalImg || LAMP_FALLBACK_SVG;
 
-                saveLampCatalogToCache();
+                        if (item.isBasePriceLinked && window.PRICES.lamps[catKey]) {
+                            window.PRICES.lamps[catKey].price = price;
+                        }
+                    }
+                });
+
                 updateUiPriceLabels();
                 renderAdminLampsList();
                 if (window.activeLampCategory === catKey) {
@@ -3461,8 +3681,17 @@
                 const profObj = window.PRICES.profiles[itemId];
                 if (!profObj) return;
 
-                profObj.name = name;
-                profObj.price = price;
+                persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                    if (isMaster) {
+                        bucket.profiles[itemId] = price;
+                        if (BASE_SHARED_PRICES.profiles[itemId]) {
+                            BASE_SHARED_PRICES.profiles[itemId].name = name;
+                        }
+                    } else {
+                        profObj.name = name;
+                        profObj.price = price;
+                    }
+                });
 
                 populateAdminForm();
                 updateUiPriceLabels();
@@ -3472,8 +3701,17 @@
                 const ledObj = window.PRICES.led[itemId];
                 if (!ledObj) return;
 
-                ledObj.name = name;
-                ledObj.price = price;
+                persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                    if (isMaster) {
+                        bucket.led[itemId] = price;
+                        if (BASE_SHARED_PRICES.led[itemId]) {
+                            BASE_SHARED_PRICES.led[itemId].name = name;
+                        }
+                    } else {
+                        ledObj.name = name;
+                        ledObj.price = price;
+                    }
+                });
 
                 populateAdminForm();
                 updateUiPriceLabels();
@@ -3483,18 +3721,30 @@
                 const svc = getExtraServiceById(itemId);
                 if (!svc) return;
 
-                svc.name = name;
-                svc.desc = desc;
-                svc.price = price;
-                if (svc.inStep4) {
-                    const svcUnitEl = document.getElementById('edit-item-service-unit');
-                    if (svcUnitEl) svc.unit = svcUnitEl.value || 'fixed';
-                }
-                if (window.PRICES.extras && Object.prototype.hasOwnProperty.call(window.PRICES.extras, itemId)) {
-                    window.PRICES.extras[itemId] = price;
-                }
+                const nextUnit = svc.inStep4
+                    ? ((document.getElementById('edit-item-service-unit')?.value) || svc.unit || 'fixed')
+                    : (svc.unit || 'fixed');
 
-                saveExtraServicesToCache();
+                persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                    if (isMaster) {
+                        bucket.extras[itemId] = price;
+                        const baseSvc = BASE_SHARED_EXTRAS.find(s => s.id === itemId);
+                        if (baseSvc) {
+                            baseSvc.name = name;
+                            baseSvc.desc = desc;
+                            baseSvc.unit = nextUnit;
+                        }
+                    } else {
+                        svc.name = name;
+                        svc.desc = desc;
+                        svc.price = price;
+                        svc.unit = nextUnit;
+                        if (window.PRICES.extras && Object.prototype.hasOwnProperty.call(window.PRICES.extras, itemId)) {
+                            window.PRICES.extras[itemId] = price;
+                        }
+                    }
+                });
+
                 renderAdminExtraServicesList();
                 updateUiPriceLabels();
                 calculateTotal();
@@ -3512,6 +3762,12 @@
                 const role = document.getElementById('edit-item-role').value || 'client';
                 const discount = role === 'master' ? Math.max(0, Math.min(90, price)) : 0;
 
+                if (newCode !== keyItem.code && window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[keyItem.code.toUpperCase()]) {
+                    window.MASTER_PRICES_MAP[newCode] = JSON.parse(JSON.stringify(window.MASTER_PRICES_MAP[keyItem.code.toUpperCase()]));
+                    delete window.MASTER_PRICES_MAP[keyItem.code.toUpperCase()];
+                    saveMasterPricesMapToCache();
+                }
+
                 keyItem.owner = name;
                 keyItem.code = newCode;
                 keyItem.role = role;
@@ -3522,10 +3778,10 @@
                 if (window.activeMasterSession && window.activeMasterSession.code === itemId) {
                     applyUserAccessProfile(keyItem, false);
                 }
+                if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
                 showToast(`Ключ «${newCode}» обновлён`);
             }
 
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
             closeAdminEditModal();
         }
 
@@ -3583,24 +3839,33 @@
             }
 
             const newId = `${catKey}_custom_${Date.now()}`;
-            LAMP_VARIANTS_CATALOG[catKey].items.push({
+            const newItem = {
                 id: newId,
                 name,
                 desc,
                 unit,
                 price,
                 img
+            };
+
+            persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                if (isMaster) {
+                    if (BASE_SHARED_LAMPS[catKey] && !BASE_SHARED_LAMPS[catKey].items.some(v => v.id === newId)) {
+                        BASE_SHARED_LAMPS[catKey].items.push({ ...newItem });
+                    }
+                    bucket.lamps[newId] = price;
+                } else {
+                    LAMP_VARIANTS_CATALOG[catKey].items.push(newItem);
+                }
             });
             calcState.lampVariants[newId] = 0;
 
-            saveLampCatalogToCache();
             updateUiPriceLabels();
             renderAdminLampsList();
             updateAdminSidebarCounts();
             if (window.activeLampCategory === catKey) {
                 renderLampVariantsGrid(catKey);
             }
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
 
             if (nameInput) nameInput.value = '';
             if (priceInput) priceInput.value = '';
@@ -3617,16 +3882,21 @@
             if (!item) return;
 
             const parsed = Math.max(0, parseInt(newPriceVal, 10) || 0);
-            item.price = parsed;
-            if (item.isBasePriceLinked && window.PRICES.lamps[catKey]) {
-                window.PRICES.lamps[catKey].price = parsed;
-            }
 
-            saveLampCatalogToCache();
+            persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                if (isMaster) {
+                    bucket.lamps[variantId] = parsed;
+                } else {
+                    item.price = parsed;
+                    if (item.isBasePriceLinked && window.PRICES.lamps[catKey]) {
+                        window.PRICES.lamps[catKey].price = parsed;
+                    }
+                }
+            });
+
             updateUiPriceLabels();
             calculateTotal();
             updateHeroQuickPrice();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
             showToast(`Цена для «${item.name}» обновлена`);
         }
 
@@ -3637,6 +3907,8 @@
             if (!item) return;
 
             item.img = (newImgUrl || '').trim() || LAMP_FALLBACK_SVG;
+            const baseItem = BASE_SHARED_LAMPS[catKey]?.items?.find(v => v.id === variantId);
+            if (baseItem) baseItem.img = item.img;
             saveLampCatalogToCache();
             renderAdminLampsList();
             if (window.activeLampCategory === catKey) {
@@ -3656,6 +3928,9 @@
 
             const target = cat.items.find(v => v.id === variantId);
             cat.items = cat.items.filter(v => v.id !== variantId);
+            if (BASE_SHARED_LAMPS[catKey]) {
+                BASE_SHARED_LAMPS[catKey].items = BASE_SHARED_LAMPS[catKey].items.filter(v => v.id !== variantId);
+            }
             delete calcState.lampVariants[variantId];
             if (cat.defaultVariantId === variantId && cat.items[0]) {
                 cat.defaultVariantId = cat.items[0].id;
@@ -3674,6 +3949,15 @@
         function resetLampCatalogToDefault() {
             LAMP_VARIANTS_CATALOG = JSON.parse(JSON.stringify(DEFAULT_LAMP_VARIANTS_CATALOG));
             window.LAMP_VARIANTS_CATALOG = LAMP_VARIANTS_CATALOG;
+            BASE_SHARED_LAMPS = JSON.parse(JSON.stringify(DEFAULT_LAMP_VARIANTS_CATALOG));
+            const masterId = getCurrentMasterKeyId();
+            if (masterId && window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[masterId]) {
+                window.MASTER_PRICES_MAP[masterId].lamps = {};
+                saveMasterPricesMapToCache();
+                if (window.cloudSync && window.cloudSync.enabled) {
+                    window.cloudSync.saveMasterPrices(masterId, window.MASTER_PRICES_MAP[masterId]);
+                }
+            }
             saveLampCatalogToCache();
             syncCategoryCountersUI();
             updateUiPriceLabels();
@@ -3872,7 +4156,7 @@
             }
 
             const newId = `service_custom_${Date.now()}`;
-            EXTRA_SERVICES_LIST.push({
+            const newSvc = {
                 id: newId,
                 name,
                 desc,
@@ -3880,13 +4164,22 @@
                 unit,
                 inStep4: true,
                 isBuiltin: false
+            };
+
+            persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                if (isMaster) {
+                    if (!BASE_SHARED_EXTRAS.some(s => s.id === newId)) {
+                        BASE_SHARED_EXTRAS.push({ ...newSvc });
+                    }
+                    bucket.extras[newId] = price;
+                } else {
+                    EXTRA_SERVICES_LIST.push(newSvc);
+                }
             });
 
-            saveExtraServicesToCache();
             renderAdminExtraServicesList();
             renderExtraServicesGrid();
             calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
 
             if (nameInput) nameInput.value = '';
             if (priceInput) priceInput.value = '';
@@ -3900,15 +4193,20 @@
             if (!svc) return;
 
             const parsed = Math.max(0, parseInt(newPriceVal, 10) || 0);
-            svc.price = parsed;
-            if (window.PRICES.extras && Object.prototype.hasOwnProperty.call(window.PRICES.extras, serviceId)) {
-                window.PRICES.extras[serviceId] = parsed;
-            }
 
-            saveExtraServicesToCache();
+            persistCurrentPriceChangeToDb((bucket, isMaster) => {
+                if (isMaster) {
+                    bucket.extras[serviceId] = parsed;
+                } else {
+                    svc.price = parsed;
+                    if (window.PRICES.extras && Object.prototype.hasOwnProperty.call(window.PRICES.extras, serviceId)) {
+                        window.PRICES.extras[serviceId] = parsed;
+                    }
+                }
+            });
+
             updateUiPriceLabels();
             calculateTotal();
-            if (window.cloudSync && window.cloudSync.enabled) window.cloudSync.saveAll();
             showToast(`Цена для «${svc.name}» обновлена`);
         }
 
@@ -3918,6 +4216,7 @@
 
             EXTRA_SERVICES_LIST = EXTRA_SERVICES_LIST.filter(s => s.id !== serviceId);
             window.EXTRA_SERVICES_LIST = EXTRA_SERVICES_LIST;
+            BASE_SHARED_EXTRAS = BASE_SHARED_EXTRAS.filter(s => s.id !== serviceId);
             delete calcState.selectedExtraServices[serviceId];
 
             saveExtraServicesToCache();
@@ -3976,9 +4275,28 @@
         }
 
         function resetPricesToDefault() {
+            const masterId = getCurrentMasterKeyId();
+            if (masterId) {
+                if (window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[masterId]) {
+                    delete window.MASTER_PRICES_MAP[masterId];
+                    saveMasterPricesMapToCache();
+                }
+                applyEffectivePricesForCurrentSession();
+                populateAdminForm();
+                updateUiPriceLabels();
+                calculateTotal();
+                updateHeroQuickPrice();
+                if (window.cloudSync && window.cloudSync.enabled && window.cloudSync.deleteMasterPrices) {
+                    window.cloudSync.deleteMasterPrices(masterId);
+                }
+                showToast('Персональные цены мастера сброшены к базовым');
+                return;
+            }
+
             window.PRICES = JSON.parse(JSON.stringify(DEFAULT_PRICES));
             EXTRA_SERVICES_LIST = JSON.parse(JSON.stringify(DEFAULT_EXTRA_SERVICES_LIST));
             window.EXTRA_SERVICES_LIST = EXTRA_SERVICES_LIST;
+            captureCurrentPricesAsSharedBase();
             saveExtraServicesToCache();
             populateAdminForm();
             updateUiPriceLabels();
@@ -4473,7 +4791,9 @@
         }
 
         function initApp() {
+            captureCurrentPricesAsSharedBase();
             initAccessControl();
+            applyEffectivePricesForCurrentSession();
             updateUiPriceLabels();
             updateActiveCardStyles();
             calculateTotal();
@@ -4491,7 +4811,10 @@
     <script>
         window.cloudSync = {
             enabled: false,
-            saveAll: async () => {}
+            saveAll: async () => {},
+            saveMasterPrices: async () => {},
+            loadMasterPrices: async () => {},
+            deleteMasterPrices: async () => {}
         };
 
         async function initCloudDatabase() {
@@ -4515,7 +4838,7 @@
             }
 
             try {
-                const [{ initializeApp }, { getAuth, signInAnonymously, signInWithCustomToken }, { getFirestore, doc, setDoc, onSnapshot }] = await Promise.all([
+                const [{ initializeApp }, { getAuth, signInAnonymously, signInWithCustomToken }, { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot }] = await Promise.all([
                     import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"),
                     import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"),
                     import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js")
@@ -4535,17 +4858,73 @@
                 if (!user) return;
 
                 const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'main');
+                const getMasterDocRef = (masterCode) => doc(db, 'artifacts', appId, 'public', 'data', 'master_prices', String(masterCode).trim().toUpperCase());
 
                 window.cloudSync.enabled = true;
+                window.cloudSync.saveMasterPrices = async (masterCode, bucketObj) => {
+                    if (!auth.currentUser || !masterCode) return;
+                    const normalizedCode = String(masterCode).trim().toUpperCase();
+                    try {
+                        await setDoc(getMasterDocRef(normalizedCode), {
+                            masterCode: normalizedCode,
+                            fabrics: JSON.parse(JSON.stringify(bucketObj?.fabrics || {})),
+                            profiles: JSON.parse(JSON.stringify(bucketObj?.profiles || {})),
+                            led: JSON.parse(JSON.stringify(bucketObj?.led || {})),
+                            lamps: JSON.parse(JSON.stringify(bucketObj?.lamps || {})),
+                            extras: JSON.parse(JSON.stringify(bucketObj?.extras || {})),
+                            updatedAt: Date.now()
+                        }, { merge: true });
+                    } catch (err) {
+                        console.error('Ошибка сохранения цен мастера в облачную БД:', err);
+                        if (typeof showToast === 'function') {
+                            showToast('Ошибка записи цен мастера в облачную БД');
+                        }
+                    }
+                };
+
+                window.cloudSync.loadMasterPrices = async (masterCode) => {
+                    if (!auth.currentUser || !masterCode) return;
+                    const normalizedCode = String(masterCode).trim().toUpperCase();
+                    try {
+                        const snap = await getDoc(getMasterDocRef(normalizedCode));
+                        if (snap.exists()) {
+                            const mData = snap.data();
+                            window.MASTER_PRICES_MAP[normalizedCode] = {
+                                fabrics: mData.fabrics || {},
+                                profiles: mData.profiles || {},
+                                led: mData.led || {},
+                                lamps: mData.lamps || {},
+                                extras: mData.extras || {}
+                            };
+                            saveMasterPricesMapToCache();
+                            if (getCurrentMasterKeyId() === normalizedCode) {
+                                refreshPricesForSessionAndUi();
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Ошибка загрузки цен мастера из облачной БД:', err);
+                    }
+                };
+
+                window.cloudSync.deleteMasterPrices = async (masterCode) => {
+                    if (!auth.currentUser || !masterCode) return;
+                    const normalizedCode = String(masterCode).trim().toUpperCase();
+                    try {
+                        await deleteDoc(getMasterDocRef(normalizedCode));
+                    } catch (err) {
+                        console.error('Ошибка удаления цен мастера из облачной БД:', err);
+                    }
+                };
+
                 window.cloudSync.saveAll = async () => {
                     if (!auth.currentUser) return;
                     try {
                         const safeClone = (val, fallback) => val !== undefined ? JSON.parse(JSON.stringify(val)) : fallback;
                         await setDoc(configDocRef, {
-                            prices: safeClone(window.PRICES, window.DEFAULT_PRICES || {}),
-                            fabricsCatalog: safeClone(FABRICS_LIST, window.DEFAULT_FABRICS_LIST || []),
-                            lampCatalog: safeClone(LAMP_VARIANTS_CATALOG, window.DEFAULT_LAMP_VARIANTS_CATALOG || {}),
-                            extraServicesCatalog: safeClone(EXTRA_SERVICES_LIST, window.DEFAULT_EXTRA_SERVICES_LIST || []),
+                            prices: safeClone(BASE_SHARED_PRICES, window.DEFAULT_PRICES || {}),
+                            fabricsCatalog: safeClone(BASE_SHARED_FABRICS, window.DEFAULT_FABRICS_LIST || []),
+                            lampCatalog: safeClone(BASE_SHARED_LAMPS, window.DEFAULT_LAMP_VARIANTS_CATALOG || {}),
+                            extraServicesCatalog: safeClone(BASE_SHARED_EXTRAS, window.DEFAULT_EXTRA_SERVICES_LIST || []),
                             isAccessRestricted: Boolean(window.isAccessRestricted),
                             allowedKeys: safeClone(window.ALLOWED_ACCESS_KEYS, []),
                             adminPin: getStoredAdminPin(),
@@ -4568,46 +4947,26 @@
                             } catch (e) {}
                         }
                         if (data.prices) {
-                            window.PRICES = data.prices;
-                            updateUiPriceLabels();
-                            calculateTotal();
-                            updateHeroQuickPrice();
-                            if (window.isAdminLoggedIn) {
-                                populateAdminForm();
-                            }
+                            BASE_SHARED_PRICES = data.prices;
                         }
                         if (Array.isArray(data.extraServicesCatalog) && data.extraServicesCatalog.length > 0) {
-                            EXTRA_SERVICES_LIST = data.extraServicesCatalog;
-                            window.EXTRA_SERVICES_LIST = EXTRA_SERVICES_LIST;
-                            saveExtraServicesToCache();
-                            updateUiPriceLabels();
-                            calculateTotal();
-                            if (window.isAdminLoggedIn) {
-                                populateAdminForm();
-                            }
+                            BASE_SHARED_EXTRAS = data.extraServicesCatalog;
                         }
                         if (Array.isArray(data.fabricsCatalog) && data.fabricsCatalog.length > 0) {
-                            FABRICS_LIST = data.fabricsCatalog.map(item => ({ ...item, badge: '' }));
-                            window.FABRICS_LIST = FABRICS_LIST;
-                            saveFabricsCatalogToCache();
-                            renderFabricsGrid();
-                            calculateTotal();
-                            updateHeroQuickPrice();
-                            if (window.isAdminLoggedIn) {
-                                renderAdminFabricsList();
-                            }
+                            BASE_SHARED_FABRICS = data.fabricsCatalog.map(item => ({ ...item, badge: '' }));
                         }
                         if (data.lampCatalog && data.lampCatalog.gx53 && data.lampCatalog.tube && data.lampCatalog.track) {
-                            LAMP_VARIANTS_CATALOG = data.lampCatalog;
-                            window.LAMP_VARIANTS_CATALOG = LAMP_VARIANTS_CATALOG;
-                            saveLampCatalogToCache();
-                            syncCategoryCountersUI();
-                            updateUiPriceLabels();
-                            calculateTotal();
-                            if (window.isAdminLoggedIn) {
-                                renderAdminLampsList();
-                            }
+                            BASE_SHARED_LAMPS = data.lampCatalog;
                         }
+
+                        applyEffectivePricesForCurrentSession();
+                        updateUiPriceLabels();
+                        calculateTotal();
+                        updateHeroQuickPrice();
+                        if (window.isAdminLoggedIn) {
+                            refreshAdminDashboardData();
+                        }
+
                         if (typeof data.isAccessRestricted === 'boolean') {
                             window.isAccessRestricted = data.isAccessRestricted;
                             try {
@@ -4640,6 +4999,7 @@
                                     window.activeMasterSession = null;
                                     window.isSessionUnlocked = false;
                                     updateMasterPaymentButtonUI();
+                                    refreshPricesForSessionAndUi();
                                     if (window.isAccessRestricted && !window.isAdminLoggedIn) lockSiteUI();
                                 }
                             } else if (savedCode) {
@@ -4659,6 +5019,11 @@
                 }, (error) => {
                     console.error('Ошибка чтения из Firestore:', error);
                 });
+
+                const currentMasterCode = getCurrentMasterKeyId();
+                if (currentMasterCode) {
+                    window.cloudSync.loadMasterPrices(currentMasterCode);
+                }
             } catch (e) {
                 console.warn('Облачная БД недоступна в офлайн-режиме предпросмотра:', e);
             }
