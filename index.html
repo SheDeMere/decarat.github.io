@@ -804,7 +804,7 @@
             <form id="access-gate-form" onsubmit="verifyAccessCode(event)" class="space-y-3 text-left">
                 <div>
                     <label class="text-[11px] font-semibold text-stone-300 block mb-1">Введите ваш PIN-код или ключ доступа:</label>
-                    <input type="text" id="access-code-input" placeholder="Например: MASTER15" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-stone-700 text-white text-center font-bold tracking-widest uppercase">
+                    <input type="password" id="access-code-input" placeholder="" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-stone-700 text-white text-center font-bold tracking-widest uppercase">
                 </div>
                 <p id="access-code-error" class="text-xs text-rose-400 text-center hidden">Неверный или заблокированный PIN-код доступа</p>
                 <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm shadow-lg transition">
@@ -814,7 +814,7 @@
 
             <div class="pt-3 border-t border-stone-800 flex items-center justify-between text-[11px] text-stone-500">
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="resetLocalAuthCache()" class="text-stone-400 hover:text-stone-200 underline">Сбросить кэш</button>
+                    <!-- <button type="button" onclick="resetLocalAuthCache()" class="text-stone-400 hover:text-stone-200 underline">Сбросить кэш</button> -->
                     <button type="button" onclick="openAdminModal()" class="text-emerald-400 hover:underline font-semibold">Вход для владельца</button>
                 </div>
             </div>
