@@ -214,6 +214,8 @@
         .h-72 { height: 18rem; }
         .h-80 { height: 20rem; }
         .h-96 { height: 24rem; }
+        .h-\[480px\] { height: 480px; }
+        .h-\[560px\] { height: 560px; }
         .h-full { height: 100%; }
         .h-\[88vh\] { height: 88vh; }
         .max-h-56 { max-height: 14rem; }
@@ -694,6 +696,7 @@
             .sm\:p-8 { padding: 2rem; }
             .sm\:py-20 { padding-top: 5rem; padding-bottom: 5rem; }
             .sm\:py-24 { padding-top: 6rem; padding-bottom: 6rem; }
+            .sm\:h-\[560px\] { height: 560px; }
             .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .sm\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
@@ -803,8 +806,8 @@
 
             <form id="access-gate-form" onsubmit="verifyAccessCode(event)" class="space-y-3 text-left">
                 <div>
-                    <!-- <label class="text-[11px] font-semibold text-stone-300 block mb-1">Введите ваш PIN-код или ключ доступа:</label> -->
-                    <input type="password" id="access-code-input" placeholder="Введите ваш PIN-код" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-stone-700 text-white text-center font-bold tracking-widest uppercase">
+                    <label class="text-[11px] font-semibold text-stone-300 block mb-1">Введите ваш PIN-код или ключ доступа:</label>
+                    <input type="password" id="access-code-input" placeholder="••••••" autocomplete="off" class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-stone-700 text-white text-center font-bold tracking-widest uppercase">
                 </div>
                 <p id="access-code-error" class="text-xs text-rose-400 text-center hidden">Неверный или заблокированный PIN-код доступа</p>
                 <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm shadow-lg transition">
@@ -814,7 +817,7 @@
 
             <div class="pt-3 border-t border-stone-800 flex items-center justify-between text-[11px] text-stone-500">
                 <div class="flex items-center gap-3">
-                    <!-- <button type="button" onclick="resetLocalAuthCache()" class="text-stone-400 hover:text-stone-200 underline">Сбросить кэш</button> -->
+                    <button type="button" onclick="resetLocalAuthCache()" class="text-stone-400 hover:text-stone-200 underline">Сбросить кэш</button>
                     <button type="button" onclick="openAdminModal()" class="text-emerald-400 hover:underline font-semibold">Вход для владельца</button>
                 </div>
             </div>
@@ -990,6 +993,124 @@
                                 <button type="button" onclick="changePipes(-1)" class="w-8 h-8 rounded-xl bg-white border border-stone-300 hover:bg-stone-100 font-bold text-stone-700 transition">-</button>
                                 <span id="pipes-count" class="w-6 text-center font-bold text-sm">0</span>
                                 <button type="button" onclick="changePipes(1)" class="w-8 h-8 rounded-xl bg-white border border-stone-300 hover:bg-stone-100 font-bold text-stone-700 transition">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ИНТЕРАКТИВНЫЙ КОНСТРУКТОР И ЧЕРТЁЖ ЗАМЕРА -->
+                    <div class="mt-6 pt-6 border-t border-stone-100">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-extrabold text-stone-900 block">Конструктор и чертёж помещения</span>
+                                    <span class="text-xs text-stone-500 block">Построение плана углов, расстановка света и сохранение в профиль</span>
+                                </div>
+                            </div>
+                            <button type="button" id="toggle-blueprint-btn" onclick="toggleBlueprintBuilder()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5">
+                                <span id="toggle-blueprint-btn-text">Открыть чертёжник</span>
+                                <span id="toggle-blueprint-btn-arrow">▾</span>
+                            </button>
+                        </div>
+
+                        <div id="blueprint-builder-panel" class="hidden mt-5 p-4 sm:p-5 rounded-2xl bg-stone-50 border border-emerald-200/80 space-y-4 animate-variants-panel">
+                            <!-- Быстрые шаблоны форм комнат -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-stone-200">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="text-[11px] font-bold text-stone-500 mr-1">Форма:</span>
+                                    <button type="button" onclick="applyBlueprintPreset('rect')" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-50 border border-stone-200 text-xs font-bold text-stone-700 transition">Прямоугольник</button>
+                                    <button type="button" onclick="applyBlueprintPreset('lshape')" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-50 border border-stone-200 text-xs font-bold text-stone-700 transition">Г-образная (6 углов)</button>
+                                    <button type="button" onclick="applyBlueprintPreset('ushape')" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-50 border border-stone-200 text-xs font-bold text-stone-700 transition">П-образная (8 углов)</button>
+                                    <button type="button" onclick="applyBlueprintPreset('bevel')" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-50 border border-stone-200 text-xs font-bold text-stone-700 transition">Скошенный угол (5 углов)</button>
+                                </div>
+                                <button type="button" onclick="clearBlueprintCanvas()" class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-xs font-bold text-rose-600 transition">
+                                    Очистить
+                                </button>
+                            </div>
+
+                            <!-- Панель инструментов для холста -->
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="text-[11px] font-bold text-stone-500 mr-1">Инструмент:</span>
+                                <button type="button" id="bp-tool-move" onclick="setBlueprintTool('move')" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-600 bg-emerald-600 text-white transition">
+                                    ✋ Углы / Перемещение
+                                </button>
+                                <button type="button" id="bp-tool-add_corner" onclick="setBlueprintTool('add_corner')" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 transition">
+                                    ➕ Добавить угол на стену
+                                </button>
+                                <button type="button" id="bp-tool-gx53" onclick="setBlueprintTool('gx53')" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 transition">
+                                    💡 Спот GX53
+                                </button>
+                                <button type="button" id="bp-tool-tube" onclick="setBlueprintTool('tube')" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 transition">
+                                    🔦 Тубус
+                                </button>
+                                <button type="button" id="bp-tool-track" onclick="setBlueprintTool('track')" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 transition">
+                                    ➖ Трек 1м
+                                </button>
+                                <button type="button" id="bp-tool-chandelier" onclick="setBlueprintTool('chandelier')" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 transition">
+                                    🌟 Люстра
+                                </button>
+                                <button type="button" id="bp-tool-pipe" onclick="setBlueprintTool('pipe')" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 transition">
+                                    ⭕ Труба
+                                </button>
+                                <button type="button" id="bp-tool-erase" onclick="setBlueprintTool('erase')" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-white text-stone-700 hover:bg-rose-50 hover:text-rose-600 transition">
+                                    🗑️ Удалить элемент
+                                </button>
+                            </div>
+
+                            <!-- Интерактивный холст чертежа (увеличенный) -->
+                            <div class="relative w-full h-[480px] sm:h-[560px] bg-white rounded-2xl border border-stone-300 overflow-hidden shadow-inner">
+                                <canvas id="blueprint-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+                                <div class="absolute top-2.5 left-3 pointer-events-none bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-stone-200 text-[10px] font-semibold text-stone-600">
+                                    Клетка = 0.5 м • Тяните синие точки углов или кликните по длине стены для точного ввода
+                                </div>
+                            </div>
+
+                            <!-- Сводка параметров чертежа и перенос в смету -->
+                            <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-white border border-stone-200">
+                                <div class="flex flex-wrap items-center gap-4 text-xs">
+                                    <div>
+                                        <span class="text-stone-400 block text-[10px] uppercase font-bold">Площадь (S)</span>
+                                        <span id="bp-stat-area" class="font-black text-stone-900 text-sm">18.0 м²</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-stone-400 block text-[10px] uppercase font-bold">Периметр (P)</span>
+                                        <span id="bp-stat-perim" class="font-black text-stone-900 text-sm">17.0 м.п.</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-stone-400 block text-[10px] uppercase font-bold">Углы</span>
+                                        <span id="bp-stat-corners" class="font-black text-stone-900 text-sm">4 шт.</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-stone-400 block text-[10px] uppercase font-bold">Точки света / трубы</span>
+                                        <span id="bp-stat-items" class="font-black text-emerald-700 text-sm">0 шт.</span>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="applyBlueprintToCalculator()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-extrabold shadow transition">
+                                    Перенести в смету
+                                </button>
+                            </div>
+
+                            <!-- Сохранение чертежа в профиле мастера / админа -->
+                            <div class="p-4 rounded-2xl bg-white border border-emerald-200/80 space-y-3">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div>
+                                        <span id="bp-profile-owner-label" class="text-xs font-extrabold text-stone-900 block">Мои сохранённые чертежи</span>
+                                        <span class="text-[11px] text-stone-500 block">Чертежи привязаны к вашему профилю и доступны с любого устройства</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                                    <input type="text" id="blueprint-project-name" placeholder="Название объекта (например: ул. Мира 12 — Гостиная)" class="flex-1 h-10 px-3.5 rounded-xl bg-stone-50 border border-stone-300 text-xs font-semibold text-stone-900">
+                                    <button type="button" onclick="saveCurrentBlueprintToProfile()" class="px-4 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold whitespace-nowrap transition shadow-sm">
+                                        💾 Сохранить чертёж
+                                    </button>
+                                </div>
+
+                                <div id="saved-blueprints-list" class="space-y-2 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+                                    <!-- Список сохранённых чертежей рендерится JS -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1282,32 +1403,6 @@
                         </div>
                         <div id="price-per-m2" class="text-xs text-emerald-100 mt-1 font-medium">
                             0 ₽ / м²
-                        </div>
-                    </div>
-
-                    <!-- Выбор способа оплаты: Наличные (-10%) ИЛИ Скидка для мастера + Рассрочка 0% -->
-                    <div class="pt-3 pb-4 border-t border-emerald-200/70 space-y-2.5">
-                        <label class="text-[11px] font-extrabold uppercase tracking-wider text-stone-600 block">Способ оплаты и скидка:</label>
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <button type="button" id="pay-cash-btn" onclick="setPaymentMethod('cash')" class="p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-950 text-left transition relative shadow-sm">
-                                <span class="absolute -top-2 right-2 text-[9px] font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-2 py-0.5 rounded-full shadow-sm">−10%</span>
-                                <span class="block text-xs font-extrabold text-stone-900">Наличными</span>
-                                <span class="block text-[10px] text-emerald-700 font-bold mt-0.5">Скидка 10%</span>
-                            </button>
-                            <!-- Кнопка скидки для мастера -->
-                            <button type="button" id="pay-master-btn" onclick="setPaymentMethod('master')" class="hidden p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-950 text-left transition relative shadow-sm">
-                                <span id="master-btn-badge" class="absolute -top-2 right-2 text-[9px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full shadow-sm">−0%</span>
-                                <span id="master-btn-title" class="block text-xs font-extrabold text-stone-900 truncate">Скидка для мастера</span>
-                                <span id="master-btn-subtitle" class="block text-[10px] text-emerald-700 font-bold mt-0.5 truncate">Скидка 0%</span>
-                            </button>
-                            <button type="button" id="pay-install-btn" onclick="setPaymentMethod('installment')" class="p-2.5 rounded-xl border border-stone-200 bg-white hover:border-emerald-300 text-stone-700 text-left transition">
-                                <span class="block text-xs font-bold text-stone-900">Рассрочка</span>
-                                <span class="block text-[10px] text-stone-500 mt-0.5">0% без переплат</span>
-                            </button>
-                        </div>
-                        <div id="payment-badge-info" class="p-2.5 rounded-xl bg-emerald-100/70 border border-emerald-200 text-[11px] text-emerald-900 font-medium flex items-center justify-between">
-                            <span>Выгода при расчете наличными:</span>
-                            <span id="cash-discount-val" class="font-extrabold text-emerald-700">0 ₽</span>
                         </div>
                     </div>
 
@@ -1855,20 +1950,6 @@
                                 </div>
                             </div>
 
-                            <div class="admin-grid-row admin-grid-2 pt-1">
-                                <div>
-                                    <label class="admin-label">Роль</label>
-                                    <select id="new-key-role" onchange="handleNewKeyRoleChange(this.value)" class="admin-input font-semibold">
-                                        <option value="master" selected>Мастер (личные цены + скидка)</option>
-                                        <option value="client">Обычный пользователь (базовые цены)</option>
-                                    </select>
-                                </div>
-                                <div id="new-key-discount-wrapper">
-                                    <label class="admin-label text-emerald-800">Доп. скидка мастера (%)</label>
-                                    <input type="number" id="new-key-discount" value="0" min="0" max="90" class="admin-input font-bold text-emerald-800">
-                                </div>
-                            </div>
-
                             <div class="pt-3 flex justify-center">
                                 <button type="button" onclick="createNewAccessKey()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl whitespace-nowrap transition shadow-sm">
                                     Создать доступ для мастера
@@ -1947,15 +2028,7 @@
                     <input type="text" id="edit-item-desc" class="admin-input-sm w-full">
                 </div>
 
-                <div id="edit-item-role-wrap" class="hidden">
-                    <label class="admin-label">Тип доступа</label>
-                    <select id="edit-item-role" onchange="handleEditKeyRoleChange(this.value)" class="admin-input-sm w-full font-semibold">
-                        <option value="master">Мастер (личные цены + скидка)</option>
-                        <option value="client">Обычный доступ (базовые цены)</option>
-                    </select>
-                </div>
-
-                <div class="flex items-end gap-3">
+                <div id="edit-item-price-row" class="flex items-end gap-3">
                     <div class="flex-1">
                         <label id="edit-item-price-label" class="admin-label text-emerald-800">Цена (₽)</label>
                         <input type="number" id="edit-item-price" min="0" step="10" class="admin-input-sm w-full font-extrabold text-emerald-800">
@@ -2025,6 +2098,7 @@
         const STORAGE_KEY_LAMP_CATALOG = 'decarat_lamp_catalog_v1';
         const STORAGE_KEY_EXTRA_SERVICES = 'decarat_extra_services_v1';
         const STORAGE_KEY_MASTER_PRICES_MAP = 'decarat_master_prices_map_v1';
+        const STORAGE_KEY_BLUEPRINTS_MAP = 'decarat_blueprints_map_v1';
 
         const LAMP_FALLBACK_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' rx='24' fill='%23f5f5f4'/%3E%3Ccircle cx='80' cy='80' r='36' fill='%23d1fae5' stroke='%23059669' stroke-width='4'/%3E%3Ccircle cx='80' cy='80' r='14' fill='%23059669'/%3E%3C/svg%3E";
 
@@ -2544,40 +2618,6 @@
             calculateTotal();
         }
 
-        function setPaymentMethod(method) {
-            calcState.paymentMethod = method;
-            
-            const cashBtn = document.getElementById('pay-cash-btn');
-            const masterBtn = document.getElementById('pay-master-btn');
-            const installBtn = document.getElementById('pay-install-btn');
-
-            if (cashBtn) {
-                if (method === 'cash') {
-                    cashBtn.className = 'p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-950 text-left transition relative shadow-sm';
-                } else {
-                    cashBtn.className = 'p-2.5 rounded-xl border border-stone-200 bg-white hover:border-emerald-300 text-stone-700 text-left transition';
-                }
-            }
-
-            if (masterBtn) {
-                if (method === 'master') {
-                    masterBtn.className = 'p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-950 text-left transition relative shadow-sm';
-                } else {
-                    masterBtn.className = 'p-2.5 rounded-xl border border-stone-200 bg-white hover:border-emerald-300 text-stone-700 text-left transition';
-                }
-            }
-
-            if (installBtn) {
-                if (method === 'installment') {
-                    installBtn.className = 'p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-950 text-left transition relative shadow-sm';
-                } else {
-                    installBtn.className = 'p-2.5 rounded-xl border border-stone-200 bg-white hover:border-emerald-300 text-stone-700 text-left transition';
-                }
-            }
-
-            calculateTotal();
-        }
-
         function openLampCategoryVariants(catKey) {
             const cat = LAMP_VARIANTS_CATALOG[catKey];
             if (!cat) return;
@@ -2691,7 +2731,7 @@
         window.activeMasterSession = null;
 
         const DEFAULT_ACCESS_KEYS = [
-            { code: 'MASTER15', owner: 'Партнёр-монтажник', role: 'master', discount: 15 },
+            { code: 'MASTER15', owner: 'Партнёр-монтажник', role: 'master', discount: 0 },
             { code: 'DECARAT2026', owner: 'Мастер базовый', role: 'master', discount: 0 }
         ];
 
@@ -2775,22 +2815,9 @@
         }
 
         function updateMasterPaymentButtonUI() {
-            const cashBtn = document.getElementById('pay-cash-btn');
-            const masterBtn = document.getElementById('pay-master-btn');
-            if (!cashBtn || !masterBtn) return;
-
-            if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                const pct = window.activeMasterSession.discount || 0;
-                cashBtn.classList.add('hidden');
-                masterBtn.classList.remove('hidden');
-                document.getElementById('master-btn-badge').textContent = `−${pct}%`;
-                document.getElementById('master-btn-title').textContent = window.activeMasterSession.owner || 'Скидка мастера';
-                document.getElementById('master-btn-subtitle').textContent = pct > 0 ? `Скидка ${pct}%` : 'Личный прайс';
-            } else {
-                masterBtn.classList.add('hidden');
-                cashBtn.classList.remove('hidden');
-            }
             updateHeaderRoleUI();
+            if (typeof updateBlueprintOwnerLabel === 'function') updateBlueprintOwnerLabel();
+            if (typeof renderSavedBlueprintsList === 'function') renderSavedBlueprintsList();
         }
 
         function refreshPricesForSessionAndUi() {
@@ -2804,7 +2831,7 @@
             }
         }
 
-        function applyUserAccessProfile(keyObj, autoSelectMasterPayment = true) {
+        function applyUserAccessProfile(keyObj) {
             if (!keyObj) return;
             window.isMasterEditorMode = true;
             window.activeMasterSession = { ...keyObj, role: 'master' };
@@ -2813,11 +2840,10 @@
             if (window.cloudSync && window.cloudSync.enabled && window.cloudSync.loadMasterPrices) {
                 window.cloudSync.loadMasterPrices(keyObj.code);
             }
-            if (autoSelectMasterPayment) {
-                setPaymentMethod('master');
-            } else {
-                calculateTotal();
+            if (window.cloudSync && window.cloudSync.enabled && window.cloudSync.loadMasterBlueprints) {
+                window.cloudSync.loadMasterBlueprints(keyObj.code);
             }
+            calculateTotal();
         }
 
         function initAccessControl() {
@@ -2844,7 +2870,7 @@
                     saveAuthCodeToCache(found.code);
                     window.isSessionUnlocked = true;
                     unlockSiteUI();
-                    applyUserAccessProfile(found, true);
+                    applyUserAccessProfile(found);
                     return;
                 }
             }
@@ -2887,7 +2913,7 @@
                 window.isSessionUnlocked = true;
                 window.isAdminLoggedIn = false;
                 unlockSiteUI();
-                applyUserAccessProfile(found, true);
+                applyUserAccessProfile(found);
                 updateLogoutButtonVisibility();
                 showToast(`Добро пожаловать, ${found.owner}! Загружены ваши личные цены.`);
             } else {
@@ -2930,36 +2956,20 @@
             showToast(window.isAccessRestricted ? 'Закрытый доступ по PIN-коду включён' : 'Свободный доступ к сайту открыт');
         }
 
-        function handleNewKeyRoleChange(role) {
-            const discountWrapper = document.getElementById('new-key-discount-wrapper');
-            const discountInp = document.getElementById('new-key-discount');
-            if (!discountWrapper || !discountInp) return;
-            if (role === 'master') {
-                discountWrapper.classList.remove('hidden');
-            } else {
-                discountWrapper.classList.add('hidden');
-                discountInp.value = 0;
-            }
-        }
-
         function createNewAccessKey() {
             const ownerInp = document.getElementById('new-key-owner');
             const codeInp = document.getElementById('new-key-code');
-            const roleSel = document.getElementById('new-key-role');
-            const discountInp = document.getElementById('new-key-discount');
 
             const owner = (ownerInp ? ownerInp.value : '').trim() || 'Новый мастер';
             const rawCode = (codeInp ? codeInp.value : '').trim().toUpperCase().replace(/\s+/g, '-');
             const code = rawCode || `M${Math.floor(1000 + Math.random() * 9000)}`;
-            const role = roleSel ? roleSel.value : 'master';
-            const discount = role === 'master' ? Math.max(0, Math.min(90, parseInt(discountInp ? discountInp.value : '0', 10) || 0)) : 0;
 
             if (code === getStoredAdminPin().toUpperCase() || window.ALLOWED_ACCESS_KEYS.some(k => k.code.toUpperCase() === code)) {
                 showToast('Этот PIN-код уже занят');
                 return;
             }
 
-            window.ALLOWED_ACCESS_KEYS.push({ code, owner, role: 'master', discount });
+            window.ALLOWED_ACCESS_KEYS.push({ code, owner, role: 'master', discount: 0 });
             saveKeysListToCache();
             renderAccessKeysList();
             updateAdminSidebarCounts();
@@ -3000,18 +3010,10 @@
             if (!container) return;
 
             container.innerHTML = window.ALLOWED_ACCESS_KEYS.map(item => {
-                const pct = item.discount || 0;
-                const roleBadge = pct > 0
-                    ? `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Мастер • Личные цены + скидка ${pct}%</span>`
-                    : `<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Мастер • Личные цены</span>`;
-
                 return `
                     <div class="admin-item-card flex flex-wrap items-center justify-between gap-4">
                         <div class="min-w-0 flex-1 space-y-1">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="text-xs sm:text-sm font-bold text-stone-900 truncate">${item.owner}</span>
-                                ${roleBadge}
-                            </div>
+                            <span class="text-xs sm:text-sm font-bold text-stone-900 block truncate">${item.owner}</span>
                             <span class="text-xs font-mono font-bold text-emerald-800 block">PIN: ${item.code}</span>
                         </div>
                         <div class="flex items-center gap-3 shrink-0">
@@ -3050,7 +3052,7 @@
             if (isMasterOnly) {
                 if (banner) banner.classList.remove('hidden');
                 const bannerTitle = document.getElementById('master-banner-title');
-                if (bannerTitle) bannerTitle.textContent = `Персональный прайс-лист: ${window.activeMasterSession.owner} (PIN: ${window.activeMasterSession.code})`;
+                if (bannerTitle) bannerTitle.textContent = `Персональный прайс-лист: ${window.activeMasterSession.owner}`;
                 if (titleEl) titleEl.textContent = `Настройка цен — ${window.activeMasterSession.owner}`;
                 if (badgeEl) badgeEl.textContent = 'МАСТЕР';
                 if (subEl) subEl.textContent = 'Ваши индивидуальные цены на полотна, светильники, профили и услуги';
@@ -3482,17 +3484,6 @@
             }).join('');
         }
 
-        function handleEditKeyRoleChange(role) {
-            const priceInput = document.getElementById('edit-item-price');
-            if (!priceInput) return;
-            if (role === 'client') {
-                priceInput.value = 0;
-                priceInput.disabled = true;
-            } else {
-                priceInput.disabled = false;
-            }
-        }
-
         let currentEditModalImg = '';
 
         function renderEditModalPhotoPreview() {
@@ -3537,8 +3528,8 @@
             const descWrap = descLabel ? descLabel.parentElement : null;
             const unitWrap = document.getElementById('edit-item-unit-wrap');
             const serviceUnitWrap = document.getElementById('edit-item-service-unit-wrap');
-            const roleWrap = document.getElementById('edit-item-role-wrap');
             const photoBox = document.getElementById('edit-item-photo-box');
+            const priceRow = document.getElementById('edit-item-price-row');
             const priceLabel = document.getElementById('edit-item-price-label');
             const priceInput = document.getElementById('edit-item-price');
             const codeInput = document.getElementById('edit-item-desc');
@@ -3550,6 +3541,7 @@
             codeInput.disabled = isMasterMode && itemType !== 'key';
             codeInput.classList.remove('uppercase', 'font-mono');
             if (descWrap) descWrap.classList.remove('hidden');
+            if (priceRow) priceRow.classList.remove('hidden');
             if (serviceUnitWrap) serviceUnitWrap.classList.add('hidden');
 
             if (itemType === 'fabric') {
@@ -3565,7 +3557,6 @@
                 priceInput.value = item.price || 0;
                 if (priceLabel) priceLabel.textContent = isMasterMode ? 'Ваша цена (₽ / м²)' : 'Цена (₽ / м²)';
                 if (unitWrap) unitWrap.classList.add('hidden');
-                if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) {
                     if (isMasterMode) photoBox.classList.add('hidden');
                     else photoBox.classList.remove('hidden');
@@ -3591,7 +3582,6 @@
                     if (isMasterMode) unitWrap.classList.add('hidden');
                     else unitWrap.classList.remove('hidden');
                 }
-                if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) {
                     if (isMasterMode) photoBox.classList.add('hidden');
                     else photoBox.classList.remove('hidden');
@@ -3613,7 +3603,6 @@
                 priceInput.value = currentPrice;
                 if (priceLabel) priceLabel.textContent = isMasterMode ? 'Ваша цена (₽ / пог. м)' : 'Цена (₽ / пог. м)';
                 if (unitWrap) unitWrap.classList.add('hidden');
-                if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) photoBox.classList.add('hidden');
             } else if (itemType === 'led') {
                 const ledObj = window.PRICES.led[itemId];
@@ -3629,7 +3618,6 @@
                 priceInput.value = currentPrice;
                 if (priceLabel) priceLabel.textContent = isMasterMode ? 'Ваша цена (₽ / пог. м)' : 'Цена (₽ / пог. м)';
                 if (unitWrap) unitWrap.classList.add('hidden');
-                if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) photoBox.classList.add('hidden');
             } else if (itemType === 'service') {
                 const svc = getExtraServiceById(itemId);
@@ -3644,7 +3632,6 @@
                 priceInput.value = svc.price || 0;
                 if (priceLabel) priceLabel.textContent = isMasterMode ? 'Ваша цена (₽)' : 'Цена (₽)';
                 if (unitWrap) unitWrap.classList.add('hidden');
-                if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) photoBox.classList.add('hidden');
                 if (serviceUnitWrap) {
                     if (svc.inStep4 && !isMasterMode) {
@@ -3667,20 +3654,21 @@
                 nameInput.value = keyItem.owner || '';
                 codeInput.value = keyItem.code || '';
                 codeInput.classList.add('uppercase', 'font-mono');
-                priceInput.step = '1';
-                priceInput.max = '90';
-                priceInput.value = keyItem.discount || 0;
-                if (priceLabel) priceLabel.textContent = 'Доп. скидка (%)';
+                if (priceRow) priceRow.classList.add('hidden');
                 if (unitWrap) unitWrap.classList.add('hidden');
-                if (roleWrap) roleWrap.classList.add('hidden');
                 if (photoBox) photoBox.classList.add('hidden');
             }
 
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
             setTimeout(() => {
-                priceInput.focus();
-                priceInput.select();
+                if (itemType === 'key') {
+                    nameInput.focus();
+                    nameInput.select();
+                } else {
+                    priceInput.focus();
+                    priceInput.select();
+                }
             }, 50);
         }
 
@@ -3838,8 +3826,6 @@
                     return;
                 }
 
-                const discount = Math.max(0, Math.min(90, price));
-
                 if (newCode !== keyItem.code && window.MASTER_PRICES_MAP && window.MASTER_PRICES_MAP[keyItem.code.toUpperCase()]) {
                     window.MASTER_PRICES_MAP[newCode] = JSON.parse(JSON.stringify(window.MASTER_PRICES_MAP[keyItem.code.toUpperCase()]));
                     delete window.MASTER_PRICES_MAP[keyItem.code.toUpperCase()];
@@ -3849,7 +3835,7 @@
                 keyItem.owner = name;
                 keyItem.code = newCode;
                 keyItem.role = 'master';
-                keyItem.discount = discount;
+                keyItem.discount = 0;
 
                 saveKeysListToCache();
                 renderAccessKeysList();
@@ -4571,53 +4557,8 @@
             });
 
             calcState.baseTotalPrice = total;
-
-            let discount = 0;
-            let finalTotal = total;
-            const badgeInfo = document.getElementById('payment-badge-info');
-
-            if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                const pct = window.activeMasterSession.discount || 0;
-                discount = Math.round(total * (pct / 100));
-                finalTotal = total - discount;
-                if (discount > 0) {
-                    breakdown.push({
-                        name: `Скидка для мастера: ${window.activeMasterSession.owner} (${pct}%)`,
-                        cost: -discount
-                    });
-                }
-                if (badgeInfo) {
-                    badgeInfo.innerHTML = pct > 0
-                        ? `<span>Скидка для мастера (${window.activeMasterSession.owner}, ${pct}%):</span><span class="font-extrabold text-emerald-700">−${discount.toLocaleString('ru-RU')} ₽</span>`
-                        : `<span>Расчёт по личному прайсу мастера:</span><span class="font-extrabold text-emerald-700">${window.activeMasterSession.owner}</span>`;
-                }
-            } else if (calcState.paymentMethod === 'cash') {
-                discount = Math.round(total * 0.10);
-                finalTotal = total - discount;
-                if (discount > 0) {
-                    breakdown.push({
-                        name: 'Скидка 10% (при оплате наличными)',
-                        cost: -discount
-                    });
-                }
-                if (badgeInfo) {
-                    badgeInfo.innerHTML = `
-                        <span>Скидка за наличный расчет (10%):</span>
-                        <span id="cash-discount-val" class="font-extrabold text-emerald-700">−${discount.toLocaleString('ru-RU')} ₽</span>
-                    `;
-                }
-            } else {
-                const perMonth = finalTotal > 0 ? Math.round(finalTotal / 6) : 0;
-                if (badgeInfo) {
-                    badgeInfo.innerHTML = `
-                        <span>Платеж в рассрочку 0%:</span>
-                        <span class="font-extrabold text-emerald-700">от ${perMonth.toLocaleString('ru-RU')} ₽/мес. на 6 мес.</span>
-                    `;
-                }
-            }
-
-            calcState.totalPrice = finalTotal;
-            calcState.discountAmount = discount;
+            calcState.totalPrice = total;
+            calcState.discountAmount = 0;
             calcState.breakdown = breakdown;
 
             const totalEl = document.getElementById('total-price');
@@ -4633,24 +4574,15 @@
                     </div>
                 `;
             } else {
-                if ((calcState.paymentMethod === 'cash' || calcState.paymentMethod === 'master') && discount > 0) {
-                    totalEl.innerHTML = `
-                        <div class="flex items-center justify-center gap-2">
-                            <span class="line-through text-emerald-200/80 text-lg font-normal">${total.toLocaleString('ru-RU')} ₽</span>
-                            <span>${finalTotal.toLocaleString('ru-RU')} ₽</span>
-                        </div>
-                    `;
-                } else {
-                    totalEl.textContent = `${finalTotal.toLocaleString('ru-RU')} ₽`;
-                }
+                totalEl.textContent = `${total.toLocaleString('ru-RU')} ₽`;
 
-                const perM2 = calcState.area > 0 ? Math.round(finalTotal / calcState.area) : 0;
+                const perM2 = calcState.area > 0 ? Math.round(total / calcState.area) : 0;
                 perM2El.textContent = perM2 > 0 ? `≈ ${perM2.toLocaleString('ru-RU')} ₽ / м²` : '—';
 
                 breakdownEl.innerHTML = breakdown.map(item => `
                     <div class="flex justify-between items-center text-xs py-1.5 border-b border-emerald-200/60 last:border-0">
-                        <span class="${item.cost < 0 ? 'text-emerald-700 font-bold' : 'text-stone-700'} pr-2">${item.name}</span>
-                        <span class="font-extrabold text-emerald-800 whitespace-nowrap">${item.cost > 0 ? item.cost.toLocaleString('ru-RU') + ' ₽' : '−' + Math.abs(item.cost).toLocaleString('ru-RU') + ' ₽'}</span>
+                        <span class="text-stone-700 pr-2">${item.name}</span>
+                        <span class="font-extrabold text-emerald-800 whitespace-nowrap">${item.cost.toLocaleString('ru-RU')} ₽</span>
                     </div>
                 `).join('');
             }
@@ -4702,7 +4634,7 @@
 
             let msg = `Здравствуйте! Рассчитал(а) смету натяжного потолка на сайте компании Decarat:\n\n`;
             if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                msg += `🛠 Мастер: ${window.activeMasterSession.owner} (ключ: ${window.activeMasterSession.code})\n`;
+                msg += `🛠 Мастер: ${window.activeMasterSession.owner}\n`;
             }
             msg += ` Площадь: ${calcState.area} м²\n`;
             msg += ` Периметр: ${calcState.perimeter} м.п.\n`;
@@ -4729,22 +4661,6 @@
             if (calcState.optCornice) msg += ` Скрытый карниз ПК-5: да\n`;
             if (calcState.optMask) msg += ` Маскировочная лента: да\n`;
 
-            if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                msg += `\n🛠 Условия: Личный прайс мастера ${window.activeMasterSession.owner} (скидка ${window.activeMasterSession.discount}%)\n`;
-                if (calcState.discountAmount > 0) {
-                    msg += ` Скидка мастера: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
-                }
-            } else if (calcState.paymentMethod === 'cash') {
-                msg += `\n Способ оплаты: Наличные (со скидкой 10%)\n`;
-                if (calcState.discountAmount > 0) {
-                    msg += ` Скидка 10%: −${calcState.discountAmount.toLocaleString('ru-RU')} ₽\n`;
-                }
-            } else {
-                const perM = Math.round(calcState.totalPrice / 6);
-                msg += `\n Способ оплаты: Рассрочка 0% без переплат\n`;
-                msg += ` Платеж: от ${perM.toLocaleString('ru-RU')} ₽/мес (на 6 месяцев)\n`;
-            }
-
             msg += `\n ИТОГОВАЯ СТОИМОСТЬ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n\n`;
             msg += `Хочу подтвердить замер и проконсультироваться с мастером.`;
 
@@ -4757,24 +4673,15 @@
                 return;
             }
 
-            let paymentLabel = 'Рассрочка 0%';
-            if (calcState.paymentMethod === 'master' && window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                paymentLabel = `Личный прайс мастера: ${window.activeMasterSession.owner} (${window.activeMasterSession.discount}%)`;
-            } else if (calcState.paymentMethod === 'cash') {
-                paymentLabel = 'Оплата наличными (Скидка 10%)';
-            }
-
             let text = `Смета натяжного потолка от компании Decarat:\n`;
             if (window.activeMasterSession && window.activeMasterSession.role === 'master') {
-                text += `Мастер: ${window.activeMasterSession.owner} (PIN ${window.activeMasterSession.code})\n`;
+                text += `Мастер: ${window.activeMasterSession.owner}\n`;
             }
             text += `Площадь: ${calcState.area} м² | Периметр: ${calcState.perimeter} м.п.\n`;
             text += `Полотно: ${getFabricById(calcState.fabricKey)?.shortName || getFabricById(calcState.fabricKey)?.name}\n`;
-            text += `Условия: ${paymentLabel}\n`;
             text += `------------------------------------\n`;
             calcState.breakdown.forEach(item => {
-                const sign = item.cost < 0 ? '−' : '';
-                text += `• ${item.name}: ${sign}${Math.abs(item.cost).toLocaleString('ru-RU')} ₽\n`;
+                text += `• ${item.name}: ${item.cost.toLocaleString('ru-RU')} ₽\n`;
             });
             text += `------------------------------------\n`;
             text += `ИТОГО К ОПЛАТЕ: ${calcState.totalPrice.toLocaleString('ru-RU')} ₽\n`;
@@ -4802,6 +4709,743 @@
             }, 3000);
         }
 
+        // ================= КОНСТРУКТОР И ЧЕРТЁЖ НАТЯЖНОГО ПОТОЛКА =================
+        const blueprintState = {
+            isOpen: false,
+            tool: 'move', // move | add_corner | gx53 | tube | track | chandelier | pipe | erase
+            gridPx: 36,   // 1 клетка = 0.5 метра -> 72 px = 1.0 метр
+            pxPerMeter: 72,
+            // Координаты углов в метрах относительно левого верхнего угла рабочей области
+            points: [
+                { x: 1.5, y: 1.0 },
+                { x: 6.0, y: 1.0 },
+                { x: 6.0, y: 5.0 },
+                { x: 1.5, y: 5.0 }
+            ],
+            items: [], // { id, type: 'gx53'|'tube'|'track'|'chandelier'|'pipe', x, y }
+            draggingPointIdx: -1,
+            draggingItemIdx: -1,
+            activeBlueprintId: null
+        };
+
+        function loadBlueprintsMapFromCache() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_BLUEPRINTS_MAP);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') return parsed;
+                }
+            } catch (e) {}
+            return {};
+        }
+
+        window.BLUEPRINTS_MAP = loadBlueprintsMapFromCache();
+
+        function saveBlueprintsMapToCache() {
+            try {
+                localStorage.setItem(STORAGE_KEY_BLUEPRINTS_MAP, JSON.stringify(window.BLUEPRINTS_MAP || {}));
+            } catch (e) {}
+        }
+
+        function getCurrentBlueprintOwnerId() {
+            if (window.activeMasterSession && window.activeMasterSession.role === 'master' && window.activeMasterSession.code) {
+                return 'MASTER_' + String(window.activeMasterSession.code).trim().toUpperCase();
+            }
+            if (window.isAdminLoggedIn) {
+                return 'ADMIN_MAIN';
+            }
+            return 'GUEST_LOCAL';
+        }
+
+        function getOwnerBlueprintsList() {
+            const ownerId = getCurrentBlueprintOwnerId();
+            if (!Array.isArray(window.BLUEPRINTS_MAP[ownerId])) {
+                window.BLUEPRINTS_MAP[ownerId] = [];
+            }
+            return window.BLUEPRINTS_MAP[ownerId];
+        }
+
+        function updateBlueprintOwnerLabel() {
+            const labelEl = document.getElementById('bp-profile-owner-label');
+            if (!labelEl) return;
+            if (window.activeMasterSession && window.activeMasterSession.owner) {
+                labelEl.textContent = `Сохранённые чертежи мастера (${window.activeMasterSession.owner})`;
+            } else if (window.isAdminLoggedIn) {
+                labelEl.textContent = 'Сохранённые чертежи администратора';
+            } else {
+                labelEl.textContent = 'Мои сохранённые чертежи';
+            }
+        }
+
+        function centerBlueprintOnCanvas() {
+            const canvas = document.getElementById('blueprint-canvas');
+            if (!canvas || !canvas.parentElement) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            if (w === 0 || h === 0) return;
+
+            const pts = blueprintState.points;
+            if (!pts || pts.length === 0) return;
+
+            const ppm = blueprintState.pxPerMeter;
+            const xs = pts.map(p => p.x);
+            const ys = pts.map(p => p.y);
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            const minY = Math.min(...ys);
+            const maxY = Math.max(...ys);
+
+            const polyCenterM_X = (minX + maxX) / 2;
+            const polyCenterM_Y = (minY + maxY) / 2;
+
+            const canvasCenterM_X = (w / 2) / ppm;
+            const canvasCenterM_Y = (h / 2) / ppm;
+
+            const dx = Math.round((canvasCenterM_X - polyCenterM_X) * 4) / 4;
+            const dy = Math.round((canvasCenterM_Y - polyCenterM_Y) * 4) / 4;
+
+            if (dx === 0 && dy === 0) return;
+
+            pts.forEach(p => {
+                p.x = Math.max(0.25, Math.round((p.x + dx) * 4) / 4);
+                p.y = Math.max(0.25, Math.round((p.y + dy) * 4) / 4);
+            });
+
+            blueprintState.items.forEach(item => {
+                item.x = Math.max(0.25, Math.round((item.x + dx) * 4) / 4);
+                item.y = Math.max(0.25, Math.round((item.y + dy) * 4) / 4);
+            });
+        }
+
+        function toggleBlueprintBuilder() {
+            blueprintState.isOpen = !blueprintState.isOpen;
+            const panel = document.getElementById('blueprint-builder-panel');
+            const btnText = document.getElementById('toggle-blueprint-btn-text');
+            const btnArrow = document.getElementById('toggle-blueprint-btn-arrow');
+
+            if (blueprintState.isOpen) {
+                if (panel) panel.classList.remove('hidden');
+                if (btnText) btnText.textContent = 'Свернуть чертёжник';
+                if (btnArrow) btnArrow.textContent = '▴';
+                updateBlueprintOwnerLabel();
+                renderSavedBlueprintsList();
+                setTimeout(() => {
+                    resizeBlueprintCanvas();
+                    centerBlueprintOnCanvas();
+                    updateBlueprintStats();
+                    renderBlueprintCanvas();
+                }, 20);
+            } else {
+                if (panel) panel.classList.add('hidden');
+                if (btnText) btnText.textContent = 'Открыть чертёжник';
+                if (btnArrow) btnArrow.textContent = '▾';
+            }
+        }
+
+        function setBlueprintTool(toolKey) {
+            blueprintState.tool = toolKey;
+            const tools = ['move', 'add_corner', 'gx53', 'tube', 'track', 'chandelier', 'pipe', 'erase'];
+            tools.forEach(t => {
+                const btn = document.getElementById(`bp-tool-${t}`);
+                if (!btn) return;
+                if (t === toolKey) {
+                    btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-600 bg-emerald-600 text-white transition';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-white text-stone-700 hover:bg-stone-100 transition';
+                }
+            });
+        }
+
+        function applyBlueprintPreset(presetName) {
+            blueprintState.activeBlueprintId = null;
+            if (presetName === 'rect') {
+                blueprintState.points = [
+                    { x: 1.5, y: 1.0 },
+                    { x: 6.0, y: 1.0 },
+                    { x: 6.0, y: 5.0 },
+                    { x: 1.5, y: 5.0 }
+                ];
+            } else if (presetName === 'lshape') {
+                blueprintState.points = [
+                    { x: 1.5, y: 1.0 },
+                    { x: 6.5, y: 1.0 },
+                    { x: 6.5, y: 3.0 },
+                    { x: 4.0, y: 3.0 },
+                    { x: 4.0, y: 5.0 },
+                    { x: 1.5, y: 5.0 }
+                ];
+            } else if (presetName === 'ushape') {
+                blueprintState.points = [
+                    { x: 1.0, y: 1.0 },
+                    { x: 7.0, y: 1.0 },
+                    { x: 7.0, y: 5.0 },
+                    { x: 5.0, y: 5.0 },
+                    { x: 5.0, y: 3.0 },
+                    { x: 3.0, y: 3.0 },
+                    { x: 3.0, y: 5.0 },
+                    { x: 1.0, y: 5.0 }
+                ];
+            } else if (presetName === 'bevel') {
+                blueprintState.points = [
+                    { x: 1.5, y: 1.0 },
+                    { x: 5.0, y: 1.0 },
+                    { x: 6.5, y: 2.5 },
+                    { x: 6.5, y: 5.0 },
+                    { x: 1.5, y: 5.0 }
+                ];
+            }
+            centerBlueprintOnCanvas();
+            updateBlueprintStats();
+            renderBlueprintCanvas();
+        }
+
+        function clearBlueprintCanvas() {
+            blueprintState.items = [];
+            blueprintState.activeBlueprintId = null;
+            const nameInp = document.getElementById('blueprint-project-name');
+            if (nameInp) nameInp.value = '';
+            applyBlueprintPreset('rect');
+            showToast('Чертёж очищен');
+        }
+
+        function computeBlueprintMetrics() {
+            const pts = blueprintState.points;
+            let area2 = 0;
+            let perim = 0;
+            for (let i = 0; i < pts.length; i++) {
+                const p1 = pts[i];
+                const p2 = pts[(i + 1) % pts.length];
+                area2 += (p1.x * p2.y - p2.x * p1.y);
+                perim += Math.hypot(p2.x - p1.x, p2.y - p1.y);
+            }
+            const area = Math.abs(area2) / 2;
+            const corners = pts.length;
+            return {
+                area: Math.round(area * 10) / 10,
+                perimeter: Math.round(perim * 10) / 10,
+                corners
+            };
+        }
+
+        function updateBlueprintStats() {
+            const metrics = computeBlueprintMetrics();
+            const areaEl = document.getElementById('bp-stat-area');
+            const perimEl = document.getElementById('bp-stat-perim');
+            const cornersEl = document.getElementById('bp-stat-corners');
+            const itemsEl = document.getElementById('bp-stat-items');
+
+            if (areaEl) areaEl.textContent = `${metrics.area.toFixed(1)} м²`;
+            if (perimEl) perimEl.textContent = `${metrics.perimeter.toFixed(1)} м.п.`;
+            if (cornersEl) cornersEl.textContent = `${metrics.corners} шт.`;
+            if (itemsEl) itemsEl.textContent = `${blueprintState.items.length} шт.`;
+        }
+
+        function applyBlueprintToCalculator() {
+            const metrics = computeBlueprintMetrics();
+
+            // 1. Площадь
+            calcState.area = metrics.area;
+            const areaInput = document.getElementById('input-area');
+            const areaSlider = document.getElementById('slider-area');
+            const areaLbl = document.getElementById('area-val-label');
+            if (areaInput) areaInput.value = metrics.area;
+            if (areaSlider) areaSlider.value = Math.min(metrics.area, 100);
+            if (areaLbl) areaLbl.textContent = metrics.area;
+
+            // 2. Периметр
+            isPerimeterManuallyEdited = true;
+            calcState.perimeter = metrics.perimeter;
+            const perimInput = document.getElementById('input-perimeter');
+            const perimSlider = document.getElementById('slider-perimeter');
+            const perimLbl = document.getElementById('perimeter-val-label');
+            if (perimInput) perimInput.value = metrics.perimeter;
+            if (perimSlider) perimSlider.value = Math.min(metrics.perimeter, 120);
+            if (perimLbl) perimLbl.textContent = metrics.perimeter;
+
+            // 3. Дополнительные углы (свыше 4)
+            const extraCorners = Math.max(0, metrics.corners - 4);
+            calcState.corners = extraCorners;
+            const cornersEl = document.getElementById('corners-count');
+            if (cornersEl) cornersEl.textContent = extraCorners;
+
+            // 4. Светильники, люстра и трубы с чертежа
+            const pipeCount = blueprintState.items.filter(it => it.type === 'pipe').length;
+            calcState.pipes = pipeCount;
+            const pipesEl = document.getElementById('pipes-count');
+            if (pipesEl) pipesEl.textContent = pipeCount;
+
+            const hasChandelier = blueprintState.items.some(it => it.type === 'chandelier');
+            calcState.chandelier = hasChandelier;
+            const chandCb = document.getElementById('has-chandelier');
+            if (chandCb) chandCb.checked = hasChandelier;
+
+            const gx53Count = blueprintState.items.filter(it => it.type === 'gx53').length;
+            const tubeCount = blueprintState.items.filter(it => it.type === 'tube').length;
+            const trackCount = blueprintState.items.filter(it => it.type === 'track').length;
+
+            if (gx53Count > 0 || tubeCount > 0 || trackCount > 0) {
+                ['gx53', 'tube', 'track'].forEach(catKey => {
+                    const cat = LAMP_VARIANTS_CATALOG[catKey];
+                    if (cat && Array.isArray(cat.items)) {
+                        cat.items.forEach(v => {
+                            calcState.lampVariants[v.id] = 0;
+                        });
+                    }
+                });
+                if (gx53Count > 0 && LAMP_VARIANTS_CATALOG.gx53?.defaultVariantId) {
+                    calcState.lampVariants[LAMP_VARIANTS_CATALOG.gx53.defaultVariantId] = gx53Count;
+                }
+                if (tubeCount > 0 && LAMP_VARIANTS_CATALOG.tube?.defaultVariantId) {
+                    calcState.lampVariants[LAMP_VARIANTS_CATALOG.tube.defaultVariantId] = tubeCount;
+                }
+                if (trackCount > 0 && LAMP_VARIANTS_CATALOG.track?.defaultVariantId) {
+                    calcState.lampVariants[LAMP_VARIANTS_CATALOG.track.defaultVariantId] = trackCount;
+                }
+            }
+
+            syncCategoryCountersUI();
+            calculateTotal();
+            showToast(`Данные с чертежа (${metrics.area} м², ${metrics.perimeter} м.п.) перенесены в смету!`);
+        }
+
+        function resizeBlueprintCanvas() {
+            const canvas = document.getElementById('blueprint-canvas');
+            if (!canvas || !canvas.parentElement) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            renderBlueprintCanvas();
+        }
+
+        function renderBlueprintCanvas() {
+            const canvas = document.getElementById('blueprint-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            if (w === 0 || h === 0) return;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // 1. Фоновая миллиметровая сетка (шаг 0.5 м = 36 px)
+            const step = blueprintState.gridPx;
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= w; x += step) {
+                ctx.strokeStyle = (x % (step * 2) === 0) ? '#e7e5e4' : '#f5f5f4';
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= h; y += step) {
+                ctx.strokeStyle = (y % (step * 2) === 0) ? '#e7e5e4' : '#f5f5f4';
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+
+            const ppm = blueprintState.pxPerMeter;
+            const pts = blueprintState.points;
+            if (pts.length < 3) return;
+
+            // 2. Заливка контура потолка
+            ctx.save();
+            ctx.beginPath();
+            pts.forEach((p, idx) => {
+                const px = p.x * ppm;
+                const py = p.y * ppm;
+                if (idx === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            });
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.10)';
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#059669';
+            ctx.stroke();
+            ctx.restore();
+
+            // 3. Подписи длин стен (в метрах)
+            ctx.font = 'bold 11px ui-sans-serif, system-ui, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let i = 0; i < pts.length; i++) {
+                const p1 = pts[i];
+                const p2 = pts[(i + 1) % pts.length];
+                const lenMeters = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+                const midX = ((p1.x + p2.x) / 2) * ppm;
+                const midY = ((p1.y + p2.y) / 2) * ppm;
+
+                const label = `${lenMeters.toFixed(2)} м`;
+                const textW = ctx.measureText(label).width + 12;
+
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#a7f3d0';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.roundRect(midX - textW / 2, midY - 10, textW, 20, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#065f46';
+                ctx.fillText(label, midX, midY);
+            }
+
+            // 4. Отрисовка светильников, люстр и труб на схеме
+            blueprintState.items.forEach(item => {
+                const ix = item.x * ppm;
+                const iy = item.y * ppm;
+
+                ctx.save();
+                if (item.type === 'gx53') {
+                    ctx.beginPath();
+                    ctx.arc(ix, iy, 11, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fef3c7';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#d97706';
+                    ctx.stroke();
+                    ctx.fillStyle = '#92400e';
+                    ctx.font = 'bold 8px sans-serif';
+                    ctx.fillText('GX', ix, iy);
+                } else if (item.type === 'tube') {
+                    ctx.beginPath();
+                    ctx.arc(ix, iy, 11, 0, Math.PI * 2);
+                    ctx.fillStyle = '#292524';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#10b981';
+                    ctx.stroke();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 8px sans-serif';
+                    ctx.fillText('ТБ', ix, iy);
+                } else if (item.type === 'track') {
+                    ctx.fillStyle = '#1c1917';
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.roundRect(ix - 24, iy - 5, 48, 10, 4);
+                    ctx.fill();
+                    ctx.stroke();
+                } else if (item.type === 'chandelier') {
+                    ctx.beginPath();
+                    ctx.arc(ix, iy, 16, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fde68a';
+                    ctx.fill();
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#b45309';
+                    ctx.stroke();
+                    ctx.fillStyle = '#78350f';
+                    ctx.font = 'bold 9px sans-serif';
+                    ctx.fillText('ЛЮСТРА', ix, iy);
+                } else if (item.type === 'pipe') {
+                    ctx.beginPath();
+                    ctx.arc(ix, iy, 9, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffe4e6';
+                    ctx.fill();
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#e11d48';
+                    ctx.stroke();
+                }
+                ctx.restore();
+            });
+
+            // 5. Отрисовка вершин (углов)
+            pts.forEach((p, idx) => {
+                const px = p.x * ppm;
+                const py = p.y * ppm;
+
+                ctx.beginPath();
+                ctx.arc(px, py, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#059669';
+                ctx.fill();
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 9px sans-serif';
+                ctx.fillText(String(idx + 1), px, py);
+            });
+        }
+
+        function getCanvasPointerMeters(clientX, clientY) {
+            const canvas = document.getElementById('blueprint-canvas');
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left;
+            const py = clientY - rect.top;
+            return {
+                x: px / blueprintState.pxPerMeter,
+                y: py / blueprintState.pxPerMeter,
+                px,
+                py
+            };
+        }
+
+        function snapMetersToGrid(val) {
+            // Привязка к шагу 0.25 м для удобного и ровного построения
+            return Math.max(0.25, Math.round(val * 4) / 4);
+        }
+
+        function distToSegmentMeters(px, py, x1, y1, x2, y2) {
+            const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+            if (l2 === 0) return Math.hypot(px - x1, py - y1);
+            let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+        }
+
+        function initBlueprintCanvasEvents() {
+            const canvas = document.getElementById('blueprint-canvas');
+            if (!canvas) return;
+
+            const handleStart = (clientX, clientY) => {
+                const pos = getCanvasPointerMeters(clientX, clientY);
+                const pts = blueprintState.points;
+                const hitRadiusMeters = 18 / blueprintState.pxPerMeter;
+
+                // Проверяем попадание в угол
+                const pointIdx = pts.findIndex(p => Math.hypot(p.x - pos.x, p.y - pos.y) <= hitRadiusMeters);
+                // Проверяем попадание в элемент (светильник/труба)
+                const itemIdx = blueprintState.items.findIndex(it => Math.hypot(it.x - pos.x, it.y - pos.y) <= hitRadiusMeters);
+
+                if (blueprintState.tool === 'erase') {
+                    if (itemIdx !== -1) {
+                        blueprintState.items.splice(itemIdx, 1);
+                        updateBlueprintStats();
+                        renderBlueprintCanvas();
+                        return;
+                    }
+                    if (pointIdx !== -1 && pts.length > 3) {
+                        pts.splice(pointIdx, 1);
+                        updateBlueprintStats();
+                        renderBlueprintCanvas();
+                        return;
+                    }
+                    return;
+                }
+
+                if (blueprintState.tool === 'add_corner') {
+                    // Находим ближайшую стену и вставляем новый угол
+                    let bestIdx = -1;
+                    let bestDist = 20 / blueprintState.pxPerMeter;
+                    for (let i = 0; i < pts.length; i++) {
+                        const p1 = pts[i];
+                        const p2 = pts[(i + 1) % pts.length];
+                        const d = distToSegmentMeters(pos.x, pos.y, p1.x, p1.y, p2.x, p2.y);
+                        if (d < bestDist) {
+                            bestDist = d;
+                            bestIdx = i;
+                        }
+                    }
+                    if (bestIdx !== -1) {
+                        pts.splice(bestIdx + 1, 0, {
+                            x: snapMetersToGrid(pos.x),
+                            y: snapMetersToGrid(pos.y)
+                        });
+                        updateBlueprintStats();
+                        renderBlueprintCanvas();
+                        setBlueprintTool('move');
+                        showToast('Новый угол добавлен на стену');
+                    }
+                    return;
+                }
+
+                if (['gx53', 'tube', 'track', 'chandelier', 'pipe'].includes(blueprintState.tool)) {
+                    if (itemIdx !== -1) {
+                        blueprintState.draggingItemIdx = itemIdx;
+                        return;
+                    }
+                    blueprintState.items.push({
+                        id: `bp_item_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                        type: blueprintState.tool,
+                        x: snapMetersToGrid(pos.x),
+                        y: snapMetersToGrid(pos.y)
+                    });
+                    updateBlueprintStats();
+                    renderBlueprintCanvas();
+                    return;
+                }
+
+                // Режим 'move'
+                if (pointIdx !== -1) {
+                    blueprintState.draggingPointIdx = pointIdx;
+                } else if (itemIdx !== -1) {
+                    blueprintState.draggingItemIdx = itemIdx;
+                }
+            };
+
+            const handleMove = (clientX, clientY) => {
+                if (blueprintState.draggingPointIdx === -1 && blueprintState.draggingItemIdx === -1) return;
+                const pos = getCanvasPointerMeters(clientX, clientY);
+                const sx = snapMetersToGrid(pos.x);
+                const sy = snapMetersToGrid(pos.y);
+
+                if (blueprintState.draggingPointIdx !== -1) {
+                    blueprintState.points[blueprintState.draggingPointIdx] = { x: sx, y: sy };
+                    updateBlueprintStats();
+                    renderBlueprintCanvas();
+                } else if (blueprintState.draggingItemIdx !== -1) {
+                    blueprintState.items[blueprintState.draggingItemIdx].x = sx;
+                    blueprintState.items[blueprintState.draggingItemIdx].y = sy;
+                    renderBlueprintCanvas();
+                }
+            };
+
+            const handleEnd = () => {
+                blueprintState.draggingPointIdx = -1;
+                blueprintState.draggingItemIdx = -1;
+            };
+
+            canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+            window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+            window.addEventListener('mouseup', handleEnd);
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 0) {
+                    e.preventDefault();
+                    handleStart(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (blueprintState.draggingPointIdx !== -1 || blueprintState.draggingItemIdx !== -1) {
+                    e.preventDefault();
+                    if (e.touches.length > 0) {
+                        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', handleEnd);
+            window.addEventListener('resize', () => {
+                if (blueprintState.isOpen) {
+                    resizeBlueprintCanvas();
+                    centerBlueprintOnCanvas();
+                    renderBlueprintCanvas();
+                }
+            });
+        }
+
+        function saveCurrentBlueprintToProfile() {
+            const ownerId = getCurrentBlueprintOwnerId();
+            const nameInp = document.getElementById('blueprint-project-name');
+            const metrics = computeBlueprintMetrics();
+            const title = (nameInp ? nameInp.value : '').trim() || `Замер ${metrics.area} м² (${new Date().toLocaleDateString('ru-RU')})`;
+
+            const list = getOwnerBlueprintsList();
+            const bpRecord = {
+                id: blueprintState.activeBlueprintId || `bp_${Date.now()}`,
+                title,
+                area: metrics.area,
+                perimeter: metrics.perimeter,
+                corners: metrics.corners,
+                points: JSON.parse(JSON.stringify(blueprintState.points)),
+                items: JSON.parse(JSON.stringify(blueprintState.items)),
+                updatedAt: Date.now()
+            };
+
+            const existingIdx = list.findIndex(b => b.id === bpRecord.id);
+            if (existingIdx !== -1) {
+                list[existingIdx] = bpRecord;
+            } else {
+                list.unshift(bpRecord);
+            }
+            blueprintState.activeBlueprintId = bpRecord.id;
+
+            saveBlueprintsMapToCache();
+            renderSavedBlueprintsList();
+
+            if (window.cloudSync && window.cloudSync.enabled && window.cloudSync.saveOwnerBlueprints) {
+                window.cloudSync.saveOwnerBlueprints(ownerId, list);
+            }
+
+            showToast(`Чертёж «${title}» сохранён в ваш профиль`);
+        }
+
+        function loadBlueprintFromProfile(bpId) {
+            const list = getOwnerBlueprintsList();
+            const found = list.find(b => b.id === bpId);
+            if (!found) return;
+
+            blueprintState.activeBlueprintId = found.id;
+            blueprintState.points = JSON.parse(JSON.stringify(found.points || []));
+            blueprintState.items = JSON.parse(JSON.stringify(found.items || []));
+
+            const nameInp = document.getElementById('blueprint-project-name');
+            if (nameInp) nameInp.value = found.title || '';
+
+            centerBlueprintOnCanvas();
+            updateBlueprintStats();
+            renderBlueprintCanvas();
+            showToast(`Чертёж «${found.title}» загружен на холст`);
+        }
+
+        function deleteBlueprintFromProfile(bpId) {
+            const ownerId = getCurrentBlueprintOwnerId();
+            const list = getOwnerBlueprintsList();
+            const target = list.find(b => b.id === bpId);
+            window.BLUEPRINTS_MAP[ownerId] = list.filter(b => b.id !== bpId);
+
+            if (blueprintState.activeBlueprintId === bpId) {
+                blueprintState.activeBlueprintId = null;
+            }
+
+            saveBlueprintsMapToCache();
+            renderSavedBlueprintsList();
+
+            if (window.cloudSync && window.cloudSync.enabled && window.cloudSync.saveOwnerBlueprints) {
+                window.cloudSync.saveOwnerBlueprints(ownerId, window.BLUEPRINTS_MAP[ownerId]);
+            }
+
+            showToast(`Чертёж «${target ? target.title : ''}» удалён`);
+        }
+
+        function renderSavedBlueprintsList() {
+            const container = document.getElementById('saved-blueprints-list');
+            if (!container) return;
+
+            const list = getOwnerBlueprintsList();
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="py-3 text-center text-[11px] text-stone-400 italic bg-stone-50 rounded-xl border border-stone-200/70">
+                        У вас пока нет сохранённых чертежей. Нарисуйте комнату и нажмите «Сохранить чертёж».
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(bp => {
+                const dateStr = bp.updatedAt ? new Date(bp.updatedAt).toLocaleDateString('ru-RU') : '';
+                return `
+                    <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-stone-50 border border-stone-200 hover:border-emerald-300 transition">
+                        <div class="min-w-0 flex-1">
+                            <span class="text-xs font-bold text-stone-900 block truncate">${bp.title}</span>
+                            <span class="text-[11px] text-stone-500 block">
+                                S: ${bp.area} м² • P: ${bp.perimeter} м • Углов: ${bp.corners} • Элементов: ${(bp.items || []).length} ${dateStr ? '• ' + dateStr : ''}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="loadBlueprintFromProfile('${bp.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition">
+                                Открыть
+                            </button>
+                            <button type="button" onclick="deleteBlueprintFromProfile('${bp.id}')" class="w-7 h-7 rounded-lg bg-white hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-stone-400 hover:text-rose-600 flex items-center justify-center text-xs font-bold transition" title="Удалить чертёж">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function initApp() {
             captureCurrentPricesAsSharedBase();
             initAccessControl();
@@ -4810,6 +5454,9 @@
             updateActiveCardStyles();
             calculateTotal();
             updateHeroQuickPrice();
+            initBlueprintCanvasEvents();
+            updateBlueprintOwnerLabel();
+            renderSavedBlueprintsList();
         }
 
         if (document.readyState === 'loading') {
@@ -4826,7 +5473,9 @@
             saveAll: async () => {},
             saveMasterPrices: async () => {},
             loadMasterPrices: async () => {},
-            deleteMasterPrices: async () => {}
+            deleteMasterPrices: async () => {},
+            saveOwnerBlueprints: async () => {},
+            loadMasterBlueprints: async () => {}
         };
 
         async function initCloudDatabase() {
@@ -4871,8 +5520,49 @@
 
                 const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'main');
                 const getMasterDocRef = (masterCode) => doc(db, 'artifacts', appId, 'public', 'data', 'master_prices', String(masterCode).trim().toUpperCase());
+                const getBlueprintDocRef = (ownerId) => doc(db, 'artifacts', appId, 'public', 'data', 'master_blueprints', String(ownerId).trim().toUpperCase());
 
                 window.cloudSync.enabled = true;
+                window.cloudSync.saveOwnerBlueprints = async (ownerId, blueprintsList) => {
+                    if (!auth.currentUser || !ownerId) return;
+                    const normalizedOwner = String(ownerId).trim().toUpperCase();
+                    try {
+                        await setDoc(getBlueprintDocRef(normalizedOwner), {
+                            ownerId: normalizedOwner,
+                            blueprintsJson: JSON.stringify(blueprintsList || []),
+                            updatedAt: Date.now()
+                        }, { merge: true });
+                    } catch (err) {
+                        console.error('Ошибка сохранения чертежей в облачную БД:', err);
+                        if (typeof showToast === 'function') {
+                            showToast('Ошибка сохранения чертежей в облачную БД');
+                        }
+                    }
+                };
+
+                window.cloudSync.loadMasterBlueprints = async (masterCodeOrOwnerId) => {
+                    if (!auth.currentUser || !masterCodeOrOwnerId) return;
+                    const raw = String(masterCodeOrOwnerId).trim().toUpperCase();
+                    const ownerId = raw.startsWith('MASTER_') || raw === 'ADMIN_MAIN' ? raw : `MASTER_${raw}`;
+                    try {
+                        const snap = await getDoc(getBlueprintDocRef(ownerId));
+                        if (snap.exists()) {
+                            const data = snap.data();
+                            if (data.blueprintsJson) {
+                                const parsed = JSON.parse(data.blueprintsJson);
+                                if (Array.isArray(parsed)) {
+                                    window.BLUEPRINTS_MAP[ownerId] = parsed;
+                                    saveBlueprintsMapToCache();
+                                    if (getCurrentBlueprintOwnerId() === ownerId) {
+                                        renderSavedBlueprintsList();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Ошибка загрузки чертежей из облачной БД:', err);
+                    }
+                };
                 window.cloudSync.saveMasterPrices = async (masterCode, bucketObj) => {
                     if (!auth.currentUser || !masterCode) return;
                     const normalizedCode = String(masterCode).trim().toUpperCase();
@@ -5036,6 +5726,9 @@
                 const currentMasterCode = getCurrentMasterKeyId();
                 if (currentMasterCode) {
                     window.cloudSync.loadMasterPrices(currentMasterCode);
+                    window.cloudSync.loadMasterBlueprints(currentMasterCode);
+                } else if (window.isAdminLoggedIn) {
+                    window.cloudSync.loadMasterBlueprints('ADMIN_MAIN');
                 }
             } catch (e) {
                 console.warn('Облачная БД недоступна в офлайн-режиме предпросмотра:', e);
