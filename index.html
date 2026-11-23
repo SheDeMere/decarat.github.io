@@ -2770,8 +2770,34 @@
 
         function clearSavedAuthCache() {
             try {
-                localStorage.removeItem(STORAGE_KEY_AUTH_CODE);
+                const keysToRemove = [
+                    STORAGE_KEY_AUTH_CODE,
+                    STORAGE_KEY_ALLOWED_KEYS,
+                    STORAGE_KEY_FABRICS_CATALOG,
+                    STORAGE_KEY_LAMP_CATALOG,
+                    STORAGE_KEY_EXTRA_SERVICES,
+                    STORAGE_KEY_MASTER_PRICES_MAP,
+                    STORAGE_KEY_BLUEPRINTS_MAP,
+                    STORAGE_KEY_ADMIN_PIN,
+                    'decarat_access_locked_v1'
+                ];
+                keysToRemove.forEach(k => localStorage.removeItem(k));
+                localStorage.clear();
             } catch (e) {}
+            try {
+                sessionStorage.clear();
+            } catch (e) {}
+        }
+
+        function resetLocalAuthCache() {
+            clearSavedAuthCache();
+            window.MASTER_PRICES_MAP = {};
+            window.BLUEPRINTS_MAP = {};
+            const inputEl = document.getElementById('access-code-input');
+            if (inputEl) inputEl.value = '';
+            const errorEl = document.getElementById('access-code-error');
+            if (errorEl) errorEl.classList.add('hidden');
+            showToast('Весь локальный кэш полностью очищен');
         }
 
         function resetLocalAuthCache() {
@@ -2927,6 +2953,19 @@
             window.isSessionUnlocked = false;
             window.isAdminLoggedIn = false;
             window.isMasterEditorMode = false;
+            window.MASTER_PRICES_MAP = {};
+            window.BLUEPRINTS_MAP = {};
+            blueprintState.items = [];
+            blueprintState.activeBlueprintId = null;
+
+            const accessInput = document.getElementById('access-code-input');
+            if (accessInput) accessInput.value = '';
+            const adminPinInput = document.getElementById('admin-pin-input');
+            if (adminPinInput) adminPinInput.value = '';
+            const bpNameInput = document.getElementById('blueprint-project-name');
+            if (bpNameInput) bpNameInput.value = '';
+
+            if (typeof closeAdminModal === 'function') closeAdminModal();
             updateMasterPaymentButtonUI();
             updateLogoutButtonVisibility();
             refreshPricesForSessionAndUi();
