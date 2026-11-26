@@ -962,6 +962,73 @@
                             </div>
                         </div>
 
+                        <!-- Резиновая (маскировочная) вставка -->
+                        <div class="space-y-2 md:col-span-2 pt-4 border-t border-stone-100">
+                            <div class="flex flex-wrap justify-between items-center gap-2 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <label class="font-bold text-stone-700">Резиновая вставка (маскировочная):</label>
+                                    <span class="text-[11px] text-stone-400 font-medium">(<span id="lbl-rubber-insert-price">90</span> ₽/м.п.)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <!-- Выбор цвета вставки: Белая или Чёрная -->
+                                    <div class="inline-flex rounded-xl bg-stone-100 p-1 border border-stone-200">
+                                        <button type="button" id="btn-insert-white" onclick="setRubberInsertColor('white')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-stone-900 shadow-sm border border-stone-200 flex items-center gap-1.5 transition">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-white border border-stone-400"></span>
+                                            <span>Белая</span>
+                                        </button>
+                                        <button type="button" id="btn-insert-black" onclick="setRubberInsertColor('black')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-stone-600 hover:text-stone-900 flex items-center gap-1.5 transition">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-stone-900"></span>
+                                            <span>Чёрная</span>
+                                        </button>
+                                    </div>
+                                    <span class="font-extrabold text-stone-900 text-sm ml-1"><span id="rubber-insert-val-label">0</span> м.п.</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="slider-rubber-insert" min="0" max="120" value="0" step="1" oninput="syncRubberInsertFromSlider(this.value)" onchange="syncRubberInsertFromSlider(this.value)" class="w-full h-3 bg-stone-200 rounded-lg cursor-pointer">
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <input type="number" id="input-rubber-insert" min="0" max="500" step="0.5" value="0" oninput="syncRubberInsertFromInput(this.value)" class="w-16 px-2 py-1 text-xs bg-stone-50 border border-stone-300 rounded-lg text-stone-900 font-bold text-center">
+                                    <span class="text-xs text-stone-500 whitespace-nowrap">м.п.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 1. Теневой профиль Еврокраб -->
+                        <div class="space-y-2 md:col-span-2 pt-4 border-t border-stone-100">
+                            <div class="flex flex-wrap justify-between items-center gap-2 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <label id="lbl-shadow-profile-slider-title" class="font-bold text-stone-700">Теневой профиль EuroKraab:</label>
+                                    <span class="text-[11px] text-stone-400 font-medium">(<span id="lbl-shadow-profile-price">450</span> ₽/м.п.)</span>
+                                </div>
+                                <span class="font-extrabold text-stone-900 text-sm"><span id="shadow-profile-val-label">0</span> м.п.</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="slider-shadow-profile" min="0" max="120" value="0" step="1" oninput="syncShadowProfileFromSlider(this.value)" onchange="syncShadowProfileFromSlider(this.value)" class="w-full h-3 bg-stone-200 rounded-lg cursor-pointer">
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <input type="number" id="input-shadow-profile" min="0" max="500" step="0.5" value="0" oninput="syncShadowProfileFromInput(this.value)" class="w-16 px-2 py-1 text-xs bg-stone-50 border border-stone-300 rounded-lg text-stone-900 font-bold text-center">
+                                    <span class="text-xs text-stone-500 whitespace-nowrap">м.п.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Парящий контур Про ЛЕД -->
+                        <div class="space-y-2 md:col-span-2 pt-4 border-t border-stone-100">
+                            <div class="flex flex-wrap justify-between items-center gap-2 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <label id="lbl-floating-contour-slider-title" class="font-bold text-stone-700">Парящий контур Pro LED:</label>
+                                    <span class="text-[11px] text-stone-400 font-medium">(<span id="lbl-floating-contour-price">550</span> ₽/м.п.)</span>
+                                </div>
+                                <span class="font-extrabold text-stone-900 text-sm"><span id="floating-contour-val-label">0</span> м.п.</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="slider-floating-contour" min="0" max="120" value="0" step="1" oninput="syncFloatingContourFromSlider(this.value)" onchange="syncFloatingContourFromSlider(this.value)" class="w-full h-3 bg-stone-200 rounded-lg cursor-pointer">
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <input type="number" id="input-floating-contour" min="0" max="500" step="0.5" value="0" oninput="syncFloatingContourFromInput(this.value)" class="w-16 px-2 py-1 text-xs bg-stone-50 border border-stone-300 rounded-lg text-stone-900 font-bold text-center">
+                                    <span class="text-xs text-stone-500 whitespace-nowrap">м.п.</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Периметр (Скрытый функционал без ползунка) -->
                         <div class="hidden">
                             <span id="perimeter-val-label">0</span>
@@ -1129,34 +1196,6 @@
                     <!-- Карточки фактур полотен -->
                     <div id="fabrics-grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- Рендерится динамически JS -->
-                    </div>
-
-                    <!-- Профиль примыкания -->
-                    <div class="mt-6 pt-5 border-t border-stone-100">
-                        <label class="text-xs font-bold text-stone-500 uppercase tracking-wider block mb-3">Тип профиля по периметру:</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <label class="profile-card border border-emerald-600 bg-emerald-50/50 p-3.5 rounded-xl cursor-pointer flex items-center gap-3">
-                                <input type="radio" name="profile_type" value="classic" checked onchange="calculateTotal()">
-                                <div>
-                                    <span class="text-xs font-bold text-stone-900 block">Классический алюминий</span>
-                                    <span class="text-[11px] text-stone-500">Включен в базовый монтаж</span>
-                                </div>
-                            </label>
-                            <label class="profile-card border border-stone-200 p-3.5 rounded-xl cursor-pointer flex items-center gap-3">
-                                <input type="radio" name="profile_type" value="shadow" onchange="calculateTotal()">
-                                <div>
-                                    <span class="text-xs font-bold text-stone-900 block">Теневой зазор (EuroKraab)</span>
-                                    <span id="price-display-profile-shadow" class="text-[11px] text-stone-500">+ 450 ₽ / пог. метр</span>
-                                </div>
-                            </label>
-                            <label class="profile-card border border-stone-200 p-3.5 rounded-xl cursor-pointer flex items-center gap-3">
-                                <input type="radio" name="profile_type" value="floating" onchange="calculateTotal()">
-                                <div>
-                                    <span class="text-xs font-bold text-stone-900 block">Парящий профиль под LED</span>
-                                    <span id="price-display-profile-floating" class="text-[11px] text-stone-500">+ 550 ₽ / пог. метр</span>
-                                </div>
-                            </label>
-                        </div>
                     </div>
                 </div>
 
@@ -1903,7 +1942,22 @@
 
                         <div class="admin-card space-y-4">
                             <div class="border-b border-stone-100 pb-3 text-center">
-                                <h4 class="text-sm font-extrabold text-stone-900 whitespace-nowrap">3. Дополнительные работы и услуги</h4>
+                                <h4 class="text-sm font-extrabold text-stone-900 whitespace-nowrap">3. Резиновая вставка (за пог. метр)</h4>
+                            </div>
+                            <div class="admin-price-row">
+                                <span id="lbl-admin-rubber-insert" class="admin-price-label">Маскировочная лента по периметру</span>
+                                <div class="flex items-center gap-4 shrink-0">
+                                    <span id="val-admin-rubber-insert" class="px-3.5 h-9 rounded-xl bg-white border border-stone-200 inline-flex items-center justify-center text-xs font-extrabold text-stone-900 whitespace-nowrap">90 ₽/м</span>
+                                    <button type="button" onclick="openAdminEditModal('service', '', 'mask')" class="w-9 h-9 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 transition" title="Редактировать резиновую вставку">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="admin-card space-y-4">
+                            <div class="border-b border-stone-100 pb-3 text-center">
+                                <h4 class="text-sm font-extrabold text-stone-900 whitespace-nowrap">4. Дополнительные работы и услуги</h4>
                             </div>
                             <div id="admin-extra-services-list" class="space-y-3">
                                 <!-- Рендерится динамически JS -->
@@ -2112,7 +2166,7 @@
             profiles: {
                 classic: { name: 'Классический алюминий', price: 0 },
                 shadow: { name: 'Теневой EuroKraab', price: 450 },
-                floating: { name: 'Парящий профиль', price: 550 }
+                floating: { name: 'Парящий контур Pro LED', price: 550 }
             },
             lamps: {
                 gx53: { name: 'Встраиваемый GX53 LED', price: 450 },
@@ -2499,7 +2553,7 @@
                 changeFn(targetBucket, true);
                 saveMasterPricesMapToCache();
                 applyEffectivePricesForCurrentSession();
-                if (window.cloudSync && window.cloudSync.enabled) {
+                if (window.cloudSync && window.cloudSync.saveMasterPrices) {
                     window.cloudSync.saveMasterPrices(masterId, targetBucket);
                 }
             } else {
@@ -2508,7 +2562,7 @@
                 saveFabricsCatalogToCache();
                 saveLampCatalogToCache();
                 saveExtraServicesToCache();
-                if (window.cloudSync && window.cloudSync.enabled) {
+                if (window.cloudSync && window.cloudSync.saveAll) {
                     window.cloudSync.saveAll();
                 }
             }
@@ -2517,6 +2571,10 @@
         const calcState = {
             area: 0,
             perimeter: 0,
+            rubberInsertLength: 0,
+            rubberInsertColor: 'white',
+            shadowProfileLength: 0,
+            floatingContourLength: 0,
             corners: 0,
             pipes: 0,
             fabricKey: FABRICS_LIST[0] ? FABRICS_LIST[0].id : 'matte',
@@ -2798,15 +2856,6 @@
             const errorEl = document.getElementById('access-code-error');
             if (errorEl) errorEl.classList.add('hidden');
             showToast('Весь локальный кэш полностью очищен');
-        }
-
-        function resetLocalAuthCache() {
-            clearSavedAuthCache();
-            const inputEl = document.getElementById('access-code-input');
-            if (inputEl) inputEl.value = '';
-            const errorEl = document.getElementById('access-code-error');
-            if (errorEl) errorEl.classList.add('hidden');
-            showToast('Кэш авторизации сброшен');
         }
 
         function lockSiteUI() {
@@ -4050,17 +4099,6 @@
                 }
             });
 
-            document.querySelectorAll('.profile-card').forEach(card => {
-                const radio = card.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    card.classList.remove('border-stone-200');
-                    card.classList.add('border-emerald-600', 'bg-emerald-50/50');
-                } else {
-                    card.classList.remove('border-emerald-600', 'bg-emerald-50/50');
-                    card.classList.add('border-stone-200');
-                }
-            });
-
             document.querySelectorAll('.led-temp-card').forEach(card => {
                 const radio = card.querySelector('input[type="radio"]');
                 if (radio && radio.checked) {
@@ -4083,19 +4121,11 @@
 
             renderFabricsGrid();
 
-            setTxt('price-display-profile-shadow', `+ ${window.PRICES.profiles.shadow.price} ₽ / пог. метр`);
-            setTxt('price-display-profile-floating', `+ ${window.PRICES.profiles.floating.price} ₽ / пог. метр`);
-
-            const shadowRadio = document.querySelector('input[name="profile_type"][value="shadow"]');
-            if (shadowRadio && shadowRadio.parentElement) {
-                const titleSpan = shadowRadio.parentElement.querySelector('span.block');
-                if (titleSpan) titleSpan.textContent = window.PRICES.profiles.shadow.name;
-            }
-            const floatingRadio = document.querySelector('input[name="profile_type"][value="floating"]');
-            if (floatingRadio && floatingRadio.parentElement) {
-                const titleSpan = floatingRadio.parentElement.querySelector('span.block');
-                if (titleSpan) titleSpan.textContent = window.PRICES.profiles.floating.name;
-            }
+            // Синхронизация названий и цен новых ползунков 1-го шага с профилями из админки
+            setTxt('lbl-shadow-profile-slider-title', `${window.PRICES.profiles.shadow.name}:`);
+            setTxt('lbl-shadow-profile-price', window.PRICES.profiles.shadow.price);
+            setTxt('lbl-floating-contour-slider-title', `${window.PRICES.profiles.floating.name}:`);
+            setTxt('lbl-floating-contour-price', window.PRICES.profiles.floating.price);
 
             const ledSelect = document.getElementById('led-type');
             if (ledSelect) {
@@ -4129,8 +4159,12 @@
 
             const cornerSvc = getExtraServiceById('corner');
             const pipeSvc = getExtraServiceById('pipe');
+            const maskSvc = getExtraServiceById('mask');
             setTxt('lbl-extra-corner', cornerSvc ? cornerSvc.price : window.PRICES.extras.corner);
             setTxt('lbl-extra-pipe', pipeSvc ? pipeSvc.price : window.PRICES.extras.pipe);
+            setTxt('lbl-rubber-insert-price', maskSvc ? maskSvc.price : window.PRICES.extras.mask);
+            setTxt('lbl-admin-rubber-insert', maskSvc ? maskSvc.name : 'Маскировочная лента по периметру');
+            setTxt('val-admin-rubber-insert', `${Number(maskSvc ? maskSvc.price : window.PRICES.extras.mask).toLocaleString('ru-RU')} ₽/м`);
 
             renderExtraServicesGrid();
 
@@ -4301,6 +4335,12 @@
             if (valLedRgb) valLedRgb.textContent = `${Number(window.PRICES.led.rgb.price).toLocaleString('ru-RU')} ₽/м`;
             if (valLedCct) valLedCct.textContent = `${Number(window.PRICES.led.cct.price).toLocaleString('ru-RU')} ₽/м`;
 
+            const maskSvc = getExtraServiceById('mask');
+            const lblRubber = document.getElementById('lbl-admin-rubber-insert');
+            const valRubber = document.getElementById('val-admin-rubber-insert');
+            if (lblRubber) lblRubber.textContent = maskSvc ? maskSvc.name : 'Маскировочная лента по периметру';
+            if (valRubber) valRubber.textContent = `${Number(maskSvc ? maskSvc.price : window.PRICES.extras.mask).toLocaleString('ru-RU')} ₽/м`;
+
             renderAdminExtraServicesList();
         }
 
@@ -4401,6 +4441,101 @@
             calculateTotal();
         }
 
+        function syncRubberInsertFromSlider(val) {
+            const len = Math.max(0, parseFloat(val) || 0);
+            const inp = document.getElementById('input-rubber-insert');
+            const lbl = document.getElementById('rubber-insert-val-label');
+            if (inp) inp.value = len;
+            if (lbl) lbl.textContent = len;
+            calcState.rubberInsertLength = len;
+            calculateTotal();
+        }
+
+        function syncRubberInsertFromInput(val) {
+            const slider = document.getElementById('slider-rubber-insert');
+            const lbl = document.getElementById('rubber-insert-val-label');
+            if (val === '') {
+                if (slider) slider.value = 0;
+                if (lbl) lbl.textContent = 0;
+                calcState.rubberInsertLength = 0;
+                calculateTotal();
+                return;
+            }
+            const len = Math.max(0, parseFloat(val) || 0);
+            if (slider) slider.value = Math.min(len, 120);
+            if (lbl) lbl.textContent = len;
+            calcState.rubberInsertLength = len;
+            calculateTotal();
+        }
+
+        function syncShadowProfileFromSlider(val) {
+            const len = Math.max(0, parseFloat(val) || 0);
+            const inp = document.getElementById('input-shadow-profile');
+            const lbl = document.getElementById('shadow-profile-val-label');
+            if (inp) inp.value = len;
+            if (lbl) lbl.textContent = len;
+            calcState.shadowProfileLength = len;
+            calculateTotal();
+        }
+
+        function syncShadowProfileFromInput(val) {
+            const slider = document.getElementById('slider-shadow-profile');
+            const lbl = document.getElementById('shadow-profile-val-label');
+            if (val === '') {
+                if (slider) slider.value = 0;
+                if (lbl) lbl.textContent = 0;
+                calcState.shadowProfileLength = 0;
+                calculateTotal();
+                return;
+            }
+            const len = Math.max(0, parseFloat(val) || 0);
+            if (slider) slider.value = Math.min(len, 120);
+            if (lbl) lbl.textContent = len;
+            calcState.shadowProfileLength = len;
+            calculateTotal();
+        }
+
+        function syncFloatingContourFromSlider(val) {
+            const len = Math.max(0, parseFloat(val) || 0);
+            const inp = document.getElementById('input-floating-contour');
+            const lbl = document.getElementById('floating-contour-val-label');
+            if (inp) inp.value = len;
+            if (lbl) lbl.textContent = len;
+            calcState.floatingContourLength = len;
+            calculateTotal();
+        }
+
+        function syncFloatingContourFromInput(val) {
+            const slider = document.getElementById('slider-floating-contour');
+            const lbl = document.getElementById('floating-contour-val-label');
+            if (val === '') {
+                if (slider) slider.value = 0;
+                if (lbl) lbl.textContent = 0;
+                calcState.floatingContourLength = 0;
+                calculateTotal();
+                return;
+            }
+            const len = Math.max(0, parseFloat(val) || 0);
+            if (slider) slider.value = Math.min(len, 120);
+            if (lbl) lbl.textContent = len;
+            calcState.floatingContourLength = len;
+            calculateTotal();
+        }
+
+        function setRubberInsertColor(color) {
+            calcState.rubberInsertColor = color === 'black' ? 'black' : 'white';
+            const whiteBtn = document.getElementById('btn-insert-white');
+            const blackBtn = document.getElementById('btn-insert-black');
+
+            const activeClass = 'px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-stone-900 shadow-sm border border-stone-200 flex items-center gap-1.5 transition';
+            const inactiveClass = 'px-2.5 py-1 rounded-lg text-[11px] font-bold text-stone-600 hover:text-stone-900 flex items-center gap-1.5 transition';
+
+            if (whiteBtn) whiteBtn.className = calcState.rubberInsertColor === 'white' ? activeClass : inactiveClass;
+            if (blackBtn) blackBtn.className = calcState.rubberInsertColor === 'black' ? activeClass : inactiveClass;
+
+            calculateTotal();
+        }
+
         function syncLedLength(val) {
             const len = Math.max(0, parseInt(val, 10) || 0);
             calcState.ledLength = len;
@@ -4477,8 +4612,7 @@
             const fabricEl = document.querySelector('input[name="fabric_type"]:checked');
             calcState.fabricKey = fabricEl ? fabricEl.value : 'matte';
 
-            const profileEl = document.querySelector('input[name="profile_type"]:checked');
-            calcState.profileKey = profileEl ? profileEl.value : 'classic';
+            calcState.profileKey = 'classic';
 
             calcState.chandelier = document.getElementById('has-chandelier').checked;
 
@@ -4505,13 +4639,35 @@
                 });
             }
 
-            const profileObj = window.PRICES.profiles[calcState.profileKey] || window.PRICES.profiles.classic;
-            const profileCost = Math.round(calcState.perimeter * profileObj.price);
-            if (profileCost > 0 && calcState.perimeter > 0) {
-                total += profileCost;
+            if (calcState.rubberInsertLength > 0) {
+                const maskSvc = getExtraServiceById('mask');
+                const maskPrice = maskSvc ? maskSvc.price : window.PRICES.extras.mask;
+                const colorText = calcState.rubberInsertColor === 'black' ? 'чёрная' : 'белая';
+                const insertCost = Math.round(calcState.rubberInsertLength * maskPrice);
+                total += insertCost;
                 breakdown.push({
-                    name: `Профиль: ${profileObj.name} (${calcState.perimeter} м.п.)`,
-                    cost: profileCost
+                    name: `Резиновая вставка (${colorText}, ${calcState.rubberInsertLength} м.п.)`,
+                    cost: insertCost
+                });
+            }
+
+            if (calcState.shadowProfileLength > 0) {
+                const shadowObj = window.PRICES.profiles.shadow;
+                const shadowCost = Math.round(calcState.shadowProfileLength * shadowObj.price);
+                total += shadowCost;
+                breakdown.push({
+                    name: `${shadowObj.name} (${calcState.shadowProfileLength} м.п.)`,
+                    cost: shadowCost
+                });
+            }
+
+            if (calcState.floatingContourLength > 0) {
+                const floatingObj = window.PRICES.profiles.floating;
+                const floatingCost = Math.round(calcState.floatingContourLength * floatingObj.price);
+                total += floatingCost;
+                breakdown.push({
+                    name: `${floatingObj.name} (${calcState.floatingContourLength} м.п.)`,
+                    cost: floatingCost
                 });
             }
 
@@ -4678,7 +4834,6 @@
             msg += ` Площадь: ${calcState.area} м²\n`;
             msg += ` Периметр: ${calcState.perimeter} м.п.\n`;
             msg += ` Полотно: ${getFabricById(calcState.fabricKey)?.shortName || getFabricById(calcState.fabricKey)?.name || 'Матовое'}\n`;
-            msg += ` Профиль: ${window.PRICES.profiles[calcState.profileKey]?.name || 'Классический'}\n`;
 
             ['gx53', 'tube', 'track'].forEach(catKey => {
                 LAMP_VARIANTS_CATALOG[catKey].items.forEach(variant => {
@@ -4697,6 +4852,16 @@
 
             if (calcState.pipes > 0) msg += ` Обвод труб: ${calcState.pipes} шт.\n`;
             if (calcState.corners > 0) msg += ` Доп. углы: ${calcState.corners} шт.\n`;
+            if (calcState.rubberInsertLength > 0) {
+                const colorLabel = calcState.rubberInsertColor === 'black' ? 'чёрная' : 'белая';
+                msg += ` Резиновая вставка (${colorLabel}): ${calcState.rubberInsertLength} м.п.\n`;
+            }
+            if (calcState.shadowProfileLength > 0) {
+                msg += ` ${window.PRICES.profiles.shadow.name}: ${calcState.shadowProfileLength} м.п.\n`;
+            }
+            if (calcState.floatingContourLength > 0) {
+                msg += ` ${window.PRICES.profiles.floating.name}: ${calcState.floatingContourLength} м.п.\n`;
+            }
             if (calcState.optCornice) msg += ` Скрытый карниз ПК-5: да\n`;
             if (calcState.optMask) msg += ` Маскировочная лента: да\n`;
 
@@ -5562,47 +5727,9 @@
                 const getBlueprintDocRef = (ownerId) => doc(db, 'artifacts', appId, 'public', 'data', 'master_blueprints', String(ownerId).trim().toUpperCase());
 
                 window.cloudSync.enabled = true;
-                window.cloudSync.saveOwnerBlueprints = async (ownerId, blueprintsList) => {
-                    if (!auth.currentUser || !ownerId) return;
-                    const normalizedOwner = String(ownerId).trim().toUpperCase();
-                    try {
-                        await setDoc(getBlueprintDocRef(normalizedOwner), {
-                            ownerId: normalizedOwner,
-                            blueprintsJson: JSON.stringify(blueprintsList || []),
-                            updatedAt: Date.now()
-                        }, { merge: true });
-                    } catch (err) {
-                        console.error('Ошибка сохранения чертежей в облачную БД:', err);
-                        if (typeof showToast === 'function') {
-                            showToast('Ошибка сохранения чертежей в облачную БД');
-                        }
-                    }
-                };
-
-                window.cloudSync.loadMasterBlueprints = async (masterCodeOrOwnerId) => {
-                    if (!auth.currentUser || !masterCodeOrOwnerId) return;
-                    const raw = String(masterCodeOrOwnerId).trim().toUpperCase();
-                    const ownerId = raw.startsWith('MASTER_') || raw === 'ADMIN_MAIN' ? raw : `MASTER_${raw}`;
-                    try {
-                        const snap = await getDoc(getBlueprintDocRef(ownerId));
-                        if (snap.exists()) {
-                            const data = snap.data();
-                            if (data.blueprintsJson) {
-                                const parsed = JSON.parse(data.blueprintsJson);
-                                if (Array.isArray(parsed)) {
-                                    window.BLUEPRINTS_MAP[ownerId] = parsed;
-                                    saveBlueprintsMapToCache();
-                                    if (getCurrentBlueprintOwnerId() === ownerId) {
-                                        renderSavedBlueprintsList();
-                                    }
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        console.error('Ошибка загрузки чертежей из облачной БД:', err);
-                    }
-                };
+                window.cloudSync.readyPromise = Promise.resolve(true);
                 window.cloudSync.saveMasterPrices = async (masterCode, bucketObj) => {
+                    if (window.cloudSync.readyPromise) await window.cloudSync.readyPromise;
                     if (!auth.currentUser || !masterCode) return;
                     const normalizedCode = String(masterCode).trim().toUpperCase();
                     try {
@@ -5615,6 +5742,9 @@
                             extras: JSON.parse(JSON.stringify(bucketObj?.extras || {})),
                             updatedAt: Date.now()
                         }, { merge: true });
+                        if (typeof showToast === 'function') {
+                            showToast('Личные цены сохранены в облачную БД');
+                        }
                     } catch (err) {
                         console.error('Ошибка сохранения цен мастера в облачную БД:', err);
                         if (typeof showToast === 'function') {
@@ -5657,7 +5787,51 @@
                     }
                 };
 
+                window.cloudSync.saveOwnerBlueprints = async (ownerId, blueprintsList) => {
+                    if (!auth.currentUser || !ownerId) return;
+                    const normalizedOwner = String(ownerId).trim().toUpperCase();
+                    try {
+                        await setDoc(getBlueprintDocRef(normalizedOwner), {
+                            ownerId: normalizedOwner,
+                            blueprintsJson: JSON.stringify(blueprintsList || []),
+                            updatedAt: Date.now()
+                        }, { merge: true });
+                    } catch (err) {
+                        console.error('Ошибка сохранения чертежей в облачную БД:', err);
+                        if (typeof showToast === 'function') {
+                            showToast('Ошибка записи чертежей в облачную БД');
+                        }
+                    }
+                };
+
+                window.cloudSync.loadMasterBlueprints = async (masterCodeOrOwner) => {
+                    if (!auth.currentUser || !masterCodeOrOwner) return;
+                    const rawKey = String(masterCodeOrOwner).trim().toUpperCase();
+                    const normalizedOwner = rawKey.startsWith('MASTER_') || rawKey === 'ADMIN_MAIN'
+                        ? rawKey
+                        : 'MASTER_' + rawKey;
+                    try {
+                        const snap = await getDoc(getBlueprintDocRef(normalizedOwner));
+                        if (snap.exists()) {
+                            const data = snap.data();
+                            if (data.blueprintsJson) {
+                                const parsed = JSON.parse(data.blueprintsJson);
+                                if (Array.isArray(parsed)) {
+                                    window.BLUEPRINTS_MAP[normalizedOwner] = parsed;
+                                    saveBlueprintsMapToCache();
+                                    if (getCurrentBlueprintOwnerId() === normalizedOwner) {
+                                        renderSavedBlueprintsList();
+                                    }
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Ошибка загрузки чертежей из облачной БД:', err);
+                    }
+                };
+
                 window.cloudSync.saveAll = async () => {
+                    if (window.cloudSync.readyPromise) await window.cloudSync.readyPromise;
                     if (!auth.currentUser) return;
                     try {
                         const safeClone = (val, fallback) => val !== undefined ? JSON.parse(JSON.stringify(val)) : fallback;
@@ -5671,6 +5845,9 @@
                             adminPin: getStoredAdminPin(),
                             updatedAt: Date.now()
                         }, { merge: true });
+                        if (typeof showToast === 'function') {
+                            showToast('Общий прайс сохранён в облачную БД');
+                        }
                     } catch (err) {
                         console.error('Ошибка сохранения в облачную БД:', err);
                         if (typeof showToast === 'function') {
